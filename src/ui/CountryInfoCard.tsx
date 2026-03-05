@@ -6,23 +6,33 @@ interface CountryInfoCardProps {
 
 export function CountryInfoCard({ info }: CountryInfoCardProps): JSX.Element {
 	return (
-		<article className='country-info-card'>
+		<article className='w-55 overflow-hidden rounded-xl bg-white'>
 			{info.flagUrl ? (
 				<img
 					src={info.flagUrl}
-					alt={`Флаг: ${info.name}`}
-					className='country-info-flag'
+					alt={`Flag: ${info.name}`}
+					className='h-22 w-full object-cover'
 				/>
-			) : null}
-			<strong className='country-info-name'>{info.name}</strong>
+			) : (
+				<div className='h-22 w-full bg-slate-200' />
+			)}
+			<div className='px-3 py-3'>
+				<strong className='mb-1.5 block text-sm text-slate-900'>
+					{info.name}
+				</strong>
 
-			<div className='country-info-row'>
-				<span>Столица</span>
-				<strong>{info.capital}</strong>
-			</div>
-			<div className='country-info-row'>
-				<span>Валюта</span>
-				<strong>{info.currency}</strong>
+				<div className='mt-1 flex items-start justify-between gap-2.5 text-xs'>
+					<span className='text-slate-500'>Capital</span>
+					<strong className='text-right text-slate-800'>
+						{info.capital}
+					</strong>
+				</div>
+				<div className='mt-1 flex items-start justify-between gap-2.5 text-xs'>
+					<span className='text-slate-500'>Currency</span>
+					<strong className='text-right text-slate-800'>
+						{info.currency}
+					</strong>
+				</div>
 			</div>
 		</article>
 	)

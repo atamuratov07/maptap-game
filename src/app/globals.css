@@ -1,0 +1,40 @@
+@import 'tailwindcss';
+
+@layer base {
+	*,
+	*::before,
+	*::after {
+		box-sizing: border-box;
+	}
+
+	html,
+	body,
+	#root {
+		margin: 0;
+		width: 100%;
+		min-height: 100%;
+	}
+
+	body {
+		font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+		color: #0f172a;
+		background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
+
+	button,
+	select {
+		font: inherit;
+	}
+}
+
+.mapboxgl-ctrl-top-right {
+	top: 0.9rem;
+	right: 0.9rem;
+}
+
+.maplibregl-ctrl-top-right {
+	top: 0.9rem;
+	right: 0.9rem;
+}

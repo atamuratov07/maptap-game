@@ -1,6 +1,6 @@
 # MapTap Game
 
-MapTap is a small educational geography game built with React + TypeScript.
+MapTap is a small educational geography game built with React + TypeScript + Tailwind CSS.
 
 ## Features
 
@@ -32,6 +32,12 @@ The app is split into two layers:
    - `src/renderers/MapboxGlobeRenderer.tsx` (optional, `mapbox-gl`)
 
 Game logic is shared regardless of renderer choice.
+
+## Styling
+
+- Tailwind CSS v4 via `@tailwindcss/vite`
+- Utility-first classes in UI and renderer components
+- Minimal global base in `src/app/global.css`
 
 ## Data Sources
 
