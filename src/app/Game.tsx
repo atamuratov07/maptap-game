@@ -4,18 +4,11 @@ import { pickRandomIds } from '../core/random'
 import type { GameConfig, RendererKind } from '../core/types'
 import { loadGameData } from '../data/gameData'
 import type { GameData } from '../data/types'
+import { toErrorMessage } from '../shared/utils'
 import { GameScreen } from '../ui/GameScreen'
 import { ResultModal } from '../ui/ResultModal'
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN as string | undefined
-
-function toErrorMessage(error: unknown): string {
-	if (error instanceof Error && error.message) {
-		return `Error: ${error.message}`
-	}
-
-	return 'Unexpected error while loading map or country data.'
-}
 
 interface GameProps {
 	config: GameConfig
