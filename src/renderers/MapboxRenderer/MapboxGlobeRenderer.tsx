@@ -1,12 +1,10 @@
 import { geoCentroid } from 'd3-geo'
 import type { FeatureCollection, Geometry } from 'geojson'
+import mapboxgl, { type GeoJSONSource, type Map as MapboxMap } from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { CountryFeature } from '../data/types'
-import type { MapRendererProps } from './types'
-
-type MapboxMap = import('mapbox-gl').Map
-type GeoJSONSource = import('mapbox-gl').GeoJSONSource
+import type { CountryFeature } from '../../data/types'
+import type { MapRendererProps } from '../types'
 
 interface MapboxGlobeRendererProps extends MapRendererProps {
 	token: string
@@ -23,6 +21,19 @@ const REVEALED_MAP_ZOOM = 3.4
 const NEUTRAL_FILL = '#d1d5db'
 const WRONG_FILL = '#f87171'
 const REVEALED_FILL = '#22c55e'
+
+function clamp(value: number, min: number, max: number): number {
+	return Math.max(min, Math.min(max, value))
+}
+
+function getOverlayScaleFromZoom(zoom: number): number {
+	const normalized = clamp(
+		(zoom - DEFAULT_MAP_ZOOM) / (REVEALED_MAP_ZOOM - DEFAULT_MAP_ZOOM),
+		0,
+		1,
+	)
+	return 0.9 + normalized * 0.35
+}
 
 function buildFillExpression(
 	revealedId: string | undefined,
@@ -107,6 +118,9 @@ export function MapboxGlobeRenderer({
 		x: number
 		y: number
 	} | null>(null)
+	const [overlayScale, setOverlayScale] = useState(() =>
+		getOverlayScaleFromZoom(DEFAULT_MAP_ZOOM),
+	)
 	const [wrongOverlayPositions, setWrongOverlayPositions] = useState<
 		Array<{ countryId: string; label: string; x: number; y: number }>
 	>([])
@@ -227,14 +241,7 @@ export function MapboxGlobeRenderer({
 			}
 
 			try {
-				const mapboxModule = await import('mapbox-gl')
-				if (cancelled || !containerRef.current) {
-					return
-				}
-
-				const mapboxgl = mapboxModule.default
 				mapboxgl.accessToken = token
-
 				const map = new mapboxgl.Map({
 					container: containerRef.current,
 					style: 'mapbox://styles/mapbox/light-v11',
@@ -397,7 +404,10 @@ export function MapboxGlobeRenderer({
 
 		const syncOverlay = (): void => {
 			if (pinned && pinnedCentroid) {
-				const projected = map.project([pinnedCentroid[0], pinnedCentroid[1]])
+				const projected = map.project([
+					pinnedCentroid[0],
+					pinnedCentroid[1],
+				])
 				setOverlayPosition({
 					x: projected.x,
 					y: projected.y,
@@ -421,6 +431,7 @@ export function MapboxGlobeRenderer({
 					}
 				}),
 			)
+			setOverlayScale(getOverlayScaleFromZoom(map.getZoom()))
 		}
 
 		syncOverlay()
@@ -432,37 +443,52 @@ export function MapboxGlobeRenderer({
 	}, [isReady, pinned, pinnedCentroid, wrongCentroids])
 
 	return (
-		<div className='mapbox-container'>
-			<div ref={containerRef} className='mapbox-canvas' />
+		<div className='relative h-full w-full overflow-hidden'>
+			<div ref={containerRef} className='h-full w-full' />
 
 			{wrongOverlayPositions.map(item => (
 				<div
 					key={`wrong-overlay-${item.countryId}`}
-					className='mapbox-wrong-overlay'
+					className='pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-[128%]'
 					style={{
 						left: `${item.x}px`,
 						top: `${item.y}px`,
 					}}
 				>
-					{item.label}
+					<div
+						className='max-w-47.5 overflow-hidden text-ellipsis whitespace-nowrap rounded-full bg-red-900/90 px-2.5 py-1 text-center text-xs leading-tight font-semibold text-red-100'
+						style={{
+							transform: `scale(${overlayScale})`,
+							transformOrigin: 'bottom center',
+						}}
+					>
+						{item.label}
+					</div>
 				</div>
 			))}
 
 			{pinned && overlayPosition ? (
 				<div
-					className='mapbox-pin-overlay'
+					className='pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-[108%]'
 					style={{
 						left: `${overlayPosition.x}px`,
 						top: `${overlayPosition.y}px`,
 					}}
 				>
-					{pinned.element}
+					<div
+						style={{
+							transform: `scale(${overlayScale})`,
+							transformOrigin: 'bottom center',
+						}}
+					>
+						{pinned.element}
+					</div>
 				</div>
 			) : null}
 
 			{hasFailure ? (
-				<div className='renderer-message'>
-					Глобус недоступен. Переключаемся на карту 2D.
+				<div className='absolute top-3 left-1/2 z-11 -translate-x-1/2 rounded-lg bg-slate-900/90 px-2.5 py-2 text-xs text-white'>
+					Globe unavailable. Switching to 2D map.
 				</div>
 			) : null}
 		</div>

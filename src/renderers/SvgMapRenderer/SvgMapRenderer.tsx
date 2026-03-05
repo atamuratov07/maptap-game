@@ -8,14 +8,16 @@ import {
 	Marker,
 	ZoomableGroup,
 } from 'react-simple-maps'
-import type { MapRendererProps } from './types'
+import type { MapRendererProps } from '../types'
 
-const NEUTRAL_FILL = '#d1d5db'
+const NEUTRAL_FILL = '#f7e4c1'
 const WRONG_FILL = '#f87171'
 const REVEALED_FILL = '#22c55e'
 const MIN_MAP_ZOOM = 1
 const MAX_MAP_ZOOM = 8
 const REVEAL_MAP_ZOOM = 3.4
+const MIN_OVERLAY_UI_SCALE = 0.9
+const MAX_OVERLAY_UI_SCALE = 1.25
 
 interface MapViewState {
 	coordinates: [number, number]
@@ -51,6 +53,22 @@ function getFillColor(
 	return NEUTRAL_FILL
 }
 
+function clamp(value: number, min: number, max: number): number {
+	return Math.max(min, Math.min(max, value))
+}
+
+function getOverlayUiScaleFromZoom(zoom: number): number {
+	const normalized = clamp(
+		(zoom - MIN_MAP_ZOOM) / (REVEAL_MAP_ZOOM - MIN_MAP_ZOOM),
+		0,
+		1,
+	)
+	return (
+		MIN_OVERLAY_UI_SCALE +
+		(MAX_OVERLAY_UI_SCALE - MIN_OVERLAY_UI_SCALE) * normalized
+	)
+}
+
 export function SvgMapRenderer({
 	features,
 	onPick,
@@ -60,8 +78,9 @@ export function SvgMapRenderer({
 	disabled = false,
 }: MapRendererProps): JSX.Element {
 	const [mapView, setMapView] = useState<MapViewState>(DEFAULT_MAP_VIEW)
-	const [lastAutoFocusedRevealId, setLastAutoFocusedRevealId] =
-		useState<string | undefined>(undefined)
+	const [lastAutoFocusedRevealId, setLastAutoFocusedRevealId] = useState<
+		string | undefined
+	>(undefined)
 
 	const mapViewRef = useRef<MapViewState>(DEFAULT_MAP_VIEW)
 	const animationFrameRef = useRef<number | null>(null)
@@ -91,7 +110,7 @@ export function SvgMapRenderer({
 			return null
 		}
 
-		const [longitude, latitude] = geoCentroid(pinnedFeature as never)
+		const [longitude, latitude] = geoCentroid(pinnedFeature)
 		if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) {
 			return null
 		}
@@ -153,6 +172,11 @@ export function SvgMapRenderer({
 
 	const canUseForeignObject =
 		typeof window === 'undefined' || 'SVGForeignObjectElement' in window
+	const overlayUiScale = useMemo(
+		() => getOverlayUiScaleFromZoom(mapView.zoom),
+		[mapView.zoom],
+	)
+	const overlayLocalScale = overlayUiScale / mapView.zoom
 
 	const pinCardPlacement = useMemo(() => {
 		const cardWidth = 244
@@ -221,8 +245,7 @@ export function SvgMapRenderer({
 		const startedAt = performance.now()
 
 		const tick = (timestamp: number): void => {
-			const rawProgress =
-				(timestamp - startedAt) / REVEAL_ZOOM_DURATION_MS
+			const rawProgress = (timestamp - startedAt) / REVEAL_ZOOM_DURATION_MS
 			const progress = Math.max(0, Math.min(1, rawProgress))
 			const eased = 1 - (1 - progress) ** 3
 
@@ -235,14 +258,11 @@ export function SvgMapRenderer({
 						(targetView.coordinates[1] - startView.coordinates[1]) *
 							eased,
 				],
-				zoom:
-					startView.zoom +
-					(targetView.zoom - startView.zoom) * eased,
+				zoom: startView.zoom + (targetView.zoom - startView.zoom) * eased,
 			})
 
 			if (progress < 1) {
-				animationFrameRef.current =
-					window.requestAnimationFrame(tick)
+				animationFrameRef.current = window.requestAnimationFrame(tick)
 				return
 			}
 
@@ -258,11 +278,7 @@ export function SvgMapRenderer({
 				animationFrameRef.current = null
 			}
 		}
-	}, [
-		highlighted.revealedId,
-		lastAutoFocusedRevealId,
-		revealedCoordinates,
-	])
+	}, [highlighted.revealedId, lastAutoFocusedRevealId, revealedCoordinates])
 
 	const handleMoveStart = useCallback(() => {
 		if (animationFrameRef.current !== null) {
@@ -310,11 +326,9 @@ export function SvgMapRenderer({
 		}
 
 		if (type === 'wheel') {
-			// Allow trackpad pinch (ctrl+wheel) and classic wheel.
 			return true
 		}
 
-		// Keep right/middle mouse button blocked, allow left button pan.
 		if (event.button !== undefined && event.button !== 0) {
 			return false
 		}
@@ -323,49 +337,50 @@ export function SvgMapRenderer({
 	}, [])
 
 	return (
-		<div className='map-canvas'>
-			<div className='map-controls'>
+		<div className='relative h-full w-full touch-none overflow-hidden bg-[#90DFFE]'>
+			<div className='absolute top-4 right-4 z-13 flex flex-col gap-2'>
 				<button
 					type='button'
-					className='map-control-button'
+					className='h-10 w-10 cursor-pointer rounded-lg border border-slate-300 bg-white/95 text-[22px] leading-none font-bold text-slate-900 transition hover:bg-white'
 					onClick={handleZoomIn}
-					aria-label='Увеличить карту'
+					aria-label='Zoom in'
 				>
 					+
 				</button>
 				<button
 					type='button'
-					className='map-control-button'
+					className='h-10 w-10 cursor-pointer rounded-lg border border-slate-300 bg-white/95 text-[22px] leading-none font-bold text-slate-900 transition hover:bg-white'
 					onClick={handleZoomOut}
-					aria-label='Уменьшить карту'
+					aria-label='Zoom out'
 				>
 					-
 				</button>
 				<button
 					type='button'
-					className='map-control-button map-control-reset'
+					className='h-10 w-10 cursor-pointer rounded-lg border border-slate-300 bg-white/95 text-[13px] leading-none font-bold text-slate-900 transition hover:bg-white'
 					onClick={handleResetView}
-					aria-label='Сбросить масштаб карты'
+					aria-label='Reset zoom'
 				>
 					1:1
 				</button>
 			</div>
 
-			<ComposableMap projection='geoEqualEarth' className='map-svg'>
+			<ComposableMap
+				projection='geoEqualEarth'
+				className='h-full w-full touch-none'
+			>
 				<ZoomableGroup
 					center={mapView.coordinates}
 					zoom={mapView.zoom}
 					minZoom={MIN_MAP_ZOOM}
 					maxZoom={MAX_MAP_ZOOM}
 					filterZoomEvent={
-						filterZoomEvent as unknown as (
-							element: SVGElement,
-						) => boolean
+						filterZoomEvent as unknown as (element: SVGElement) => boolean
 					}
 					onMoveStart={handleMoveStart}
 					onMoveEnd={handleMoveEnd}
 				>
-					<Geographies geography={geographyCollection as never}>
+					<Geographies geography={geographyCollection}>
 						{({ geographies }) =>
 							geographies.map(
 								(geography: {
@@ -397,24 +412,28 @@ export function SvgMapRenderer({
 											style={{
 												default: {
 													fill,
-													stroke: '#475569',
+													stroke: '#2a2a2a',
 													strokeWidth: 0.35,
 													outline: 'none',
 													cursor: isDisabledCountry
 														? 'not-allowed'
 														: 'pointer',
 												},
-												hover: {
-													fill: isDisabledCountry
-														? fill
-														: '#94a3b8',
-													stroke: '#1e293b',
-													strokeWidth: 0.55,
-													outline: 'none',
-													cursor: isDisabledCountry
-														? 'not-allowed'
-														: 'pointer',
-												},
+												hover: isDisabledCountry
+													? {
+															cursor: 'not-allowed',
+															outline: 'none',
+															fill,
+															stroke: '#2a2a2a',
+															strokeWidth: 0.35,
+														}
+													: {
+															fill: '#FB9EB9',
+															stroke: '#FF1493',
+															strokeWidth: 0.55,
+															outline: 'none',
+															cursor: 'pointer',
+														},
 												pressed: {
 													fill,
 													stroke: '#1e293b',
@@ -437,68 +456,85 @@ export function SvgMapRenderer({
 							key={`wrong-label-${item.countryId}`}
 							coordinates={item.coordinates}
 						>
-							{canUseForeignObject ? (
-								<foreignObject
-									x={-88}
-									y={-36}
-									width={176}
-									height={30}
-									pointerEvents='none'
-								>
-									<div className='wrong-map-label'>{item.label}</div>
-								</foreignObject>
-							) : (
-								<g transform='translate(-70,-22)' pointerEvents='none'>
-									<rect
-										width='140'
-										height='24'
-										rx='12'
-										fill='#7f1d1d'
-										opacity='0.9'
-									/>
-									<text
-										x='70'
-										y='16'
-										fontSize='11'
-										fill='#fee2e2'
-										textAnchor='middle'
+							<g
+								transform={`scale(${overlayLocalScale})`}
+								pointerEvents='none'
+							>
+								{canUseForeignObject ? (
+									<foreignObject
+										x={-88}
+										y={-36}
+										width={176}
+										height={30}
+										pointerEvents='none'
 									>
-										{item.label}
-									</text>
-								</g>
-							)}
+										<div className='mx-auto w-max max-w-44 overflow-hidden text-ellipsis whitespace-nowrap rounded-full bg-red-900/90 px-2.5 py-1 text-center text-xs leading-[1.15] font-semibold text-red-100'>
+											{item.label}
+										</div>
+									</foreignObject>
+								) : (
+									<g
+										transform='translate(-70,-22)'
+										pointerEvents='none'
+									>
+										<rect
+											width='140'
+											height='24'
+											rx='12'
+											fill='#7f1d1d'
+											opacity='0.9'
+										/>
+										<text
+											x='70'
+											y='16'
+											fontSize='11'
+											fill='#fee2e2'
+											textAnchor='middle'
+										>
+											{item.label}
+										</text>
+									</g>
+								)}
+							</g>
 						</Marker>
 					))}
 
 					{pinned && pinnedCoordinates ? (
 						<Marker coordinates={pinnedCoordinates}>
-						{canUseForeignObject ? (
-							<foreignObject
-								x={pinCardPlacement.x}
-								y={pinCardPlacement.y}
-								width={pinCardPlacement.width}
-								height={pinCardPlacement.height}
-								pointerEvents='none'
-							>
-								<div className='map-pin-card'>{pinned.element}</div>
-							</foreignObject>
-						) : (
 							<g
-								transform={pinCardPlacement.fallbackTransform}
+								transform={`scale(${overlayLocalScale})`}
 								pointerEvents='none'
 							>
-									<rect
-										width='164'
-										height='48'
-										rx='8'
-										fill='#ffffff'
-										stroke='#334155'
-									/>
-									<text x='12' y='30' fontSize='12' fill='#0f172a'>
-										Ответ открыт
-									</text>
-								</g>
-							)}
+								{canUseForeignObject ? (
+									<foreignObject
+										x={pinCardPlacement.x}
+										y={pinCardPlacement.y}
+										width={pinCardPlacement.width}
+										height={pinCardPlacement.height}
+										pointerEvents='none'
+									>
+										<div className='pointer-events-none'>
+											{pinned.element}
+										</div>
+									</foreignObject>
+								) : (
+									<g
+										transform={pinCardPlacement.fallbackTransform}
+										pointerEvents='none'
+									>
+										<rect
+											width='164'
+											height='48'
+											rx='8'
+											fill='#ffffff'
+											stroke='#334155'
+										/>
+										<text x='12' y='30' fontSize='12' fill='#0f172a'>
+											Answer revealed
+										</text>
+									</g>
+								)}
+							</g>
 						</Marker>
 					) : null}
 				</ZoomableGroup>
