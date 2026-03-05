@@ -1,10 +1,6 @@
 import { useMemo } from 'react'
-import {
-	getTargetId,
-	isPickAllowed,
-	type GameState,
-	type RendererKind,
-} from '../core/engine'
+import { getTargetId, isPickAllowed } from '../core/engine'
+import type { GameState, RendererKind } from '../core/types'
 import type { CountryFeature, CountryInfo } from '../data/types'
 import { MapboxGlobeRenderer } from '../renderers/MapboxGlobeRenderer'
 import { SvgMapRenderer } from '../renderers/SvgMapRenderer'
@@ -19,7 +15,6 @@ interface GameScreenProps {
 	infoMap: Map<string, CountryInfo>
 	rendererKind: RendererKind
 	mapboxToken?: string
-	elapsedSeconds: number
 	onPick: (countryId: string) => void
 	onGiveUp: () => void
 	onNext: () => void
@@ -32,7 +27,6 @@ export function GameScreen({
 	infoMap,
 	rendererKind,
 	mapboxToken,
-	elapsedSeconds,
 	onPick,
 	onGiveUp,
 	onNext,
@@ -49,7 +43,6 @@ export function GameScreen({
 			})),
 		[infoMap, state.wrongPicks],
 	)
-
 	const highlighted = useMemo<MapRendererProps['highlighted']>(() => {
 		if (state.phase === 'playing') {
 			return {
@@ -87,8 +80,8 @@ export function GameScreen({
 
 	const canPick = isPickAllowed(state)
 	const progressLabel = state.questionIds.length
-		? `Вопрос ${Math.min(state.index + 1, state.questionIds.length)} / ${state.questionIds.length}`
-		: 'Нет вопросов'
+		? `Question ${Math.min(state.index + 1, state.questionIds.length)} / ${state.questionIds.length}`
+		: 'No questions'
 
 	const commonRendererProps: MapRendererProps = {
 		features,
@@ -103,18 +96,20 @@ export function GameScreen({
 	const showHearts = state.phase === 'playing' || state.phase === 'revealed'
 
 	return (
-		<section className='game-screen'>
+		<section className='min-h-screen'>
 			<HeaderBar
 				progressLabel={progressLabel}
-				targetName={targetInfo?.name || 'Игра завершена'}
+				targetName={targetInfo?.name || 'Game complete'}
 				targetFlagUrl={targetInfo?.flagUrl}
-				elapsedSeconds={elapsedSeconds}
+				phase={state.phase}
+				questionStartedAt={state.questionStartedAt}
+				questionResolvedAt={state.questionResolvedAt}
 				canGiveUp={state.phase === 'playing'}
 				onGiveUp={onGiveUp}
 			/>
 
-			<main className='map-area'>
-				<div className='renderer-shell'>
+			<main className='relative h-screen'>
+				<div className='h-full w-full'>
 					{useMapboxRenderer ? (
 						<MapboxGlobeRenderer
 							{...commonRendererProps}
@@ -127,7 +122,7 @@ export function GameScreen({
 				</div>
 
 				{showHearts ? (
-					<div className='hearts-anchor'>
+					<div className='absolute right-5 bottom-5 z-20'>
 						<Hearts
 							attemptsLeft={state.attemptsLeft}
 							maxAttempts={state.config.attemptsPerQuestion}
@@ -136,13 +131,13 @@ export function GameScreen({
 				) : null}
 
 				{state.phase === 'revealed' ? (
-					<div className='next-button-row'>
+					<div className='absolute bottom-5 left-1/2 z-20 -translate-x-1/2'>
 						<button
 							type='button'
-							className='next-button'
+							className='rounded-lg bg-sky-500 px-4 py-2.5 text-sm font-bold text-white shadow-[0_6px_20px_rgba(14,165,233,0.35)] transition hover:-translate-y-0.5 hover:bg-sky-400'
 							onClick={onNext}
 						>
-							Следующий вопрос
+							Next Question
 						</button>
 					</div>
 				) : null}

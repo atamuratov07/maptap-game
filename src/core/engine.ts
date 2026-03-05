@@ -1,51 +1,5 @@
-export type GamePhase = 'home' | 'playing' | 'revealed' | 'finished'
-
-export type RendererKind = 'svg' | 'mapbox'
-
-export interface GameConfig {
-	questionCount: number
-	rendererKind: RendererKind
-	attemptsPerQuestion: number
-}
-
-export interface GameState {
-	phase: GamePhase
-	config: GameConfig
-	questionIds: string[]
-	index: number
-	attemptsLeft: number
-	wrongPicks: string[]
-	revealedId?: string
-	score: number
-	correctCount: number
-	gameStartedAt: number
-	questionStartedAt: number
-	questionResolvedAt?: number
-}
-
-export type GameAction =
-	| {
-			type: 'START'
-			config: GameConfig
-			questionIds: string[]
-			now: number
-	  }
-	| {
-			type: 'PICK'
-			countryId: string
-			now: number
-	  }
-	| {
-			type: 'GIVE_UP'
-			now: number
-	  }
-	| {
-			type: 'NEXT'
-			now: number
-	  }
-	| {
-			type: 'HOME'
-	  }
+import { calculateQuestionScore } from './score'
+import type { GameAction, GameConfig, GameState } from './types'
 
 const DEFAULT_CONFIG: GameConfig = {
 	questionCount: 10,
@@ -59,14 +13,6 @@ function clampAttempts(value: number): number {
 
 function elapsedSeconds(start: number, end: number): number {
 	return Math.max(0, Math.floor((end - start) / 1000))
-}
-
-function calculateQuestionScore(
-	secondsElapsed: number,
-	wrongPickCount: number,
-): number {
-	const totalPenalty = secondsElapsed * 5 + wrongPickCount * 20
-	return Math.max(0, 100 - totalPenalty)
 }
 
 function revealCurrentQuestion(state: GameState, now: number): GameState {
@@ -84,7 +30,7 @@ function revealCurrentQuestion(state: GameState, now: number): GameState {
 	}
 }
 
-export function createHomeState(
+export function createIdleState(
 	configOverride: Partial<GameConfig> = {},
 ): GameState {
 	const config: GameConfig = {
@@ -97,7 +43,7 @@ export function createHomeState(
 	}
 
 	return {
-		phase: 'home',
+		phase: 'idle',
 		config,
 		questionIds: [],
 		index: 0,
@@ -151,7 +97,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 			const nextQuestionIds = action.questionIds.slice(0, cappedCount)
 
 			if (nextQuestionIds.length === 0) {
-				return createHomeState({
+				return createIdleState({
 					questionCount: action.config.questionCount,
 					rendererKind: action.config.rendererKind,
 					attemptsPerQuestion,
@@ -265,14 +211,6 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 				questionStartedAt: action.now,
 				questionResolvedAt: undefined,
 			}
-		}
-
-		case 'HOME': {
-			return createHomeState({
-				questionCount: state.config.questionCount,
-				rendererKind: state.config.rendererKind,
-				attemptsPerQuestion: state.config.attemptsPerQuestion,
-			})
 		}
 
 		default:
