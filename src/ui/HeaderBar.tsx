@@ -34,7 +34,7 @@ export function HeaderBar({
 				<div className='flex min-w-0 justify-center'>
 					<div className='flex flex-wrap items-center justify-center gap-2 text-center'>
 						<span className='text-sm font-semibold text-slate-300'>
-							Find:
+							Найдите:
 						</span>
 						<span className='text-xl font-bold leading-tight sm:text-2xl'>
 							{targetName}
@@ -63,7 +63,7 @@ export function HeaderBar({
 						onClick={onGiveUp}
 						disabled={!canGiveUp}
 					>
-						Give up / Skip
+						Сдаться / Пропустить
 					</button>
 				</div>
 			</div>

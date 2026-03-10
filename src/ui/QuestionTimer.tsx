@@ -38,5 +38,5 @@ export function QuestionTimer({
 		return Math.max(0, Math.floor((endTime - questionStartedAt) / 1000))
 	}, [isPlaying, now, questionResolvedAt, questionStartedAt])
 
-	return <span>Time: {elapsedSeconds}s</span>
+	return <span>Время: {elapsedSeconds}с</span>
 }

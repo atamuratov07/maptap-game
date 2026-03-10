@@ -65,7 +65,7 @@ function requireCoordinate(
 ): number {
 	if (typeof value !== 'number' || !Number.isFinite(value)) {
 		throw new Error(
-			`Country ${countryId} has invalid ${fieldName} in ${PLAYABLE_COUNTRY_REGISTRY_URL}`,
+			`У страны ${countryId} некорректное поле ${fieldName} в ${PLAYABLE_COUNTRY_REGISTRY_URL}`,
 		)
 	}
 
@@ -80,7 +80,7 @@ function parseMapFeatures(topologyPayload: unknown): CountryFeature[] {
 	const countriesObject = topology.objects?.countries
 	if (!countriesObject) {
 		throw new Error(
-			'Could not find countries geometry in world-atlas payload.',
+			'Не удалось найти геометрию стран в данных world-atlas.',
 		)
 	}
 
@@ -126,7 +126,7 @@ async function fetchPlayableRegistry(
 		const response = await fetch(PLAYABLE_COUNTRY_REGISTRY_URL, { signal })
 		if (!response.ok) {
 			throw new Error(
-				`Failed to load ${PLAYABLE_COUNTRY_REGISTRY_URL}: HTTP ${response.status}`,
+				`Не удалось загрузить ${PLAYABLE_COUNTRY_REGISTRY_URL}: HTTP ${response.status}`,
 			)
 		}
 
@@ -136,7 +136,7 @@ async function fetchPlayableRegistry(
 			throw error
 		}
 		throw new Error(
-			`Failed to load playable country registry from ${PLAYABLE_COUNTRY_REGISTRY_URL}`,
+			`Не удалось загрузить реестр игровых стран из ${PLAYABLE_COUNTRY_REGISTRY_URL}`,
 		)
 	}
 }
@@ -160,9 +160,9 @@ async function loadCountryRegistry(
 
 		const name = country.name?.trim() || id
 		const nameRu = country.name_ru?.trim() || name
-		const capital = country.capital?.trim() || 'Unknown'
+		const capital = country.capital?.trim() || 'Неизвестно'
 		const capitalRu = country.capital_ru?.trim() || capital
-		const currency = country.currency?.trim() || 'Unknown'
+		const currency = country.currency?.trim() || 'Неизвестно'
 		const currencyRu = country.currency_ru?.trim() || currency
 		const flagUrl = country.flag_url?.trim() || ''
 		const centroidLng = requireCoordinate(country.centroid_lng, id, 'centroid_lng')
@@ -174,7 +174,7 @@ async function loadCountryRegistry(
 			nameRu,
 			capital,
 			capitalRu,
-			continent: country.continent?.trim() || 'Unknown',
+			continent: country.continent?.trim() || 'Неизвестно',
 			population:
 				typeof country.population === 'number' ? country.population : 0,
 			centroidLng,
@@ -200,7 +200,7 @@ export async function loadGameData(signal?: AbortSignal): Promise<GameData> {
 
 	if (!topologyResponse.ok) {
 		throw new Error(
-			`Failed to load world-atlas data: ${topologyResponse.status}`,
+			`Не удалось загрузить данные world-atlas: ${topologyResponse.status}`,
 		)
 	}
 

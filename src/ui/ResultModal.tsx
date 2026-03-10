@@ -26,14 +26,14 @@ export function ResultModal({
 			aria-modal='true'
 		>
 			<section className='w-full max-w-[420px] rounded-[18px] border border-slate-300 bg-white p-6 text-center shadow-[0_24px_54px_rgba(15,23,42,0.24)]'>
-				<h2 className='m-0 text-2xl font-bold text-slate-900'>Game Complete</h2>
+				<h2 className='m-0 text-2xl font-bold text-slate-900'>Игра завершена</h2>
 
 				<div className='my-4'>
 					<p className='m-0 text-[40px] leading-none font-extrabold text-slate-900'>
 						{score}
 					</p>
 					<p className='mt-1 text-sm text-slate-700'>
-						Correct: {correctCount} / {totalCount}
+						Верно: {correctCount} / {totalCount}
 					</p>
 				</div>
 
@@ -43,14 +43,14 @@ export function ResultModal({
 						className='rounded-lg bg-teal-700 px-4 py-2 text-sm font-bold text-white shadow transition hover:-translate-y-0.5 hover:bg-teal-600'
 						onClick={onTryAgain}
 					>
-						Try again
+						Сыграть снова
 					</button>
 					<button
 						type='button'
 						className='rounded-lg bg-slate-200 px-4 py-2 text-sm font-bold text-slate-900 transition hover:-translate-y-0.5 hover:bg-slate-300'
 						onClick={onHome}
 					>
-						Home
+						На главную
 					</button>
 				</div>
 			</section>

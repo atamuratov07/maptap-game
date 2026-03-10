@@ -20,12 +20,12 @@ export function HomeScreen({
 					MapTap
 				</h1>
 				<p className='mb-5 text-sm leading-relaxed text-slate-600'>
-					Find countries on the map and remember their key facts.
+					Находите страны на карте и запоминайте их ключевые факты.
 				</p>
 
 				<label className='mb-4 block'>
 					<span className='mb-2 block text-sm font-semibold text-slate-800'>
-						Question count
+						Количество вопросов
 					</span>
 					<select
 						className='w-full rounded-lg border border-slate-400 bg-white px-3 py-2 text-slate-900 shadow-sm outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-300'
@@ -48,7 +48,7 @@ export function HomeScreen({
 					onClick={onStart}
 					disabled={startDisabled}
 				>
-					Start
+					Начать
 				</button>
 			</div>
 		</section>

@@ -31,7 +31,7 @@ export function Game({ config, onBackToHome }: GameProps): JSX.Element {
 			const loaded = await loadGameData()
 			if (loaded.allowedIds.length === 0) {
 				setLoadError(
-					'No matches were found between map geometry and country facts.',
+					'Не найдено совпадений между геометрией карты и данными о странах.',
 				)
 				setGameData(null)
 				return
@@ -63,7 +63,7 @@ export function Game({ config, onBackToHome }: GameProps): JSX.Element {
 
 			if (questionIds.length === 0) {
 				setLoadError(
-					'No matches were found between map geometry and country facts.',
+					'Не найдено совпадений между геометрией карты и данными о странах.',
 				)
 				return
 			}
@@ -127,10 +127,10 @@ export function Game({ config, onBackToHome }: GameProps): JSX.Element {
 			<div className='grid min-h-screen place-items-center px-5'>
 				<div className='w-full max-w-115 rounded-2xl border border-slate-300 bg-white p-6 text-center shadow-[0_15px_35px_rgba(15,23,42,0.12)]'>
 					<h1 className='mb-2 text-2xl font-bold text-slate-900'>
-						Loading MapTap
+						Загрузка MapTap
 					</h1>
 					<p className='text-slate-700'>
-						Fetching map geometry and country facts...
+						Загружаем геометрию карты и данные о странах...
 					</p>
 				</div>
 			</div>
@@ -142,17 +142,17 @@ export function Game({ config, onBackToHome }: GameProps): JSX.Element {
 			<div className='grid min-h-screen place-items-center px-5'>
 				<div className='w-full max-w-115 rounded-2xl border border-slate-300 bg-white p-6 text-center shadow-[0_15px_35px_rgba(15,23,42,0.12)]'>
 					<h1 className='mb-2 text-2xl font-bold text-slate-900'>
-						Failed to load game data
+						Не удалось загрузить данные игры
 					</h1>
 					<p className='mb-4 text-slate-700'>
-						{loadError || 'Unknown error.'}
+						{loadError || 'Неизвестная ошибка.'}
 					</p>
 					<button
 						type='button'
 						className='rounded-lg bg-teal-700 px-4 py-2 text-sm font-bold text-white shadow transition hover:-translate-y-0.5 hover:bg-teal-600'
 						onClick={() => void loadData()}
 					>
-						Retry
+						Повторить
 					</button>
 				</div>
 			</div>

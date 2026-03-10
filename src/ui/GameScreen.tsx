@@ -69,8 +69,8 @@ export function GameScreen({
 
 	const canPick = isPickAllowed(state)
 	const progressLabel = state.questionIds.length
-		? `Question ${Math.min(state.index + 1, state.questionIds.length)} / ${state.questionIds.length}`
-		: 'No questions'
+		? `Вопрос ${Math.min(state.index + 1, state.questionIds.length)} / ${state.questionIds.length}`
+		: 'Нет вопросов'
 
 	const commonRendererProps: MapRendererProps = {
 		onPick: canPick ? onPick : () => undefined,
@@ -86,7 +86,7 @@ export function GameScreen({
 		<section className='min-h-screen'>
 			<HeaderBar
 				progressLabel={progressLabel}
-				targetName={targetInfo?.name || 'Game complete'}
+				targetName={targetInfo?.nameRu || 'Игра завершена'}
 				targetFlagUrl={targetInfo?.flagUrl}
 				phase={state.phase}
 				questionStartedAt={state.questionStartedAt}
@@ -116,7 +116,7 @@ export function GameScreen({
 							className='rounded-lg bg-sky-500 px-4 py-2.5 text-sm font-bold text-white shadow-[0_6px_20px_rgba(14,165,233,0.35)] transition hover:-translate-y-0.5 hover:bg-sky-400'
 							onClick={onNext}
 						>
-							Next Question
+							Следующий вопрос
 						</button>
 					</div>
 				) : null}

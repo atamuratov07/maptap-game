@@ -1,4 +1,4 @@
-import type { FilterSpecification } from 'maplibre-gl'
+﻿import type { FilterSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Map, {
@@ -287,7 +287,7 @@ export function MapLibreRenderer({
 						setMapProjection(MERCATOR_PROJECTION)
 					}}
 				>
-					🗺️
+					2D
 				</button>
 				<button
 					className={`${isGlobeProjection ? 'bg-blue-500 cursor-pointer' : 'bg-gray-500'} hover:bg-blue-700 text-white font-bold py-2 px-4 rounded`}
@@ -295,12 +295,12 @@ export function MapLibreRenderer({
 						setMapProjection(GLOBE_PROJECTION)
 					}}
 				>
-					🌎
+					3D
 				</button>
 			</div>
 			{hasFailure ? (
 				<div className='absolute top-3 left-1/2 z-11 -translate-x-1/2 rounded-lg bg-slate-900/90 px-2.5 py-2 text-xs text-white'>
-					MapLibre renderer failed.
+					Сбой рендера MapLibre.
 				</div>
 			) : null}
 		</div>

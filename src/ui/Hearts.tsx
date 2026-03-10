@@ -12,7 +12,7 @@ export function Hearts({
 	return (
 		<div
 			className='flex items-center gap-2 rounded-full bg-slate-900/75 px-3.5 py-2 shadow-xl backdrop-blur'
-			aria-label={`Attempts left: ${safeAttempts}`}
+			aria-label={`Осталось попыток: ${safeAttempts}`}
 		>
 			{Array.from({ length: maxAttempts }, (_, index) => {
 				const isFilled = index < safeAttempts
