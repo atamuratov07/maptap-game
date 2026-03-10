@@ -266,17 +266,12 @@ export function MapLibreRenderer({
 						longitude={revealedInfo.longitude}
 						latitude={revealedInfo.latitude}
 						offset={REVEALED_POPUP_OFFSET}
+						className='revealed-popup'
+						maxWidth='none'
 						closeOnClick={false}
 						closeButton={false}
 					>
-						<div
-							onClickCapture={event => event.stopPropagation()}
-							onMouseDownCapture={event => event.stopPropagation()}
-							onDoubleClickCapture={event => event.stopPropagation()}
-							onTouchStartCapture={event => event.stopPropagation()}
-						>
-							{revealedInfo.element}
-						</div>
+						<div>{revealedInfo.element}</div>
 					</Popup>
 				)}
 			</Map>

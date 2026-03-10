@@ -63,7 +63,7 @@ export function HeaderBar({
 						onClick={onGiveUp}
 						disabled={!canGiveUp}
 					>
-						Сдаться / Пропустить
+						Сдаться
 					</button>
 				</div>
 			</div>
