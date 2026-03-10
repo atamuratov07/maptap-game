@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+HOST_DIR="$(cygpath -w "$PWD")"
+MSYS2_ARG_CONV_EXCL='*' docker run --rm -v "$HOST_DIR":/data -w /data tippecanoe:latest tippecanoe-enumerate "$@"

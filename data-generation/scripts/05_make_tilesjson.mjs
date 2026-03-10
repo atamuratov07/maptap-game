@@ -1,0 +1,95 @@
+import fs from 'node:fs'
+
+const tilejson = {
+	tilejson: '2.0.0',
+	name: 'world',
+	type: 'baselayer',
+	profile: 'mercator',
+	version: '1',
+	format: 'pbf',
+	minzoom: 0,
+	maxzoom: 6,
+	bounds: [-180, -85.051129, 180, 85.05112900000002],
+	attribution:
+		'MapLibre demotiles base geometry; Natural Earth fallback; REST Countries; Wikidata',
+	tiles: ['/map/tiles/{z}/{x}/{y}.pbf'],
+	center: [0, 2.5444437451708134e-14, 1],
+	vector_layers: [
+		{
+			id: 'geolines',
+			description: 'original demotiles geolines with manual Russian names',
+			minzoom: 0,
+			maxzoom: 4,
+			fields: {
+				name: 'String',
+				name_ru: 'String',
+			},
+		},
+		{
+			id: 'countries',
+			description:
+				'original demotiles countries plus missing sovereign supplements',
+			minzoom: 0,
+			maxzoom: 6,
+			fields: {
+				NAME: 'String',
+				NAME_RU: 'String',
+				CAPITAL: 'String',
+				CAPITAL_RU: 'String',
+				ABBREV: 'String',
+				ADM0_A3: 'String',
+				ISO_A2: 'String',
+				ISO_N3: 'String',
+				CONTINENT: 'String',
+				DIFFICULTY: 'String',
+				PLAYABLE: 'Number',
+			},
+		},
+		{
+			id: 'centroids',
+			description: 'rebuilt country label points keyed by ADM0_A3',
+			minzoom: 0,
+			maxzoom: 6,
+			fields: {
+				NAME: 'String',
+				NAME_RU: 'String',
+				CAPITAL: 'String',
+				CAPITAL_RU: 'String',
+				ABBREV: 'String',
+				ADM0_A3: 'String',
+				ISO_A2: 'String',
+				ISO_N3: 'String',
+				CONTINENT: 'String',
+				DIFFICULTY: 'String',
+				PLAYABLE: 'Number',
+			},
+		},
+		{
+			id: 'capitals',
+			description: 'capital points',
+			minzoom: 0,
+			maxzoom: 6,
+			fields: {
+				NAME: 'String',
+				NAME_RU: 'String',
+				CAPITAL: 'String',
+				CAPITAL_RU: 'String',
+				ABBREV: 'String',
+				ADM0_A3: 'String',
+				ISO_A2: 'String',
+				ISO_N3: 'String',
+				CONTINENT: 'String',
+				DIFFICULTY: 'String',
+				PLAYABLE: 'Number',
+			},
+		},
+	],
+}
+
+fs.mkdirSync('dist', { recursive: true })
+fs.writeFileSync(
+	'dist/tiles/tiles.json',
+	JSON.stringify(tilejson, null, 2),
+	'utf8',
+)
+console.log('Wrote dist/tiles/tiles.json')

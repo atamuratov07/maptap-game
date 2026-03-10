@@ -1,0 +1,407 @@
+import pointOnFeature from '@turf/point-on-feature'
+import fs from 'node:fs'
+
+const SEED_JSON = 'build/country_seed.json'
+const OVERRIDES_JSON = 'data/manual_overrides.json'
+const CENTROIDS_GEOJSON = 'build/centroids.geojson'
+const BASE_COUNTRIES_GEOJSON = 'build/base_countries.geojson'
+const SUPPLEMENTAL_COUNTRIES_GEOJSON = 'build/supplemental_countries.geojson'
+
+fs.mkdirSync('build', { recursive: true })
+fs.mkdirSync('dist', { recursive: true })
+
+function readJson(path) {
+	return JSON.parse(fs.readFileSync(path, 'utf8'))
+}
+
+function writeJson(path, value) {
+	fs.writeFileSync(path, JSON.stringify(value, null, 2), 'utf8')
+}
+
+function csvEscape(v) {
+	if (v === null || v === undefined) return ''
+	const s = String(v)
+	return /[",\n]/.test(s) ? `"${s.replaceAll('"', '""')}"` : s
+}
+
+function writeCsv(path, header, rows) {
+	const lines = [header.join(',')]
+	for (const row of rows) lines.push(row.map(csvEscape).join(','))
+	fs.writeFileSync(path, lines.join('\n'), 'utf8')
+}
+
+function firstNonEmpty(...vals) {
+	for (const v of vals) {
+		if (v === undefined || v === null) continue
+		if (typeof v === 'string' && v.trim() === '') continue
+		return v
+	}
+	return ''
+}
+
+function isBlank(v) {
+	return v === undefined || v === null || String(v).trim() === ''
+}
+
+function normalizeIsoN3(v) {
+	const s = String(v ?? '').trim()
+	if (!s || s === '-99') return ''
+	return s
+}
+
+function normalizeIsoA3(v) {
+	return String(v ?? '')
+		.trim()
+		.toUpperCase()
+}
+
+function extractPointCoords(feature) {
+	const coords = feature?.geometry?.coordinates
+	if (
+		feature?.geometry?.type !== 'Point' ||
+		!Array.isArray(coords) ||
+		coords.length !== 2
+	) {
+		return null
+	}
+
+	const lng = Number(coords[0])
+	const lat = Number(coords[1])
+	if (!Number.isFinite(lng) || !Number.isFinite(lat)) return null
+
+	return [lng, lat]
+}
+
+function indexGeometryByA3(geometryByA3, featureCollection) {
+	for (const feature of featureCollection?.features ?? []) {
+		const a3 = String(feature?.properties?.ADM0_A3 ?? '').trim()
+		if (!a3 || !feature?.geometry || geometryByA3.has(a3)) continue
+		geometryByA3.set(a3, feature.geometry)
+	}
+}
+
+function fallbackCentroidFromGeometry(a3, geometryByA3) {
+	const geometry = geometryByA3.get(a3)
+	if (!geometry) return null
+
+	try {
+		const fallbackPoint = pointOnFeature({
+			type: 'Feature',
+			properties: { ADM0_A3: a3 },
+			geometry,
+		})
+		return extractPointCoords(fallbackPoint)
+	} catch {
+		return null
+	}
+}
+
+async function fetchJson(url) {
+	const res = await fetch(url, {
+		headers: { 'user-agent': 'maptap-registry-build/1.0' },
+	})
+	if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`)
+	return res.json()
+}
+
+async function wdqs(query) {
+	const res = await fetch('https://query.wikidata.org/sparql', {
+		method: 'POST',
+		headers: {
+			'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+			accept: 'application/sparql-results+json',
+			'user-agent': 'maptap-registry-build/1.0',
+		},
+		body: new URLSearchParams({ query }),
+	})
+	if (!res.ok) throw new Error(`WDQS ${res.status}`)
+	return res.json()
+}
+
+function pickPrimaryCurrency(currenciesObj) {
+	const entries = Object.entries(currenciesObj ?? {}).sort((a, b) =>
+		a[0].localeCompare(b[0]),
+	)
+	if (!entries.length) return null
+
+	const [code, meta] = entries[0]
+	return {
+		code,
+		name: meta?.name ?? '',
+		symbol: meta?.symbol ?? '',
+	}
+}
+
+const seed = readJson(SEED_JSON)
+const overrides = readJson(OVERRIDES_JSON)
+if (!fs.existsSync(CENTROIDS_GEOJSON)) {
+	throw new Error(
+		`Missing ${CENTROIDS_GEOJSON}. Run your build_data step first.`,
+	)
+}
+if (!fs.existsSync(BASE_COUNTRIES_GEOJSON)) {
+	throw new Error(
+		`Missing ${BASE_COUNTRIES_GEOJSON}. Run your build_data step first.`,
+	)
+}
+const centroids = readJson(CENTROIDS_GEOJSON)
+const baseCountries = readJson(BASE_COUNTRIES_GEOJSON)
+const supplementalCountries = fs.existsSync(SUPPLEMENTAL_COUNTRIES_GEOJSON)
+	? readJson(SUPPLEMENTAL_COUNTRIES_GEOJSON)
+	: { type: 'FeatureCollection', features: [] }
+
+if (!Array.isArray(seed)) {
+	throw new Error('build/country_seed.json must be an array')
+}
+
+const centroidByA3 = new Map()
+for (const feature of centroids.features ?? []) {
+	const a3 = String(feature?.properties?.ADM0_A3 ?? '').trim()
+	const coords = extractPointCoords(feature)
+	if (!a3 || !coords || centroidByA3.has(a3)) continue
+	centroidByA3.set(a3, coords)
+}
+
+const geometryByA3 = new Map()
+indexGeometryByA3(geometryByA3, baseCountries)
+indexGeometryByA3(geometryByA3, supplementalCountries)
+
+const centroidSourceStats = {
+	from_centroids_geojson: 0,
+	from_geometry_fallback: 0,
+	missing: 0,
+}
+
+/**
+ * Fetch only the extra fields the registry needs.
+ * This is intentionally separate from build_data.
+ */
+const restMeta = await fetchJson(
+	'https://restcountries.com/v3.1/all?fields=cca3,ccn3,population,currencies,flags,independent,unMember',
+)
+
+const restByA3 = new Map()
+for (const row of restMeta) {
+	if (!row?.cca3) continue
+	restByA3.set(row.cca3, row)
+}
+
+const restByN3 = new Map()
+for (const row of restMeta) {
+	const n3 = normalizeIsoN3(row?.ccn3)
+	if (!n3 || restByN3.has(n3)) continue
+	restByN3.set(n3, row)
+}
+
+/**
+ * Russian currency labels keyed by ISO 4217 code.
+ */
+const wdCurrencies = await wdqs(`
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX bd: <http://www.bigdata.com/rdf#>
+PREFIX wikibase: <http://wikiba.se/ontology#>
+
+SELECT ?code ?currencyLabel WHERE {
+  ?currency wdt:P498 ?code .
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "ru,en". }
+}
+`)
+
+const currencyRuByCode = new Map()
+for (const row of wdCurrencies.results.bindings ?? []) {
+	const code = row.code?.value?.trim()
+	if (!code || currencyRuByCode.has(code)) continue
+	currencyRuByCode.set(code, row.currencyLabel?.value?.trim() ?? '')
+}
+
+const registry = []
+const validatorFailures = []
+const seenA3 = new Set()
+const seenIds = new Map()
+
+for (const baseRow of seed) {
+	const a3 = String(baseRow.ADM0_A3 ?? '').trim()
+	const ov = overrides.countries?.[a3] ?? {}
+	const seedIsoN3 = normalizeIsoN3(baseRow.ISO_N3)
+	const overrideRestA3 = normalizeIsoA3(ov.REST_CCA3)
+	const overrideRestN3 = normalizeIsoN3(ov.REST_CCN3)
+	const rest =
+		(seedIsoN3 ? restByN3.get(seedIsoN3) : null) ??
+		(overrideRestN3 ? restByN3.get(overrideRestN3) : null) ??
+		(overrideRestA3 ? restByA3.get(overrideRestA3) : null) ??
+		restByA3.get(a3) ??
+		null
+
+	if (!a3) {
+		validatorFailures.push({
+			ADM0_A3: '',
+			ID: '',
+			NAME: String(baseRow.NAME ?? ''),
+			MISSING: 'ADM0_A3',
+		})
+		continue
+	}
+
+	if (seenA3.has(a3)) {
+		validatorFailures.push({
+			ADM0_A3: a3,
+			ID: String(baseRow.ISO_N3 ?? ''),
+			NAME: String(baseRow.NAME ?? ''),
+			MISSING: 'duplicate_ADM0_A3',
+		})
+		continue
+	}
+	seenA3.add(a3)
+
+	const centroidFromCentroids = centroidByA3.get(a3) ?? null
+	const centroid =
+		centroidFromCentroids ?? fallbackCentroidFromGeometry(a3, geometryByA3)
+	if (centroidFromCentroids) centroidSourceStats.from_centroids_geojson += 1
+	else if (centroid) centroidSourceStats.from_geometry_fallback += 1
+	else centroidSourceStats.missing += 1
+
+	const primaryCurrency = pickPrimaryCurrency(rest?.currencies)
+
+	const record = {
+		id: String(
+			firstNonEmpty(
+				seedIsoN3,
+				normalizeIsoN3(ov.ISO_N3),
+				normalizeIsoN3(rest?.ccn3),
+				baseRow.ISO_N3,
+			),
+		),
+		name: String(firstNonEmpty(baseRow.NAME)),
+		name_ru: String(firstNonEmpty(baseRow.NAME_RU)),
+		capital: String(firstNonEmpty(baseRow.CAPITAL)),
+		capital_ru: String(firstNonEmpty(baseRow.CAPITAL_RU)),
+		continent: String(firstNonEmpty(baseRow.CONTINENT)),
+		population:
+			typeof ov.POPULATION === 'number'
+				? ov.POPULATION
+				: typeof rest?.population === 'number'
+					? rest.population
+					: null,
+		currency: String(firstNonEmpty(ov.CURRENCY, primaryCurrency?.name)),
+		currency_ru: String(
+			firstNonEmpty(
+				ov.CURRENCY_RU,
+				primaryCurrency?.code
+					? currencyRuByCode.get(primaryCurrency.code)
+					: '',
+			),
+		),
+		flag_url: String(
+			firstNonEmpty(ov.FLAG_URL, rest?.flags?.svg, rest?.flags?.png),
+		),
+		centroid_lng: centroid ? centroid[0] : null,
+		centroid_lat: centroid ? centroid[1] : null,
+		playable: Number(baseRow.PLAYABLE) === 1,
+		difficulty: String(firstNonEmpty(baseRow.DIFFICULTY)),
+		independent:
+			typeof ov.INDEPENDENT === 'boolean'
+				? ov.INDEPENDENT
+				: Boolean(rest?.independent),
+		un_member:
+			typeof ov.UN_MEMBER === 'boolean'
+				? ov.UN_MEMBER
+				: Boolean(rest?.unMember),
+	}
+
+	const missing = []
+
+	for (const key of [
+		'id',
+		'name',
+		'name_ru',
+		'capital',
+		'capital_ru',
+		'continent',
+		'currency',
+		'currency_ru',
+		'flag_url',
+		'difficulty',
+	]) {
+		if (isBlank(record[key])) missing.push(key)
+	}
+
+	if (record.population === null) {
+		missing.push('population')
+	}
+	if (
+		record.playable &&
+		(typeof record.centroid_lng !== 'number' ||
+			typeof record.centroid_lat !== 'number')
+	) {
+		missing.push('centroid')
+	}
+
+	const canonicalId = normalizeIsoN3(record.id)
+	if (canonicalId) {
+		if (seenIds.has(canonicalId)) {
+			missing.push(`duplicate_id:${record.id}`)
+		} else {
+			seenIds.set(canonicalId, a3)
+		}
+	}
+
+	if (record.playable && missing.length) {
+		validatorFailures.push({
+			ADM0_A3: a3,
+			ID: record.id,
+			NAME: record.name,
+			MISSING: missing.join('|'),
+		})
+	}
+
+	registry.push(record)
+}
+
+registry.sort((a, b) =>
+	String(a.id).localeCompare(String(b.id), undefined, { numeric: true }),
+)
+const playableRegistry = registry.filter(r => r.playable)
+
+writeJson('dist/countries.registry.json', {
+	version: 1,
+	generated_at: new Date().toISOString(),
+	country_count: registry.length,
+	countries: registry,
+})
+
+writeJson('dist/countries.playable.json', {
+	version: 1,
+	generated_at: new Date().toISOString(),
+	playable_count: playableRegistry.length,
+	countries: playableRegistry,
+})
+
+writeCsv(
+	'build/validator_registry_failures.csv',
+	['ADM0_A3', 'ID', 'NAME', 'MISSING'],
+	validatorFailures.map(r => [r.ADM0_A3, r.ID, r.NAME, r.MISSING]),
+)
+
+writeJson('build/registry_build_report.json', {
+	seed_country_count: seed.length,
+	final_registry_count: registry.length,
+	playable_registry_count: playableRegistry.length,
+	centroid_from_centroids_geojson: centroidSourceStats.from_centroids_geojson,
+	centroid_from_geometry_fallback: centroidSourceStats.from_geometry_fallback,
+	centroid_missing: centroidSourceStats.missing,
+	validator_failure_count: validatorFailures.length,
+})
+
+if (validatorFailures.length > 0) {
+	console.error('Registry build blocked.')
+	console.error(
+		'Inspect build/validator_registry_failures.csv and build/registry_build_report.json',
+	)
+	process.exitCode = 1
+} else {
+	console.log('OK')
+}
+
+console.log(
+	JSON.stringify(readJson('build/registry_build_report.json'), null, 2),
+)
