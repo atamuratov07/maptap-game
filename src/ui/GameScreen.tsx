@@ -1,9 +1,8 @@
 import { useMemo } from 'react'
 import { getTargetId, isPickAllowed } from '../core/engine'
-import type { GameState, RendererKind } from '../core/types'
-import type { CountryFeature, CountryInfo } from '../data/types'
-import { MapboxGlobeRenderer } from '../renderers/MapboxRenderer/MapboxGlobeRenderer'
-import { SvgMapRenderer } from '../renderers/SvgMapRenderer/SvgMapRenderer'
+import type { GameState } from '../core/types'
+import type { CountryInfo } from '../data/types'
+import { MapLibreRenderer } from '../renderers/MapLibreRenderer/MapLibreRenderer'
 import type { MapRendererProps } from '../renderers/types'
 import { CountryInfoCard } from './CountryInfoCard'
 import { HeaderBar } from './HeaderBar'
@@ -11,38 +10,22 @@ import { Hearts } from './Hearts'
 
 interface GameScreenProps {
 	state: GameState
-	features: CountryFeature[]
 	infoMap: Map<string, CountryInfo>
-	rendererKind: RendererKind
-	mapboxToken?: string
 	onPick: (countryId: string) => void
 	onGiveUp: () => void
 	onNext: () => void
-	onMapboxUnavailable: () => void
 }
 
 export function GameScreen({
 	state,
-	features,
 	infoMap,
-	rendererKind,
-	mapboxToken,
 	onPick,
 	onGiveUp,
 	onNext,
-	onMapboxUnavailable,
 }: GameScreenProps): JSX.Element {
 	const targetId = getTargetId(state)
 	const targetInfo = targetId ? infoMap.get(targetId) : undefined
 
-	const wrongChoiceLabels = useMemo(
-		() =>
-			state.wrongPicks.map(id => ({
-				countryId: id,
-				label: infoMap.get(id)?.name || id,
-			})),
-		[infoMap, state.wrongPicks],
-	)
 	const highlighted = useMemo<MapRendererProps['highlighted']>(() => {
 		if (state.phase === 'playing') {
 			return {
@@ -62,7 +45,7 @@ export function GameScreen({
 		}
 	}, [state.phase, state.revealedId, state.wrongPicks])
 
-	const pinned = useMemo<MapRendererProps['pinned']>(() => {
+	const revealedInfo = useMemo<MapRendererProps['revealedInfo']>(() => {
 		if (state.phase !== 'revealed' || !state.revealedId) {
 			return null
 		}
@@ -74,9 +57,15 @@ export function GameScreen({
 
 		return {
 			countryId: state.revealedId,
+			longitude: info.centroidLng,
+			latitude: info.centroidLat,
 			element: <CountryInfoCard info={info} />,
 		}
 	}, [infoMap, state.phase, state.revealedId])
+	const playableIds = useMemo<ReadonlySet<string>>(
+		() => new Set(infoMap.keys()),
+		[infoMap],
+	)
 
 	const canPick = isPickAllowed(state)
 	const progressLabel = state.questionIds.length
@@ -84,15 +73,13 @@ export function GameScreen({
 		: 'No questions'
 
 	const commonRendererProps: MapRendererProps = {
-		features,
 		onPick: canPick ? onPick : () => undefined,
+		playableIds,
 		highlighted,
-		wrongChoiceLabels,
-		pinned,
+		revealedInfo,
 		disabled: !canPick,
 	}
 
-	const useMapboxRenderer = rendererKind === 'mapbox' && Boolean(mapboxToken)
 	const showHearts = state.phase === 'playing' || state.phase === 'revealed'
 
 	return (
@@ -110,15 +97,7 @@ export function GameScreen({
 
 			<main className='relative h-screen'>
 				<div className='h-full w-full'>
-					{useMapboxRenderer ? (
-						<MapboxGlobeRenderer
-							{...commonRendererProps}
-							token={mapboxToken as string}
-							onCriticalError={onMapboxUnavailable}
-						/>
-					) : (
-						<SvgMapRenderer {...commonRendererProps} />
-					)}
+					<MapLibreRenderer {...commonRendererProps} />
 				</div>
 
 				{showHearts ? (

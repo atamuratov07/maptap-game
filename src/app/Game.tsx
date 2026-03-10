@@ -1,28 +1,19 @@
 import { useCallback, useEffect, useReducer, useState } from 'react'
 import { createIdleState, gameReducer } from '../core/engine'
 import { pickRandomIds } from '../core/random'
-import type { GameConfig, RendererKind } from '../core/types'
+import type { GameConfig } from '../core/types'
 import { loadGameData } from '../data/gameData'
 import type { GameData } from '../data/types'
 import { toErrorMessage } from '../shared/utils'
 import { GameScreen } from '../ui/GameScreen'
 import { ResultModal } from '../ui/ResultModal'
 
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN as string | undefined
-
 interface GameProps {
 	config: GameConfig
-	mapboxAvailable: boolean
-	onMapboxUnavailable: () => void
 	onBackToHome: () => void
 }
 
-export function Game({
-	config,
-	mapboxAvailable,
-	onMapboxUnavailable,
-	onBackToHome,
-}: GameProps): JSX.Element {
+export function Game({ config, onBackToHome }: GameProps): JSX.Element {
 	const [gameData, setGameData] = useState<GameData | null>(null)
 	const [isLoading, setIsLoading] = useState(true)
 	const [loadError, setLoadError] = useState<string | null>(null)
@@ -65,11 +56,6 @@ export function Game({
 				return
 			}
 
-			const rendererKind: RendererKind =
-				nextConfig.rendererKind === 'mapbox' && !mapboxAvailable
-					? 'svg'
-					: nextConfig.rendererKind
-
 			const questionIds = pickRandomIds(
 				gameData.allowedIds,
 				nextConfig.questionCount,
@@ -86,14 +72,13 @@ export function Game({
 				type: 'START',
 				config: {
 					...nextConfig,
-					rendererKind,
 					questionCount: questionIds.length,
 				},
 				questionIds,
 				now: Date.now(),
 			})
 		},
-		[gameData, mapboxAvailable],
+		[gameData],
 	)
 
 	useEffect(() => {
@@ -137,11 +122,6 @@ export function Game({
 		})
 	}, [])
 
-	const activeRendererKind: RendererKind =
-		engineState.config.rendererKind === 'mapbox' && !mapboxAvailable
-			? 'svg'
-			: engineState.config.rendererKind
-
 	if (isLoading) {
 		return (
 			<div className='grid min-h-screen place-items-center px-5'>
@@ -183,14 +163,10 @@ export function Game({
 		<div className='min-h-screen'>
 			<GameScreen
 				state={engineState}
-				features={gameData.features}
 				infoMap={gameData.infoMap}
-				rendererKind={activeRendererKind}
-				mapboxToken={MAPBOX_TOKEN}
 				onPick={handlePick}
 				onGiveUp={handleGiveUp}
 				onNext={handleNext}
-				onMapboxUnavailable={onMapboxUnavailable}
 			/>
 
 			<ResultModal

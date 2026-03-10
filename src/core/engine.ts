@@ -3,7 +3,6 @@ import type { GameAction, GameConfig, GameState } from './types'
 
 const DEFAULT_CONFIG: GameConfig = {
 	questionCount: 10,
-	rendererKind: 'svg',
 	attemptsPerQuestion: 3,
 }
 
@@ -99,7 +98,6 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 			if (nextQuestionIds.length === 0) {
 				return createIdleState({
 					questionCount: action.config.questionCount,
-					rendererKind: action.config.rendererKind,
 					attemptsPerQuestion,
 				})
 			}
@@ -108,7 +106,6 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 				phase: 'playing',
 				config: {
 					questionCount: nextQuestionIds.length,
-					rendererKind: action.config.rendererKind,
 					attemptsPerQuestion,
 				},
 				questionIds: nextQuestionIds,

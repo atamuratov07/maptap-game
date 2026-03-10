@@ -1,17 +1,7 @@
-import type { RendererKind } from '../core/types'
-
-interface MapModeOption {
-	value: RendererKind
-	label: string
-}
-
 interface HomeScreenProps {
 	questionCount: number
 	questionCountOptions: number[]
-	rendererKind: RendererKind
-	mapModeOptions: MapModeOption[]
 	onQuestionCountChange: (value: number) => void
-	onRendererKindChange: (value: RendererKind) => void
 	onStart: () => void
 	startDisabled?: boolean
 }
@@ -19,10 +9,7 @@ interface HomeScreenProps {
 export function HomeScreen({
 	questionCount,
 	questionCountOptions,
-	rendererKind,
-	mapModeOptions,
 	onQuestionCountChange,
-	onRendererKindChange,
 	onStart,
 	startDisabled = false,
 }: HomeScreenProps): JSX.Element {
@@ -50,25 +37,6 @@ export function HomeScreen({
 						{questionCountOptions.map(option => (
 							<option key={option} value={option}>
 								{option}
-							</option>
-						))}
-					</select>
-				</label>
-
-				<label className='mb-5 block'>
-					<span className='mb-2 block text-sm font-semibold text-slate-800'>
-						Map mode
-					</span>
-					<select
-						className='w-full rounded-lg border border-slate-400 bg-white px-3 py-2 text-slate-900 shadow-sm outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-300'
-						value={rendererKind}
-						onChange={event => {
-							onRendererKindChange(event.target.value as RendererKind)
-						}}
-					>
-						{mapModeOptions.map(option => (
-							<option key={option.value} value={option.value}>
-								{option.label}
 							</option>
 						))}
 					</select>

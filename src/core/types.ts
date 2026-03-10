@@ -1,10 +1,7 @@
 export type GamePhase = 'idle' | 'playing' | 'revealed' | 'finished'
 
-export type RendererKind = 'svg' | 'mapbox'
-
 export interface GameConfig {
 	questionCount: number
-	rendererKind: RendererKind
 	attemptsPerQuestion: number
 }
 

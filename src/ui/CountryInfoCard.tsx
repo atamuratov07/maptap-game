@@ -10,7 +10,7 @@ export function CountryInfoCard({ info }: CountryInfoCardProps): JSX.Element {
 			{info.flagUrl ? (
 				<img
 					src={info.flagUrl}
-					alt={`Flag: ${info.name}`}
+					alt={`Flag: ${info.nameRu}`}
 					className='h-22 w-full object-cover'
 				/>
 			) : (
@@ -18,19 +18,19 @@ export function CountryInfoCard({ info }: CountryInfoCardProps): JSX.Element {
 			)}
 			<div className='px-3 py-3'>
 				<strong className='mb-1.5 block text-sm text-slate-900'>
-					{info.name}
+					{info.nameRu}
 				</strong>
 
 				<div className='mt-1 flex items-start justify-between gap-2.5 text-xs'>
 					<span className='text-slate-500'>Capital</span>
 					<strong className='text-right text-slate-800'>
-						{info.capital}
+						{info.capitalRu}
 					</strong>
 				</div>
 				<div className='mt-1 flex items-start justify-between gap-2.5 text-xs'>
 					<span className='text-slate-500'>Currency</span>
 					<strong className='text-right text-slate-800'>
-						{info.currency}
+						{info.currencyRu}
 					</strong>
 				</div>
 			</div>
