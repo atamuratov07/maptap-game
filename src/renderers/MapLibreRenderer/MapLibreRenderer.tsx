@@ -25,7 +25,7 @@ import type { MapRendererProps } from '../types'
 const MAP_STYLE_URL = '/map/style.json'
 
 const DEFAULT_MAP_CENTER: [number, number] = [8, 18]
-const DEFAULT_MAP_ZOOM = 1.1
+const DEFAULT_MAP_ZOOM = 2
 const REVEALED_MAP_ZOOM = 3.4
 const REVEALED_FLY_DURATION_MS = 900
 const REVEALED_FLY_OFFSET: [number, number] = [0, 120]
@@ -223,7 +223,9 @@ export function MapLibreRenderer({
 		projectionType === 'globe' || projectionType === 'vertical-perspective'
 
 	return (
-		<div className='relative h-full w-full pt-15 overflow-hidden'>
+		<div
+			className={`relative h-full w-full pt-15 overflow-hidden ${isGlobeProjection ? 'bg-[#08162F]' : ''}`}
+		>
 			<Map
 				ref={mapRef}
 				initialViewState={{
