@@ -8,6 +8,20 @@ export interface GameConfig {
 	difficulty: GameDifficulty
 }
 
+export interface SessionCountryInfo {
+	difficulty: GameDifficulty
+}
+
+export interface SessionCountryPool {
+	allowedIds: readonly string[]
+	countriesById: ReadonlyMap<string, SessionCountryInfo>
+}
+
+export interface PreparedGameSession {
+	config: GameConfig
+	questionIds: string[]
+}
+
 export interface GameState {
 	phase: GamePhase
 	config: GameConfig
