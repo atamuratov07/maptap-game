@@ -2,8 +2,8 @@ import { useMemo } from 'react'
 import { getTargetId, isPickAllowed } from '../core/engine'
 import type { GameState } from '../core/types'
 import type { CountryInfo } from '../data/types'
-import { MapLibreRenderer } from '../renderers/MapLibreRenderer/MapLibreRenderer'
-import type { MapRendererProps } from '../renderers/types'
+import { MapLibreRenderer } from '../renderer/MapLibreRenderer'
+import type { MapRendererProps } from '../renderer/types'
 import { CountryInfoCard } from './CountryInfoCard'
 import { HeaderBar } from './HeaderBar'
 import { Hearts } from './Hearts'
@@ -72,7 +72,7 @@ export function GameScreen({
 		? `Вопрос ${Math.min(state.index + 1, state.questionIds.length)} / ${state.questionIds.length}`
 		: 'Нет вопросов'
 
-	const commonRendererProps: MapRendererProps = {
+	const rendererProps: MapRendererProps = {
 		onPick: canPick ? onPick : () => undefined,
 		playableIds,
 		highlighted,
@@ -97,7 +97,7 @@ export function GameScreen({
 
 			<main className='relative h-screen'>
 				<div className='h-full w-full'>
-					<MapLibreRenderer {...commonRendererProps} />
+					<MapLibreRenderer {...rendererProps} />
 				</div>
 
 				{showHearts ? (

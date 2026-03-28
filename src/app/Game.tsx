@@ -1,143 +1,25 @@
-import { useCallback, useEffect, useReducer, useState } from 'react'
-import { createIdleState, gameReducer } from '../core/engine'
-import { pickRandomIds } from '../core/random'
 import type { GameConfig } from '../core/types'
-import { loadGameData } from '../data/gameData'
-import type { CountryDifficulty, GameData } from '../data/types'
-import { toErrorMessage } from '../shared/utils'
 import { GameScreen } from '../ui/GameScreen'
 import { ResultModal } from '../ui/ResultModal'
+import { useGameSession } from './useGameSession'
 
 interface GameProps {
 	config: GameConfig
 	onBackToHome: () => void
 }
 
-const NO_COUNTRIES_ERROR =
-	'Не найдено совпадений между геометрией карты и данными о странах.'
-
-function selectEligibleIds(gameData: GameData, config: GameConfig): string[] {
-	const difficultyRank: Record<CountryDifficulty, number> = {
-		easy: 0,
-		medium: 1,
-		hard: 2,
-	}
-
-	return gameData.allowedIds.filter(id => {
-		const info = gameData.infoMap.get(id)
-
-		return (
-			info &&
-			difficultyRank[info.difficulty] <= difficultyRank[config.difficulty]
-		)
-	})
-}
-
 export function Game({ config, onBackToHome }: GameProps): JSX.Element {
-	const [gameData, setGameData] = useState<GameData | null>(null)
-	const [isLoading, setIsLoading] = useState(true)
-	const [loadError, setLoadError] = useState<string | null>(null)
-
-	const [engineState, dispatchEngineState] = useReducer(
-		gameReducer,
-		createIdleState(),
-	)
-
-	const loadData = useCallback(async () => {
-		setIsLoading(true)
-		setLoadError(null)
-
-		try {
-			const loaded = await loadGameData()
-			if (loaded.allowedIds.length === 0) {
-				setLoadError(NO_COUNTRIES_ERROR)
-				setGameData(null)
-				return
-			}
-
-			setGameData(loaded)
-		} catch (error) {
-			setGameData(null)
-			setLoadError(toErrorMessage(error))
-		} finally {
-			setIsLoading(false)
-		}
-	}, [])
-
-	useEffect(() => {
-		void loadData()
-	}, [loadData])
-
-	const startGame = useCallback(
-		(nextConfig: GameConfig) => {
-			if (!gameData) {
-				return
-			}
-
-			const eligibleIds = selectEligibleIds(gameData, nextConfig)
-			const questionIds = pickRandomIds(
-				eligibleIds,
-				nextConfig.questionCount,
-			)
-
-			if (questionIds.length === 0) {
-				setLoadError(NO_COUNTRIES_ERROR)
-				return
-			}
-
-			dispatchEngineState({
-				type: 'START',
-				config: {
-					...nextConfig,
-					questionCount: questionIds.length,
-				},
-				questionIds,
-				now: Date.now(),
-			})
-		},
-		[gameData],
-	)
-
-	useEffect(() => {
-		if (!gameData || engineState.phase !== 'idle') {
-			return
-		}
-
-		startGame(config)
-	}, [config, engineState.phase, gameData, startGame])
-
-	const handleTryAgain = useCallback(() => {
-		startGame(engineState.config)
-	}, [engineState.config, startGame])
-
-	const handlePick = useCallback(
-		(countryId: string) => {
-			if (!gameData?.infoMap.has(countryId)) {
-				return
-			}
-
-			dispatchEngineState({
-				type: 'PICK',
-				countryId,
-				now: Date.now(),
-			})
-		},
-		[gameData],
-	)
-
-	const handleGiveUp = useCallback(() => {
-		dispatchEngineState({
-			type: 'GIVE_UP',
-			now: Date.now(),
-		})
-	}, [])
-
-	const handleNext = useCallback(() => {
-		dispatchEngineState({
-			type: 'NEXT',
-			now: Date.now(),
-		})
-	}, [])
+	const {
+		gameData,
+		isLoading,
+		loadError,
+		engineState,
+		reloadGameData,
+		handleTryAgain,
+		handlePick,
+		handleGiveUp,
+		handleNext,
+	} = useGameSession(config)
 
 	if (isLoading) {
 		return (
@@ -167,7 +49,7 @@ export function Game({ config, onBackToHome }: GameProps): JSX.Element {
 					<button
 						type='button'
 						className='rounded-lg bg-teal-700 px-4 py-2 text-sm font-bold text-white shadow transition hover:-translate-y-0.5 hover:bg-teal-600'
-						onClick={() => void loadData()}
+						onClick={() => void reloadGameData()}
 					>
 						Повторить
 					</button>

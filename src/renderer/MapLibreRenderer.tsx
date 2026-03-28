@@ -9,7 +9,7 @@ import Map, {
 	type MapRef,
 	type ProjectionSpecification,
 } from 'react-map-gl/maplibre'
-import { normalizeCountryId } from '../../data/gameData'
+import { normalizeCountryId } from '../data/gameData'
 import {
 	BASE_STYLE_LAYER_ID,
 	buildHighlightLayer,
@@ -19,8 +19,8 @@ import {
 	LABELS_BOTTOM_LAYER_ID,
 	SOURCE_ID,
 	SOURCE_LAYER_ID,
-} from '../map-styles'
-import type { MapRendererProps } from '../types'
+} from './map-styles'
+import type { MapRendererProps } from './types'
 
 const MAP_STYLE_URL = '/map/style.json'
 
