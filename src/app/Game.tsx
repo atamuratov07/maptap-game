@@ -3,7 +3,7 @@ import { createIdleState, gameReducer } from '../core/engine'
 import { pickRandomIds } from '../core/random'
 import type { GameConfig } from '../core/types'
 import { loadGameData } from '../data/gameData'
-import type { GameData } from '../data/types'
+import type { CountryDifficulty, GameData } from '../data/types'
 import { toErrorMessage } from '../shared/utils'
 import { GameScreen } from '../ui/GameScreen'
 import { ResultModal } from '../ui/ResultModal'
@@ -11,6 +11,26 @@ import { ResultModal } from '../ui/ResultModal'
 interface GameProps {
 	config: GameConfig
 	onBackToHome: () => void
+}
+
+const NO_COUNTRIES_ERROR =
+	'Не найдено совпадений между геометрией карты и данными о странах.'
+
+function selectEligibleIds(gameData: GameData, config: GameConfig): string[] {
+	const difficultyRank: Record<CountryDifficulty, number> = {
+		easy: 0,
+		medium: 1,
+		hard: 2,
+	}
+
+	return gameData.allowedIds.filter(id => {
+		const info = gameData.infoMap.get(id)
+
+		return (
+			info &&
+			difficultyRank[info.difficulty] <= difficultyRank[config.difficulty]
+		)
+	})
 }
 
 export function Game({ config, onBackToHome }: GameProps): JSX.Element {
@@ -30,9 +50,7 @@ export function Game({ config, onBackToHome }: GameProps): JSX.Element {
 		try {
 			const loaded = await loadGameData()
 			if (loaded.allowedIds.length === 0) {
-				setLoadError(
-					'Не найдено совпадений между геометрией карты и данными о странах.',
-				)
+				setLoadError(NO_COUNTRIES_ERROR)
 				setGameData(null)
 				return
 			}
@@ -56,15 +74,14 @@ export function Game({ config, onBackToHome }: GameProps): JSX.Element {
 				return
 			}
 
+			const eligibleIds = selectEligibleIds(gameData, nextConfig)
 			const questionIds = pickRandomIds(
-				gameData.allowedIds,
+				eligibleIds,
 				nextConfig.questionCount,
 			)
 
 			if (questionIds.length === 0) {
-				setLoadError(
-					'Не найдено совпадений между геометрией карты и данными о странах.',
-				)
+				setLoadError(NO_COUNTRIES_ERROR)
 				return
 			}
 

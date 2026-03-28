@@ -1,8 +1,11 @@
+import type { CountryDifficulty } from '../data/types'
+
 export type GamePhase = 'idle' | 'playing' | 'revealed' | 'finished'
 
 export interface GameConfig {
 	questionCount: number
 	attemptsPerQuestion: number
+	difficulty: CountryDifficulty
 }
 
 export interface GameState {

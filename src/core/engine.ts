@@ -4,6 +4,7 @@ import type { GameAction, GameConfig, GameState } from './types'
 const DEFAULT_CONFIG: GameConfig = {
 	questionCount: 10,
 	attemptsPerQuestion: 3,
+	difficulty: 'easy',
 }
 
 function clampAttempts(value: number): number {
@@ -98,6 +99,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 			if (nextQuestionIds.length === 0) {
 				return createIdleState({
 					questionCount: action.config.questionCount,
+					difficulty: action.config.difficulty,
 					attemptsPerQuestion,
 				})
 			}
@@ -107,6 +109,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 				config: {
 					questionCount: nextQuestionIds.length,
 					attemptsPerQuestion,
+					difficulty: action.config.difficulty,
 				},
 				questionIds: nextQuestionIds,
 				index: 0,
