@@ -1,18 +1,15 @@
 import { useCallback, useEffect, useMemo, useReducer, useState } from 'react'
 import { createIdleState, gameReducer } from '../core/engine'
+import type { GameErrorCode } from '../core/errors'
 import { prepareGameSession } from '../core/session'
 import type { GameConfig, GameState } from '../core/types'
 import { loadGameData, toSessionCountryPool } from '../data/gameData'
 import type { GameData } from '../data/types'
-import { toErrorMessage } from '../shared/utils'
-
-const NO_COUNTRIES_ERROR =
-	'Не найдено совпадений между геометрией карты и данными о странах.'
 
 interface UseGameSessionResult {
 	gameData: GameData | null
 	isLoading: boolean
-	loadError: string | null
+	loadErrorCode: GameErrorCode | null
 	engineState: GameState
 	reloadGameData: () => Promise<void>
 	handleTryAgain: () => void
@@ -24,7 +21,7 @@ interface UseGameSessionResult {
 export function useGameSession(config: GameConfig): UseGameSessionResult {
 	const [gameData, setGameData] = useState<GameData | null>(null)
 	const [isLoading, setIsLoading] = useState(true)
-	const [loadError, setLoadError] = useState<string | null>(null)
+	const [loadErrorCode, setLoadErrorCode] = useState<GameErrorCode | null>(null)
 
 	const [engineState, dispatchEngineState] = useReducer(
 		gameReducer,
@@ -38,20 +35,20 @@ export function useGameSession(config: GameConfig): UseGameSessionResult {
 
 	const reloadGameData = useCallback(async () => {
 		setIsLoading(true)
-		setLoadError(null)
+		setLoadErrorCode(null)
 
 		try {
 			const loaded = await loadGameData()
 			if (loaded.allowedIds.length === 0) {
-				setLoadError(NO_COUNTRIES_ERROR)
+				setLoadErrorCode('no_playable_countries')
 				setGameData(null)
 				return
 			}
 
 			setGameData(loaded)
-		} catch (error) {
+		} catch {
 			setGameData(null)
-			setLoadError(toErrorMessage(error))
+			setLoadErrorCode('load_failed')
 		} finally {
 			setIsLoading(false)
 		}
@@ -69,11 +66,11 @@ export function useGameSession(config: GameConfig): UseGameSessionResult {
 
 			const result = prepareGameSession(sessionPool, nextConfig)
 			if (!result.ok) {
-				setLoadError(NO_COUNTRIES_ERROR)
+				setLoadErrorCode(result.error.code)
 				return
 			}
 
-			setLoadError(null)
+			setLoadErrorCode(null)
 			dispatchEngineState({
 				type: 'START',
 				session: result.session,
@@ -127,7 +124,7 @@ export function useGameSession(config: GameConfig): UseGameSessionResult {
 	return {
 		gameData,
 		isLoading,
-		loadError,
+		loadErrorCode,
 		engineState,
 		reloadGameData,
 		handleTryAgain,

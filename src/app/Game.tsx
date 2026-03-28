@@ -1,3 +1,4 @@
+import type { GameErrorCode } from '../core/errors'
 import type { GameConfig } from '../core/types'
 import {
 	getCorrectCount,
@@ -13,11 +14,24 @@ interface GameProps {
 	onBackToHome: () => void
 }
 
+function getLoadErrorMessage(errorCode: GameErrorCode | null): string {
+	switch (errorCode) {
+		case 'no_playable_countries':
+			return 'Нет доступных стран для игры.'
+		case 'no_eligible_countries':
+			return 'Нет стран, подходящих для выбранных настроек.'
+		case 'load_failed':
+			return 'Не удалось загрузить данные игры.'
+		case null:
+			return 'Неизвестная ошибка.'
+	}
+}
+
 export function Game({ config, onBackToHome }: GameProps): JSX.Element {
 	const {
 		gameData,
 		isLoading,
-		loadError,
+		loadErrorCode,
 		engineState,
 		reloadGameData,
 		handleTryAgain,
@@ -34,14 +48,14 @@ export function Game({ config, onBackToHome }: GameProps): JSX.Element {
 						Загрузка MapTap
 					</h1>
 					<p className='text-slate-700'>
-						Загружаем геометрию карты и данные о странах...
+						Загружаем игровые страны и данные о странах...
 					</p>
 				</div>
 			</div>
 		)
 	}
 
-	if (loadError || !gameData) {
+	if (loadErrorCode || !gameData) {
 		return (
 			<div className='grid min-h-screen place-items-center px-5'>
 				<div className='w-full max-w-115 rounded-2xl border border-slate-300 bg-white p-6 text-center shadow-[0_15px_35px_rgba(15,23,42,0.12)]'>
@@ -49,7 +63,7 @@ export function Game({ config, onBackToHome }: GameProps): JSX.Element {
 						Не удалось загрузить данные игры
 					</h1>
 					<p className='mb-4 text-slate-700'>
-						{loadError || 'Неизвестная ошибка.'}
+						{getLoadErrorMessage(loadErrorCode)}
 					</p>
 					<button
 						type='button'
