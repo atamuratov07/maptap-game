@@ -22,26 +22,50 @@ export interface PreparedGameSession {
 	questionIds: string[]
 }
 
-export interface GameState {
-	phase: GamePhase
+export interface IdleGameState {
+	phase: 'idle'
+	config: GameConfig
+}
+
+interface StartedGameStateBase {
 	config: GameConfig
 	questionIds: string[]
 	index: number
-	attemptsLeft: number
-	wrongPicks: string[]
-	revealedId?: string
 	score: number
 	correctCount: number
-	gameStartedAt: number
 	questionStartedAt: number
-	questionResolvedAt?: number
 }
+
+export interface PlayingGameState extends StartedGameStateBase {
+	phase: 'playing'
+	attemptsLeft: number
+	wrongPicks: string[]
+}
+
+export interface RevealedGameState extends StartedGameStateBase {
+	phase: 'revealed'
+	attemptsLeft: number
+	wrongPicks: string[]
+	revealedId: string
+	questionResolvedAt: number
+}
+
+export interface FinishedGameState extends StartedGameStateBase {
+	phase: 'finished'
+	questionResolvedAt: number
+}
+
+export type StartedGameState =
+	| PlayingGameState
+	| RevealedGameState
+	| FinishedGameState
+
+export type GameState = IdleGameState | StartedGameState
 
 export type GameAction =
 	| {
 			type: 'START'
-			config: GameConfig
-			questionIds: string[]
+			session: PreparedGameSession
 			now: number
 	  }
 	| {
@@ -56,7 +80,4 @@ export type GameAction =
 	| {
 			type: 'NEXT'
 			now: number
-	  }
-	| {
-			type: 'HOME'
 	  }

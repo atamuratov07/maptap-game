@@ -1,5 +1,15 @@
 import { useMemo } from 'react'
-import { getTargetId, isPickAllowed } from '../core/engine'
+import {
+	getAttemptsLeft,
+	getQuestionCount,
+	getQuestionIndex,
+	getQuestionResolvedAt,
+	getQuestionStartedAt,
+	getRevealedId,
+	getTargetId,
+	getWrongPicks,
+	isPickAllowed,
+} from '../core/selectors'
 import type { GameState } from '../core/types'
 import type { CountryInfo } from '../data/types'
 import { MapLibreRenderer } from '../renderer/MapLibreRenderer'
@@ -25,51 +35,53 @@ export function GameScreen({
 }: GameScreenProps): JSX.Element {
 	const targetId = getTargetId(state)
 	const targetInfo = targetId ? infoMap.get(targetId) : undefined
+	const revealedId = getRevealedId(state)
+	const wrongPicks = getWrongPicks(state)
+	const questionCount = getQuestionCount(state)
+	const questionIndex = getQuestionIndex(state)
+	const questionStartedAt = getQuestionStartedAt(state)
+	const questionResolvedAt = getQuestionResolvedAt(state)
+	const attemptsLeft = getAttemptsLeft(state)
 
 	const highlighted = useMemo<MapRendererProps['highlighted']>(() => {
-		if (state.phase === 'playing') {
-			return {
-				wrongIds: state.wrongPicks,
-			}
-		}
-
 		if (state.phase === 'revealed') {
 			return {
-				revealedId: state.revealedId,
-				wrongIds: state.wrongPicks,
+				revealedId,
+				wrongIds: wrongPicks,
 			}
 		}
 
 		return {
-			wrongIds: [],
+			wrongIds: wrongPicks,
 		}
-	}, [state.phase, state.revealedId, state.wrongPicks])
+	}, [revealedId, state.phase, wrongPicks])
 
 	const revealedInfo = useMemo<MapRendererProps['revealedInfo']>(() => {
-		if (state.phase !== 'revealed' || !state.revealedId) {
+		if (!revealedId) {
 			return null
 		}
 
-		const info = infoMap.get(state.revealedId)
+		const info = infoMap.get(revealedId)
 		if (!info) {
 			return null
 		}
 
 		return {
-			countryId: state.revealedId,
+			countryId: revealedId,
 			longitude: info.centroidLng,
 			latitude: info.centroidLat,
 			element: <CountryInfoCard info={info} />,
 		}
-	}, [infoMap, state.phase, state.revealedId])
+	}, [infoMap, revealedId])
+
 	const playableIds = useMemo<ReadonlySet<string>>(
 		() => new Set(infoMap.keys()),
 		[infoMap],
 	)
 
 	const canPick = isPickAllowed(state)
-	const progressLabel = state.questionIds.length
-		? `Вопрос ${Math.min(state.index + 1, state.questionIds.length)} / ${state.questionIds.length}`
+	const progressLabel = questionCount
+		? `Вопрос ${Math.min(questionIndex + 1, questionCount)} / ${questionCount}`
 		: 'Нет вопросов'
 
 	const rendererProps: MapRendererProps = {
@@ -89,8 +101,8 @@ export function GameScreen({
 				targetName={targetInfo?.nameRu || 'Игра завершена'}
 				targetFlagUrl={targetInfo?.flagUrl}
 				phase={state.phase}
-				questionStartedAt={state.questionStartedAt}
-				questionResolvedAt={state.questionResolvedAt}
+				questionStartedAt={questionStartedAt}
+				questionResolvedAt={questionResolvedAt}
 				canGiveUp={state.phase === 'playing'}
 				onGiveUp={onGiveUp}
 			/>
@@ -103,7 +115,7 @@ export function GameScreen({
 				{showHearts ? (
 					<div className='absolute right-5 bottom-5 z-20'>
 						<Hearts
-							attemptsLeft={state.attemptsLeft}
+							attemptsLeft={attemptsLeft}
 							maxAttempts={state.config.attemptsPerQuestion}
 						/>
 					</div>

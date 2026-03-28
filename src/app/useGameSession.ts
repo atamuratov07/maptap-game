@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useReducer, useState } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useState } from 'react'
 import { createIdleState, gameReducer } from '../core/engine'
-import { pickRandomIds } from '../core/random'
-import type { GameConfig, GameDifficulty, GameState } from '../core/types'
-import { loadGameData } from '../data/gameData'
+import { prepareGameSession } from '../core/session'
+import type { GameConfig, GameState } from '../core/types'
+import { loadGameData, toSessionCountryPool } from '../data/gameData'
 import type { GameData } from '../data/types'
 import { toErrorMessage } from '../shared/utils'
 
@@ -21,22 +21,6 @@ interface UseGameSessionResult {
 	handleNext: () => void
 }
 
-function selectEligibleIds(gameData: GameData, config: GameConfig): string[] {
-	const difficultyRank: Record<GameDifficulty, number> = {
-		easy: 0,
-		medium: 1,
-		hard: 2,
-	}
-	return gameData.allowedIds.filter(id => {
-		const info = gameData.countriesInfo.get(id)
-
-		return (
-			info &&
-			difficultyRank[info.difficulty] <= difficultyRank[config.difficulty]
-		)
-	})
-}
-
 export function useGameSession(config: GameConfig): UseGameSessionResult {
 	const [gameData, setGameData] = useState<GameData | null>(null)
 	const [isLoading, setIsLoading] = useState(true)
@@ -45,6 +29,11 @@ export function useGameSession(config: GameConfig): UseGameSessionResult {
 	const [engineState, dispatchEngineState] = useReducer(
 		gameReducer,
 		createIdleState(),
+	)
+
+	const sessionPool = useMemo(
+		() => (gameData ? toSessionCountryPool(gameData) : null),
+		[gameData],
 	)
 
 	const reloadGameData = useCallback(async () => {
@@ -74,42 +63,33 @@ export function useGameSession(config: GameConfig): UseGameSessionResult {
 
 	const prepareAndStartGame = useCallback(
 		(nextConfig: GameConfig) => {
-			if (!gameData) {
+			if (!sessionPool) {
 				return
 			}
 
-			const eligibleIds = selectEligibleIds(gameData, nextConfig)
-
-			const questionIds = pickRandomIds(
-				eligibleIds,
-				nextConfig.questionCount,
-			)
-
-			if (questionIds.length === 0) {
+			const result = prepareGameSession(sessionPool, nextConfig)
+			if (!result.ok) {
 				setLoadError(NO_COUNTRIES_ERROR)
 				return
 			}
 
+			setLoadError(null)
 			dispatchEngineState({
 				type: 'START',
-				config: {
-					...nextConfig,
-					questionCount: questionIds.length,
-				},
-				questionIds,
+				session: result.session,
 				now: Date.now(),
 			})
 		},
-		[gameData],
+		[sessionPool],
 	)
 
 	useEffect(() => {
-		if (!gameData || engineState.phase !== 'idle') {
+		if (!sessionPool || engineState.phase !== 'idle') {
 			return
 		}
 
 		prepareAndStartGame(config)
-	}, [config, engineState.phase, gameData, prepareAndStartGame])
+	}, [config, engineState.phase, prepareAndStartGame, sessionPool])
 
 	const handleTryAgain = useCallback(() => {
 		prepareAndStartGame(engineState.config)

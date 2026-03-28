@@ -1,4 +1,5 @@
-﻿import type { CountryInfo, GameData } from './types'
+import type { SessionCountryPool } from '../core/types'
+import type { CountryInfo, GameData } from './types'
 
 const PLAYABLE_COUNTRY_REGISTRY_URL =
 	'/countries-registry/countries.playable.json'
@@ -164,7 +165,25 @@ export async function loadGameData(signal?: AbortSignal): Promise<GameData> {
 	}
 
 	return {
-		countriesInfo: countriesInfo,
+		countriesInfo,
 		allowedIds,
+	}
+}
+
+export function toSessionCountryPool(gameData: GameData): SessionCountryPool {
+	const countriesById = new Map<string, { difficulty: CountryInfo['difficulty'] }>()
+
+	for (const id of gameData.allowedIds) {
+		const country = gameData.countriesInfo.get(id)
+		if (country) {
+			countriesById.set(id, {
+				difficulty: country.difficulty,
+			})
+		}
+	}
+
+	return {
+		allowedIds: gameData.allowedIds,
+		countriesById,
 	}
 }

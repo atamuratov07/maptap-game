@@ -1,4 +1,9 @@
 import type { GameConfig } from '../core/types'
+import {
+	getCorrectCount,
+	getQuestionCount,
+	getScore,
+} from '../core/selectors'
 import { GameScreen } from '../ui/GameScreen'
 import { ResultModal } from '../ui/ResultModal'
 import { useGameSession } from './useGameSession'
@@ -70,9 +75,9 @@ export function Game({ config, onBackToHome }: GameProps): JSX.Element {
 
 			<ResultModal
 				open={engineState.phase === 'finished'}
-				score={engineState.score}
-				correctCount={engineState.correctCount}
-				totalCount={engineState.questionIds.length}
+				score={getScore(engineState)}
+				correctCount={getCorrectCount(engineState)}
+				totalCount={getQuestionCount(engineState)}
 				onTryAgain={handleTryAgain}
 				onHome={onBackToHome}
 			/>
