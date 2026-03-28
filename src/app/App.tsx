@@ -1,13 +1,12 @@
 import { useCallback, useState } from 'react'
-import type { GameConfig } from '../core/types'
-import type { CountryDifficulty } from '../data/types'
+import type { GameConfig, GameDifficulty } from '../core/types'
 import { HomeScreen } from '../ui/HomeScreen'
 import { Game } from './Game'
 
 const QUESTION_COUNT_OPTIONS = [5, 10, 15, 20]
 const ATTEMPS_PER_QUESTION_OPTIONS = [1, 2, 3, 4, 5]
 const DIFFICULTY_OPTIONS: Array<{
-	value: CountryDifficulty
+	value: GameDifficulty
 	label: string
 }> = [
 	{ value: 'easy', label: 'Легкий (Самые известные страны мира)' },
@@ -18,7 +17,7 @@ const DIFFICULTY_OPTIONS: Array<{
 function buildGameConfig(
 	questionCount: number,
 	attemptsPerQuestion: number,
-	difficulty: CountryDifficulty,
+	difficulty: GameDifficulty,
 ): GameConfig {
 	return {
 		questionCount,
@@ -30,7 +29,7 @@ function buildGameConfig(
 export default function App(): JSX.Element {
 	const [questionCount, setQuestionCount] = useState(10)
 	const [attemptsPerQuestion, setAttemptsPerQuestion] = useState(3)
-	const [difficulty, setDifficulty] = useState<CountryDifficulty>('easy')
+	const [difficulty, setDifficulty] = useState<GameDifficulty>('easy')
 	const [activeConfig, setActiveConfig] = useState<GameConfig | null>(null)
 
 	const handleStart = useCallback(() => {

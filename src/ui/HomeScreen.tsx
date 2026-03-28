@@ -1,4 +1,4 @@
-import type { CountryDifficulty } from '../data/types'
+import type { GameDifficulty } from '../core/types'
 
 interface HomeScreenProps {
 	questionCount: number
@@ -7,12 +7,12 @@ interface HomeScreenProps {
 	attemptsPerQuestion: number
 	onAttemptsPerQuestionChange: (value: number) => void
 	attemptsPerQuestionOptions: number[]
-	difficulty: CountryDifficulty
+	difficulty: GameDifficulty
 	difficultyOptions: Array<{
-		value: CountryDifficulty
+		value: GameDifficulty
 		label: string
 	}>
-	onDifficultyChange: (value: CountryDifficulty) => void
+	onDifficultyChange: (value: GameDifficulty) => void
 	onStart: () => void
 	startDisabled?: boolean
 }
@@ -85,7 +85,7 @@ export function HomeScreen({
 						className='w-full rounded-lg border border-slate-400 bg-white px-3 py-2 text-slate-900 shadow-sm outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-300'
 						value={difficulty}
 						onChange={event => {
-							onDifficultyChange(event.target.value as CountryDifficulty)
+							onDifficultyChange(event.target.value as GameDifficulty)
 						}}
 					>
 						{difficultyOptions.map(option => (

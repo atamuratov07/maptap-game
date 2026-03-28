@@ -1,7 +1,4 @@
-﻿import type { Feature, FeatureCollection, Geometry } from 'geojson'
-import { feature } from 'topojson-client'
-import countriesTopoJsonUrl from 'world-atlas/countries-110m.json?url'
-import type { CountryFeature, CountryInfo, GameData } from './types'
+﻿import type { CountryInfo, GameData } from './types'
 
 const PLAYABLE_COUNTRY_REGISTRY_URL =
 	'/countries-registry/countries.playable.json'
@@ -72,53 +69,6 @@ function requireCoordinate(
 	return value
 }
 
-function parseMapFeatures(topologyPayload: unknown): CountryFeature[] {
-	const topology = topologyPayload as {
-		objects?: Record<string, unknown>
-	}
-
-	const countriesObject = topology.objects?.countries
-	if (!countriesObject) {
-		throw new Error(
-			'Не удалось найти геометрию стран в данных world-atlas.',
-		)
-	}
-
-	const resolvedFeature = feature(
-		topologyPayload as never,
-		countriesObject as never,
-	) as
-		| FeatureCollection<Geometry, Record<string, unknown>>
-		| Feature<Geometry, Record<string, unknown>>
-
-	const collection: FeatureCollection<
-		Geometry,
-		Record<string, unknown>
-	> = resolvedFeature.type === 'FeatureCollection'
-		? resolvedFeature
-		: {
-				type: 'FeatureCollection',
-				features: [resolvedFeature],
-			}
-
-	const features: CountryFeature[] = []
-	for (const item of collection.features) {
-		const normalizedId = normalizeCountryId(
-			item.id as string | number | undefined,
-		)
-		if (!normalizedId) {
-			continue
-		}
-
-		features.push({
-			...item,
-			id: normalizedId,
-		})
-	}
-
-	return features
-}
-
 async function fetchPlayableRegistry(
 	signal?: AbortSignal,
 ): Promise<PlayableRegistryPayload> {
@@ -146,7 +96,7 @@ async function loadCountryRegistry(
 ): Promise<Map<string, CountryInfo>> {
 	const payload = await fetchPlayableRegistry(signal)
 	const countries = payload.countries ?? []
-	const infoMap = new Map<string, CountryInfo>()
+	const countriesInfo = new Map<string, CountryInfo>()
 
 	for (const country of countries) {
 		if (!country.playable) {
@@ -154,7 +104,7 @@ async function loadCountryRegistry(
 		}
 
 		const id = normalizeCountryId(country.id)
-		if (!id || infoMap.has(id)) {
+		if (!id || countriesInfo.has(id)) {
 			continue
 		}
 
@@ -165,10 +115,18 @@ async function loadCountryRegistry(
 		const currency = country.currency?.trim() || 'Неизвестно'
 		const currencyRu = country.currency_ru?.trim() || currency
 		const flagUrl = country.flag_url?.trim() || ''
-		const centroidLng = requireCoordinate(country.centroid_lng, id, 'centroid_lng')
-		const centroidLat = requireCoordinate(country.centroid_lat, id, 'centroid_lat')
+		const centroidLng = requireCoordinate(
+			country.centroid_lng,
+			id,
+			'centroid_lng',
+		)
+		const centroidLat = requireCoordinate(
+			country.centroid_lat,
+			id,
+			'centroid_lat',
+		)
 
-		infoMap.set(id, {
+		countriesInfo.set(id, {
 			id,
 			name,
 			nameRu,
@@ -189,41 +147,24 @@ async function loadCountryRegistry(
 		})
 	}
 
-	return infoMap
+	return countriesInfo
 }
 
 export async function loadGameData(signal?: AbortSignal): Promise<GameData> {
-	const [topologyResponse, infoMapRaw] = await Promise.all([
-		fetch(countriesTopoJsonUrl, { signal }),
-		loadCountryRegistry(signal),
-	])
+	const countriesInfoRaw = await loadCountryRegistry(signal)
 
-	if (!topologyResponse.ok) {
-		throw new Error(
-			`Не удалось загрузить данные world-atlas: ${topologyResponse.status}`,
-		)
-	}
-
-	const topologyPayload = await topologyResponse.json()
-	const topoFeatures = parseMapFeatures(topologyPayload)
-	const featureIdSet = new Set(topoFeatures.map(item => item.id))
-
-	const allowedIds = [...infoMapRaw.keys()].filter(id => featureIdSet.has(id))
-	const allowedIdSet = new Set(allowedIds)
-
-	const features = topoFeatures.filter(item => allowedIdSet.has(item.id))
-	const infoMap = new Map<string, CountryInfo>()
+	const countriesInfo = new Map<string, CountryInfo>()
+	const allowedIds = Array.from(countriesInfoRaw.keys())
 
 	for (const id of allowedIds) {
-		const info = infoMapRaw.get(id)
+		const info = countriesInfoRaw.get(id)
 		if (info) {
-			infoMap.set(id, info)
+			countriesInfo.set(id, info)
 		}
 	}
 
 	return {
-		features,
-		infoMap,
+		countriesInfo: countriesInfo,
 		allowedIds,
 	}
 }

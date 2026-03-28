@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useReducer, useState } from 'react'
 import { createIdleState, gameReducer } from '../core/engine'
 import { pickRandomIds } from '../core/random'
-import type { GameConfig, GameState } from '../core/types'
+import type { GameConfig, GameDifficulty, GameState } from '../core/types'
 import { loadGameData } from '../data/gameData'
-import type { CountryDifficulty, GameData } from '../data/types'
+import type { GameData } from '../data/types'
 import { toErrorMessage } from '../shared/utils'
 
 const NO_COUNTRIES_ERROR =
@@ -22,13 +22,13 @@ interface UseGameSessionResult {
 }
 
 function selectEligibleIds(gameData: GameData, config: GameConfig): string[] {
-	const difficultyRank: Record<CountryDifficulty, number> = {
+	const difficultyRank: Record<GameDifficulty, number> = {
 		easy: 0,
 		medium: 1,
 		hard: 2,
 	}
 	return gameData.allowedIds.filter(id => {
-		const info = gameData.infoMap.get(id)
+		const info = gameData.countriesInfo.get(id)
 
 		return (
 			info &&
@@ -117,7 +117,7 @@ export function useGameSession(config: GameConfig): UseGameSessionResult {
 
 	const handlePick = useCallback(
 		(countryId: string) => {
-			if (!gameData?.infoMap.has(countryId)) {
+			if (!gameData?.countriesInfo.has(countryId)) {
 				return
 			}
 

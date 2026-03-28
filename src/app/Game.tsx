@@ -62,7 +62,7 @@ export function Game({ config, onBackToHome }: GameProps): JSX.Element {
 		<div className='min-h-screen'>
 			<GameScreen
 				state={engineState}
-				infoMap={gameData.infoMap}
+				infoMap={gameData.countriesInfo}
 				onPick={handlePick}
 				onGiveUp={handleGiveUp}
 				onNext={handleNext}

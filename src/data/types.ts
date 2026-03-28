@@ -1,10 +1,4 @@
-import type { Feature, Geometry } from 'geojson'
-
-export type CountryFeature = Feature<Geometry, Record<string, unknown>> & {
-	id: string
-}
-
-export type CountryDifficulty = 'easy' | 'medium' | 'hard'
+import type { GameDifficulty } from '../core/types'
 
 export interface CountryInfo {
 	id: string
@@ -19,14 +13,13 @@ export interface CountryInfo {
 	currency: string
 	currencyRu: string
 	playable: boolean
-	difficulty: CountryDifficulty
+	difficulty: GameDifficulty
 	independent: boolean
 	unMember: boolean
 	flagUrl: string
 }
 
 export interface GameData {
-	features: CountryFeature[]
-	infoMap: Map<string, CountryInfo>
+	countriesInfo: Map<string, CountryInfo>
 	allowedIds: string[]
 }
