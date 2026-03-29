@@ -1,10 +1,6 @@
 import type { GameErrorCode } from '../core/errors'
+import { getCorrectCount, getQuestionCount, getScore } from '../core/selectors'
 import type { GameConfig } from '../core/types'
-import {
-	getCorrectCount,
-	getQuestionCount,
-	getScore,
-} from '../core/selectors'
 import { GameScreen } from '../ui/GameScreen'
 import { ResultModal } from '../ui/ResultModal'
 import { useGameSession } from './useGameSession'
@@ -81,7 +77,7 @@ export function Game({ config, onBackToHome }: GameProps): JSX.Element {
 		<div className='min-h-screen'>
 			<GameScreen
 				state={engineState}
-				infoMap={gameData.countriesInfo}
+				countriesInfo={gameData.countriesInfo}
 				onPick={handlePick}
 				onGiveUp={handleGiveUp}
 				onNext={handleNext}

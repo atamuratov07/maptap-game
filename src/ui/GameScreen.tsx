@@ -20,7 +20,7 @@ import { Hearts } from './Hearts'
 
 interface GameScreenProps {
 	state: GameState
-	infoMap: Map<string, CountryInfo>
+	countriesInfo: Map<string, CountryInfo>
 	onPick: (countryId: string) => void
 	onGiveUp: () => void
 	onNext: () => void
@@ -28,13 +28,13 @@ interface GameScreenProps {
 
 export function GameScreen({
 	state,
-	infoMap,
+	countriesInfo,
 	onPick,
 	onGiveUp,
 	onNext,
 }: GameScreenProps): JSX.Element {
 	const targetId = getTargetId(state)
-	const targetInfo = targetId ? infoMap.get(targetId) : undefined
+	const targetInfo = targetId ? countriesInfo.get(targetId) : undefined
 	const revealedId = getRevealedId(state)
 	const wrongPicks = getWrongPicks(state)
 	const questionCount = getQuestionCount(state)
@@ -43,25 +43,12 @@ export function GameScreen({
 	const questionResolvedAt = getQuestionResolvedAt(state)
 	const attemptsLeft = getAttemptsLeft(state)
 
-	const highlighted = useMemo<MapRendererProps['highlighted']>(() => {
-		if (state.phase === 'revealed') {
-			return {
-				revealedId,
-				wrongIds: wrongPicks,
-			}
-		}
-
-		return {
-			wrongIds: wrongPicks,
-		}
-	}, [revealedId, state.phase, wrongPicks])
-
 	const revealedInfo = useMemo<MapRendererProps['revealedInfo']>(() => {
 		if (!revealedId) {
 			return null
 		}
 
-		const info = infoMap.get(revealedId)
+		const info = countriesInfo.get(revealedId)
 		if (!info) {
 			return null
 		}
@@ -72,11 +59,11 @@ export function GameScreen({
 			latitude: info.centroidLat,
 			element: <CountryInfoCard info={info} />,
 		}
-	}, [infoMap, revealedId])
+	}, [countriesInfo, revealedId])
 
 	const playableIds = useMemo<ReadonlySet<string>>(
-		() => new Set(infoMap.keys()),
-		[infoMap],
+		() => new Set(countriesInfo.keys()),
+		[countriesInfo],
 	)
 
 	const canPick = isPickAllowed(state)
@@ -87,7 +74,7 @@ export function GameScreen({
 	const rendererProps: MapRendererProps = {
 		onPick: canPick ? onPick : () => undefined,
 		playableIds,
-		highlighted,
+		wrongIds: wrongPicks,
 		revealedInfo,
 		disabled: !canPick,
 	}

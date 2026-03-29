@@ -39,15 +39,11 @@ const GLOBE_PROJECTION: ProjectionSpecification = {
 export function MapLibreRenderer({
 	onPick,
 	playableIds,
-	highlighted,
+	wrongIds,
 	revealedInfo,
 	disabled = false,
 }: MapRendererProps): JSX.Element {
 	const mapRef = useRef<MapRef | null>(null)
-	const wrongIdSet = useMemo(
-		() => new Set(highlighted.wrongIds),
-		[highlighted.wrongIds],
-	)
 
 	const [isLoaded, setIsLoaded] = useState(false)
 	const [hasFailure, setHasFailure] = useState(false)
@@ -145,14 +141,14 @@ export function MapLibreRenderer({
 
 	// Layers ================================================
 	const highlightLayer = useMemo(() => {
-		return buildHighlightLayer(highlighted.revealedId, highlighted.wrongIds)
-	}, [highlighted.revealedId, highlighted.wrongIds])
+		return buildHighlightLayer(revealedInfo?.countryId, wrongIds)
+	}, [revealedInfo?.countryId, wrongIds])
 
 	const labelIds = useMemo(() => {
-		const ids = new Set<string>(highlighted.wrongIds)
-		if (highlighted.revealedId) ids.add(highlighted.revealedId)
+		const ids = new Set<string>(wrongIds)
+		if (revealedInfo?.countryId) ids.add(revealedInfo?.countryId)
 		return [...ids]
-	}, [highlighted.wrongIds, highlighted.revealedId])
+	}, [wrongIds, revealedInfo?.countryId])
 
 	const labelFilter = useMemo<FilterSpecification>(() => {
 		if (!labelIds.length) {
@@ -178,13 +174,13 @@ export function MapLibreRenderer({
 			if (
 				!pickedId ||
 				!playableIds.has(pickedId) ||
-				wrongIdSet.has(pickedId)
+				wrongIds.includes(pickedId)
 			) {
 				return
 			}
 			onPick(pickedId)
 		},
-		[disabled, onPick, playableIds, wrongIdSet, isLoaded, clearHover],
+		[disabled, onPick, playableIds, wrongIds, isLoaded, clearHover],
 	)
 
 	const handleMouseMove = useCallback(
@@ -207,13 +203,13 @@ export function MapLibreRenderer({
 				!disabled &&
 				hoveredId &&
 				playableIds.has(hoveredId) &&
-				!wrongIdSet.has(hoveredId)
+				!wrongIds.includes(hoveredId)
 			) {
 				setFeatureHoverState(hoveredId, true)
 				hoveredFeatureIdRef.current = hoveredId
 			}
 		},
-		[disabled, playableIds, wrongIdSet, setFeatureHoverState],
+		[disabled, playableIds, wrongIds, setFeatureHoverState],
 	)
 
 	const projectionType =
