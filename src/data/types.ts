@@ -1,4 +1,4 @@
-import type { GameDifficulty } from '../core/types'
+import type { GameContinent, GameDifficulty } from '../core/types'
 
 export interface CountryInfo {
 	id: string
@@ -6,7 +6,7 @@ export interface CountryInfo {
 	nameRu: string
 	capital: string
 	capitalRu: string
-	continent: string
+	continent: GameContinent
 	population: number
 	centroidLng: number
 	centroidLat: number
@@ -21,5 +21,5 @@ export interface CountryInfo {
 
 export interface GameData {
 	countriesInfo: Map<string, CountryInfo>
-	allowedIds: string[]
+	countryIds: string[]
 }

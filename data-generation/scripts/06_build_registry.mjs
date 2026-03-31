@@ -1,5 +1,6 @@
 import pointOnFeature from '@turf/point-on-feature'
 import fs from 'node:fs'
+import { canonicalizeContinent, isGameContinent } from './lib/continent.mjs'
 
 const SEED_JSON = 'build/country_seed.json'
 const OVERRIDES_JSON = 'data/manual_overrides.json'
@@ -275,7 +276,7 @@ for (const baseRow of seed) {
 		name_ru: String(firstNonEmpty(baseRow.NAME_RU)),
 		capital: String(firstNonEmpty(baseRow.CAPITAL)),
 		capital_ru: String(firstNonEmpty(baseRow.CAPITAL_RU)),
-		continent: String(firstNonEmpty(baseRow.CONTINENT)),
+		continent: canonicalizeContinent(baseRow.CONTINENT, a3),
 		population:
 			typeof ov.POPULATION === 'number'
 				? ov.POPULATION
@@ -334,6 +335,9 @@ for (const baseRow of seed) {
 			typeof record.centroid_lat !== 'number')
 	) {
 		missing.push('centroid')
+	}
+	if (record.playable && !isGameContinent(record.continent)) {
+		missing.push(`unsupported_continent:${record.continent}`)
 	}
 
 	const canonicalId = normalizeIsoN3(record.id)

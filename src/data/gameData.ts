@@ -10,7 +10,7 @@ interface RegistryCountry {
 	name_ru?: string
 	capital?: string
 	capital_ru?: string
-	continent?: string
+	continent?: CountryInfo['continent']
 	population?: number
 	centroid_lng?: number | null
 	centroid_lat?: number | null
@@ -40,6 +40,28 @@ export function normalizeCountryId(
 	}
 
 	return parsed.toString().padStart(3, '0')
+}
+
+const GAME_CONTINENTS = [
+	'africa',
+	'asia',
+	'europe',
+	'north-america',
+	'south-america',
+	'oceania',
+] as const satisfies readonly CountryInfo['continent'][]
+
+function requireGameContinent(
+	value: RegistryCountry['continent'],
+	countryId: string,
+): CountryInfo['continent'] {
+	if (typeof value === 'string' && GAME_CONTINENTS.includes(value)) {
+		return value
+	}
+
+	throw new Error(
+		`Invalid canonical continent "${value ?? ''}" for country ${countryId}`,
+	)
 }
 
 function normalizeDifficulty(
@@ -133,7 +155,7 @@ async function loadCountryRegistry(
 			nameRu,
 			capital,
 			capitalRu,
-			continent: country.continent?.trim() || 'Неизвестно',
+			continent: requireGameContinent(country.continent, id),
 			population:
 				typeof country.population === 'number' ? country.population : 0,
 			centroidLng,
@@ -155,9 +177,9 @@ export async function loadGameData(signal?: AbortSignal): Promise<GameData> {
 	const countriesInfoRaw = await loadCountryRegistry(signal)
 
 	const countriesInfo = new Map<string, CountryInfo>()
-	const allowedIds = Array.from(countriesInfoRaw.keys())
+	const countryIds = Array.from(countriesInfoRaw.keys())
 
-	for (const id of allowedIds) {
+	for (const id of countryIds) {
 		const info = countriesInfoRaw.get(id)
 		if (info) {
 			countriesInfo.set(id, info)
@@ -166,24 +188,30 @@ export async function loadGameData(signal?: AbortSignal): Promise<GameData> {
 
 	return {
 		countriesInfo,
-		allowedIds,
+		countryIds,
 	}
 }
 
 export function toSessionCountryPool(gameData: GameData): SessionCountryPool {
-	const countriesById = new Map<string, { difficulty: CountryInfo['difficulty'] }>()
+	const countriesById = new Map<
+		string,
+		{
+			difficulty: CountryInfo['difficulty']
+			continent: CountryInfo['continent']
+		}
+	>()
 
-	for (const id of gameData.allowedIds) {
+	for (const id of gameData.countryIds) {
 		const country = gameData.countriesInfo.get(id)
 		if (country) {
 			countriesById.set(id, {
 				difficulty: country.difficulty,
+				continent: country.continent,
 			})
 		}
 	}
 
 	return {
-		allowedIds: gameData.allowedIds,
 		countriesById,
 	}
 }

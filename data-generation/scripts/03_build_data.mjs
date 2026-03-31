@@ -19,6 +19,7 @@ It does all of this:
 import pointOnFeature from '@turf/point-on-feature'
 import fs from 'node:fs'
 import shp from 'shpjs'
+import { canonicalizeContinent } from './lib/continent.mjs'
 
 const BASE_COUNTRIES = 'build/base_countries.geojson'
 const BASE_CENTROIDS_NDJSON = 'build/base_centroids_z0.geojson'
@@ -472,11 +473,14 @@ function buildCountryRecord({ a3, baseFeat, neFeat }) {
 
 	const ISO_N3 = firstNonEmpty(ov.ISO_N3, pickNeIsoN3(ne), rest?.ccn3)
 
-	const CONTINENT = firstNonEmpty(
-		ov.CONTINENT,
-		base.CONTINENT,
-		pickNeContinent(ne),
-		firstArrayValue(rest?.continents),
+	const CONTINENT = canonicalizeContinent(
+		firstNonEmpty(
+			ov.CONTINENT,
+			base.CONTINENT,
+			pickNeContinent(ne),
+			firstArrayValue(rest?.continents),
+		),
+		a3,
 	)
 
 	const props = {
