@@ -20,6 +20,7 @@ import { Hearts } from './Hearts'
 
 interface GameScreenProps {
 	state: GameState
+	eligibleIds: string[]
 	countriesInfo: Map<string, CountryInfo>
 	onPick: (countryId: string) => void
 	onGiveUp: () => void
@@ -28,6 +29,7 @@ interface GameScreenProps {
 
 export function GameScreen({
 	state,
+	eligibleIds,
 	countriesInfo,
 	onPick,
 	onGiveUp,
@@ -61,9 +63,9 @@ export function GameScreen({
 		}
 	}, [countriesInfo, revealedId])
 
-	const playableIds = useMemo<ReadonlySet<string>>(
-		() => new Set(countriesInfo.keys()),
-		[countriesInfo],
+	const interactiveIds = useMemo<ReadonlySet<string>>(
+		() => new Set(eligibleIds),
+		[eligibleIds],
 	)
 
 	const canPick = isPickAllowed(state)
@@ -73,7 +75,8 @@ export function GameScreen({
 
 	const rendererProps: MapRendererProps = {
 		onPick: canPick ? onPick : () => undefined,
-		playableIds,
+		interactiveIds,
+		scope: state.config.scope,
 		wrongIds: wrongPicks,
 		revealedInfo,
 		disabled: !canPick,

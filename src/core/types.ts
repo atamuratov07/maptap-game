@@ -1,24 +1,35 @@
 export type GamePhase = 'idle' | 'playing' | 'revealed' | 'finished'
 
 export type GameDifficulty = 'easy' | 'medium' | 'hard'
+export type GameContinent =
+	| 'asia'
+	| 'europe'
+	| 'oceania'
+	| 'north-america'
+	| 'south-america'
+	| 'africa'
+
+export type GameScope = 'all' | GameContinent
 
 export interface GameConfig {
 	questionCount: number
 	attemptsPerQuestion: number
 	difficulty: GameDifficulty
+	scope: GameScope
 }
 
 export interface SessionCountryInfo {
 	difficulty: GameDifficulty
+	continent: GameContinent
 }
 
 export interface SessionCountryPool {
-	allowedIds: readonly string[]
 	countriesById: ReadonlyMap<string, SessionCountryInfo>
 }
 
-export interface PreparedGameSession {
+export interface GameSession {
 	config: GameConfig
+	eligibleIds: string[]
 	questionIds: string[]
 }
 
@@ -65,7 +76,7 @@ export type GameState = IdleGameState | StartedGameState
 export type GameAction =
 	| {
 			type: 'START'
-			session: PreparedGameSession
+			session: GameSession
 			now: number
 	  }
 	| {

@@ -11,6 +11,7 @@ interface UseGameSessionResult {
 	isLoading: boolean
 	loadErrorCode: GameErrorCode | null
 	engineState: GameState
+	eligibleIds: string[]
 	reloadGameData: () => Promise<void>
 	handleTryAgain: () => void
 	handlePick: (countryId: string) => void
@@ -20,8 +21,11 @@ interface UseGameSessionResult {
 
 export function useGameSession(config: GameConfig): UseGameSessionResult {
 	const [gameData, setGameData] = useState<GameData | null>(null)
+	const [eligibleIds, setEligibleIds] = useState<string[]>([])
 	const [isLoading, setIsLoading] = useState(true)
-	const [loadErrorCode, setLoadErrorCode] = useState<GameErrorCode | null>(null)
+	const [loadErrorCode, setLoadErrorCode] = useState<GameErrorCode | null>(
+		null,
+	)
 
 	const [engineState, dispatchEngineState] = useReducer(
 		gameReducer,
@@ -39,7 +43,7 @@ export function useGameSession(config: GameConfig): UseGameSessionResult {
 
 		try {
 			const loaded = await loadGameData()
-			if (loaded.allowedIds.length === 0) {
+			if (loaded.countryIds.length === 0) {
 				setLoadErrorCode('no_playable_countries')
 				setGameData(null)
 				return
@@ -71,6 +75,7 @@ export function useGameSession(config: GameConfig): UseGameSessionResult {
 			}
 
 			setLoadErrorCode(null)
+			setEligibleIds(result.session.eligibleIds)
 			dispatchEngineState({
 				type: 'START',
 				session: result.session,
@@ -126,6 +131,7 @@ export function useGameSession(config: GameConfig): UseGameSessionResult {
 		isLoading,
 		loadErrorCode,
 		engineState,
+		eligibleIds,
 		reloadGameData,
 		handleTryAgain,
 		handlePick,

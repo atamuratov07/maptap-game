@@ -9,9 +9,12 @@ import Map, {
 	type MapRef,
 	type ProjectionSpecification,
 } from 'react-map-gl/maplibre'
+import type { GameContinent, GameScope } from '../core/types'
 import { normalizeCountryId } from '../data/gameData'
+import { CONTINENT_VIEW_PRESETS } from './continent-view'
 import {
 	BASE_STYLE_LAYER_ID,
+	buildDimLayer,
 	buildHighlightLayer,
 	capitalLabelLayer,
 	countryLabelLayer,
@@ -36,9 +39,14 @@ const GLOBE_PROJECTION: ProjectionSpecification = {
 	type: 'vertical-perspective',
 }
 
+const isContinentScope = (scope: GameScope): scope is GameContinent => {
+	return scope !== 'all'
+}
+
 export function MapLibreRenderer({
 	onPick,
-	playableIds,
+	interactiveIds,
+	scope,
 	wrongIds,
 	revealedInfo,
 	disabled = false,
@@ -50,9 +58,49 @@ export function MapLibreRenderer({
 	const [mapProjection, setMapProjection] =
 		useState<ProjectionSpecification>(MERCATOR_PROJECTION)
 	const [isPopupVisible, setIsPopupVisible] = useState(false)
+	const [continentMinZoom, setContinentMinZoom] = useState<number | undefined>(
+		undefined,
+	)
+
+	// Scope =================================================
+
+	const isContinentChosen = isContinentScope(scope)
+	const activePreset = isContinentChosen ? CONTINENT_VIEW_PRESETS[scope] : null
+
+	useEffect(() => {
+		if (isContinentScope(scope)) {
+			setMapProjection(MERCATOR_PROJECTION)
+		}
+	}, [isContinentChosen])
+
+	useEffect(() => {
+		const map = mapRef.current?.getMap()
+		if (!map || !isLoaded) {
+			return
+		}
+
+		if (!activePreset) {
+			setContinentMinZoom(undefined)
+			return
+		}
+
+		const camera = map.cameraForBounds(activePreset.focusBounds, {
+			padding: activePreset.padding,
+		})
+		if (!camera) {
+			return
+		}
+
+		setContinentMinZoom(camera.zoom)
+		map.easeTo({
+			center: camera.center,
+			zoom: camera.zoom,
+			duration: 800,
+			essential: true,
+		})
+	}, [scope, isLoaded])
 
 	// Hover =================================================
-
 	const hoveredFeatureIdRef = useRef<string | null>(null)
 
 	const setFeatureHoverState = useCallback(
@@ -144,6 +192,10 @@ export function MapLibreRenderer({
 		return buildHighlightLayer(revealedInfo?.countryId, wrongIds)
 	}, [revealedInfo?.countryId, wrongIds])
 
+	const dimLayer = useMemo(() => {
+		return buildDimLayer(interactiveIds, true)
+	}, [interactiveIds, isContinentChosen])
+
 	const labelIds = useMemo(() => {
 		const ids = new Set<string>(wrongIds)
 		if (revealedInfo?.countryId) ids.add(revealedInfo?.countryId)
@@ -173,14 +225,14 @@ export function MapLibreRenderer({
 			clearHover()
 			if (
 				!pickedId ||
-				!playableIds.has(pickedId) ||
+				!interactiveIds.has(pickedId) ||
 				wrongIds.includes(pickedId)
 			) {
 				return
 			}
 			onPick(pickedId)
 		},
-		[disabled, onPick, playableIds, wrongIds, isLoaded, clearHover],
+		[disabled, onPick, interactiveIds, wrongIds, isLoaded, clearHover],
 	)
 
 	const handleMouseMove = useCallback(
@@ -202,16 +254,17 @@ export function MapLibreRenderer({
 			if (
 				!disabled &&
 				hoveredId &&
-				playableIds.has(hoveredId) &&
+				interactiveIds.has(hoveredId) &&
 				!wrongIds.includes(hoveredId)
 			) {
 				setFeatureHoverState(hoveredId, true)
 				hoveredFeatureIdRef.current = hoveredId
 			}
 		},
-		[disabled, playableIds, wrongIds, setFeatureHoverState],
+		[disabled, interactiveIds, wrongIds, setFeatureHoverState],
 	)
 
+	// Projection ================================================
 	const projectionType =
 		typeof mapProjection.type === 'string' ? mapProjection.type : ''
 	const isMercatorProjection = projectionType === 'mercator'
@@ -231,10 +284,10 @@ export function MapLibreRenderer({
 				}}
 				mapStyle={MAP_STYLE_URL}
 				style={{ width: '100%', height: '100%' }}
+				maxBounds={activePreset?.maxBounds}
+				minZoom={activePreset ? continentMinZoom : undefined}
 				projection={mapProjection}
-				onLoad={() => {
-					setIsLoaded(true)
-				}}
+				onLoad={() => setIsLoaded(true)}
 				transformRequest={url => {
 					const absoluteUrl = url.startsWith('/')
 						? new URL(url, window.location.origin).toString()
@@ -253,10 +306,11 @@ export function MapLibreRenderer({
 			>
 				<NavigationControl showCompass={false} position='top-right' />
 
+				<Layer {...dimLayer} beforeId={LABELS_BOTTOM_LAYER_ID} />
 				<Layer {...highlightLayer} beforeId={LABELS_BOTTOM_LAYER_ID} />
 				<Layer {...hoverLayer} beforeId={LABELS_BOTTOM_LAYER_ID} />
-				<Layer {...countryLabelLayer} filter={labelFilter} />
 				<Layer {...capitalLabelLayer} filter={labelFilter} />
+				<Layer {...countryLabelLayer} filter={labelFilter} />
 
 				{revealedInfo && isPopupVisible && (
 					<Popup
@@ -283,10 +337,13 @@ export function MapLibreRenderer({
 					2D
 				</button>
 				<button
-					className={`${isGlobeProjection ? 'bg-blue-500 cursor-pointer' : 'bg-gray-500'} hover:bg-blue-700 text-white font-bold py-2 px-4 rounded`}
+					className={`${isGlobeProjection ? 'bg-blue-500 cursor-pointer' : 'bg-gray-500'} ${isContinentChosen ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-blue-700'} hover:bg-blue-700 text-white font-bold py-2 px-4 rounded`}
 					onClick={() => {
-						setMapProjection(GLOBE_PROJECTION)
+						if (!isContinentChosen) {
+							setMapProjection(GLOBE_PROJECTION)
+						}
 					}}
+					disabled={isContinentChosen}
 				>
 					3D
 				</button>

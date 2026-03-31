@@ -29,6 +29,7 @@ function normalizeConfig(
 		questionCount,
 		attemptsPerQuestion: clampAttempts(config.attemptsPerQuestion),
 		difficulty: config.difficulty,
+		scope: config.scope,
 	}
 }
 
@@ -36,14 +37,17 @@ export function selectEligibleIds(
 	pool: SessionCountryPool,
 	config: GameConfig,
 ): string[] {
-	return pool.allowedIds.filter(id => {
-		const country = pool.countriesById.get(id)
-		return (
-			country &&
-			DIFFICULTY_RANK[country.difficulty] <=
-				DIFFICULTY_RANK[config.difficulty]
-		)
-	})
+	return Array.from(pool.countriesById.entries())
+		.filter(([_, countryInfo]) => {
+			return (
+				countryInfo &&
+				(config.scope === 'all' ||
+					countryInfo.continent === config.scope) &&
+				DIFFICULTY_RANK[countryInfo.difficulty] <=
+					DIFFICULTY_RANK[config.difficulty]
+			)
+		})
+		.map(entry => entry[0])
 }
 
 export type PrepareGameSessionResult =
@@ -81,6 +85,7 @@ export function prepareGameSession(
 		ok: true,
 		session: {
 			config: normalizeConfig(config, questionIds.length),
+			eligibleIds,
 			questionIds,
 		},
 	}

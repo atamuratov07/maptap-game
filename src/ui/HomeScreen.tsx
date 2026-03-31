@@ -1,4 +1,4 @@
-import type { GameDifficulty } from '../core/types'
+import type { GameDifficulty, GameScope } from '../core/types'
 
 interface HomeScreenProps {
 	questionCount: number
@@ -7,6 +7,12 @@ interface HomeScreenProps {
 	attemptsPerQuestion: number
 	onAttemptsPerQuestionChange: (value: number) => void
 	attemptsPerQuestionOptions: number[]
+	scope: GameScope
+	scopeOptions: Array<{
+		value: GameScope
+		label: string
+	}>
+	onScopeChange: (value: GameScope) => void
 	difficulty: GameDifficulty
 	difficultyOptions: Array<{
 		value: GameDifficulty
@@ -25,6 +31,9 @@ export function HomeScreen({
 	attemptsPerQuestion,
 	attemptsPerQuestionOptions,
 	onAttemptsPerQuestionChange,
+	scope,
+	scopeOptions,
+	onScopeChange,
 	difficulty,
 	difficultyOptions,
 	onDifficultyChange,
@@ -72,6 +81,25 @@ export function HomeScreen({
 						{attemptsPerQuestionOptions.map(option => (
 							<option key={option} value={option}>
 								{option}
+							</option>
+						))}
+					</select>
+				</label>
+
+				<label className='mb-4 block'>
+					<span className='mb-2 block text-sm font-semibold text-slate-800'>
+						Регион игры
+					</span>
+					<select
+						className='w-full rounded-lg border border-slate-400 bg-white px-3 py-2 text-slate-900 shadow-sm outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-300'
+						value={scope}
+						onChange={event => {
+							onScopeChange(event.target.value as GameScope)
+						}}
+					>
+						{scopeOptions.map(option => (
+							<option key={option.value} value={option.value}>
+								{option.label}
 							</option>
 						))}
 					</select>

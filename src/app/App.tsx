@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import type { GameConfig, GameDifficulty } from '../core/types'
+import type { GameConfig, GameDifficulty, GameScope } from '../core/types'
 import { HomeScreen } from '../ui/HomeScreen'
 import { Game } from './Game'
 
@@ -14,29 +14,45 @@ const DIFFICULTY_OPTIONS: Array<{
 	{ value: 'hard', label: 'Сложный' },
 ]
 
+const SCOPE_OPTIONS: Array<{
+	value: GameScope
+	label: string
+}> = [
+	{ value: 'all', label: 'Весь мир' },
+	{ value: 'africa', label: 'Африка' },
+	{ value: 'asia', label: 'Азия' },
+	{ value: 'europe', label: 'Европа' },
+	{ value: 'north-america', label: 'Северная Америка' },
+	{ value: 'south-america', label: 'Южная Америка' },
+	{ value: 'oceania', label: 'Океания' },
+]
+
 function buildGameConfig(
 	questionCount: number,
 	attemptsPerQuestion: number,
+	scope: GameScope,
 	difficulty: GameDifficulty,
 ): GameConfig {
 	return {
 		questionCount,
 		attemptsPerQuestion,
 		difficulty,
+		scope,
 	}
 }
 
 export default function App(): JSX.Element {
 	const [questionCount, setQuestionCount] = useState(10)
 	const [attemptsPerQuestion, setAttemptsPerQuestion] = useState(3)
+	const [scope, setScope] = useState<GameScope>('all')
 	const [difficulty, setDifficulty] = useState<GameDifficulty>('easy')
 	const [activeConfig, setActiveConfig] = useState<GameConfig | null>(null)
 
 	const handleStart = useCallback(() => {
 		setActiveConfig(
-			buildGameConfig(questionCount, attemptsPerQuestion, difficulty),
+			buildGameConfig(questionCount, attemptsPerQuestion, scope, difficulty),
 		)
-	}, [questionCount, attemptsPerQuestion, difficulty])
+	}, [questionCount, attemptsPerQuestion, scope, difficulty])
 
 	const handleBackToHome = useCallback(() => {
 		setActiveConfig(null)
@@ -52,6 +68,9 @@ export default function App(): JSX.Element {
 					attemptsPerQuestion={attemptsPerQuestion}
 					attemptsPerQuestionOptions={ATTEMPS_PER_QUESTION_OPTIONS}
 					onAttemptsPerQuestionChange={setAttemptsPerQuestion}
+					scope={scope}
+					scopeOptions={SCOPE_OPTIONS}
+					onScopeChange={setScope}
 					difficulty={difficulty}
 					difficultyOptions={DIFFICULTY_OPTIONS}
 					onDifficultyChange={setDifficulty}

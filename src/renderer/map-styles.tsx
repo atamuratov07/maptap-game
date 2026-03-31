@@ -12,6 +12,7 @@ export const CAPITALS_LAYER = 'capitals'
 export const BASE_STYLE_LAYER_ID = 'countries-fill'
 export const HOVER_LAYER_ID = 'countries-hovered'
 export const HIGHLIGHT_LAYER_ID = 'countries-highlighted'
+export const DIM_LAYER_ID = 'countries-dimmed'
 export const COUNTRY_LABEL_LAYER_ID = 'countries-label'
 export const CAPITAL_LABEL_LAYER_ID = 'capitals-label'
 export const LABELS_BOTTOM_LAYER_ID = 'capitals-dot'
@@ -22,6 +23,10 @@ export const REVEALED_FILL = '#22c55e'
 export type FillColorExpression = NonNullable<
 	FillLayerSpecification['paint']
 >['fill-color']
+
+export type FillOpacityExpression = NonNullable<
+	FillLayerSpecification['paint']
+>['fill-opacity']
 
 const zoomStops = <T,>(...stops: Array<[number, T]>): Array<[number, T]> =>
 	stops
@@ -35,7 +40,7 @@ export function buildHighlightLayer(
 	for (const id of wrongIds) cases.push(id, WRONG_FILL)
 
 	return {
-		id: 'countries-highlighted',
+		id: HIGHLIGHT_LAYER_ID,
 		type: 'fill',
 		source: SOURCE_ID,
 		'source-layer': COUNTRY_LAYER,
@@ -51,6 +56,35 @@ export function buildHighlightLayer(
 					: 'transparent',
 			'fill-outline-color': '#ffffff',
 			'fill-opacity': 0.85,
+		},
+	}
+}
+
+export function buildDimLayer(
+	interactiveIds: ReadonlySet<string>,
+	enabled: boolean,
+): FillLayerSpecification {
+	const fillOpacity: FillOpacityExpression = !enabled
+		? 0
+		: interactiveIds.size === 0
+			? 0.75
+			: ([
+					'match',
+					['to-string', ['get', 'ISO_N3']],
+					[...interactiveIds],
+					0,
+					0.75,
+				] as FillOpacityExpression)
+
+	return {
+		id: DIM_LAYER_ID,
+		type: 'fill',
+		source: SOURCE_ID,
+		'source-layer': COUNTRY_LAYER,
+		paint: {
+			'fill-color': '#eeeeee',
+			'fill-outline-color': '#ffffff',
+			'fill-opacity': fillOpacity,
 		},
 	}
 }

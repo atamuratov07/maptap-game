@@ -29,6 +29,7 @@ export function Game({ config, onBackToHome }: GameProps): JSX.Element {
 		isLoading,
 		loadErrorCode,
 		engineState,
+		eligibleIds,
 		reloadGameData,
 		handleTryAgain,
 		handlePick,
@@ -77,6 +78,7 @@ export function Game({ config, onBackToHome }: GameProps): JSX.Element {
 		<div className='min-h-screen'>
 			<GameScreen
 				state={engineState}
+				eligibleIds={eligibleIds}
 				countriesInfo={gameData.countriesInfo}
 				onPick={handlePick}
 				onGiveUp={handleGiveUp}

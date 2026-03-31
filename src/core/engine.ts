@@ -2,9 +2,9 @@ import { calculateQuestionScore } from './score'
 import type {
 	GameAction,
 	GameConfig,
+	GameSession,
 	GameState,
 	PlayingGameState,
-	PreparedGameSession,
 	RevealedGameState,
 } from './types'
 
@@ -12,6 +12,7 @@ const DEFAULT_CONFIG: GameConfig = {
 	questionCount: 10,
 	attemptsPerQuestion: 3,
 	difficulty: 'easy',
+	scope: 'all',
 }
 
 function clampAttempts(value: number): number {
@@ -38,7 +39,7 @@ function getCurrentQuestionId(state: {
 }
 
 function createPlayingState(
-	session: PreparedGameSession,
+	session: GameSession,
 	now: number,
 ): PlayingGameState {
 	return {
