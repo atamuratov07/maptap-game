@@ -71,7 +71,7 @@ export function MapLibreRenderer({
 		if (isContinentScope(scope)) {
 			setMapProjection(MERCATOR_PROJECTION)
 		}
-	}, [isContinentChosen])
+	}, [isContinentChosen, scope])
 
 	useEffect(() => {
 		const map = mapRef.current?.getMap()
@@ -98,7 +98,7 @@ export function MapLibreRenderer({
 			duration: 800,
 			essential: true,
 		})
-	}, [scope, isLoaded])
+	}, [isLoaded, scope, activePreset])
 
 	// Hover =================================================
 	const hoveredFeatureIdRef = useRef<string | null>(null)
@@ -194,7 +194,7 @@ export function MapLibreRenderer({
 
 	const dimLayer = useMemo(() => {
 		return buildDimLayer(interactiveIds, true)
-	}, [interactiveIds, isContinentChosen])
+	}, [interactiveIds])
 
 	const labelIds = useMemo(() => {
 		const ids = new Set<string>(wrongIds)
