@@ -37,6 +37,9 @@ const CONTINENT_OVERRIDES_BY_A3 = new Map([
 ])
 
 export function canonicalizeContinent(rawValue, a3) {
+	if (GAME_CONTINENTS.has(rawValue)) {
+		return rawValue
+	}
 	const direct = CONTINENT_ALIASES.get(normalizeContinentKey(rawValue))
 	if (direct) {
 		return direct

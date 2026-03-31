@@ -1,4 +1,11 @@
 import fs from 'node:fs'
+import path from 'node:path'
+import {
+	ensureDir,
+	parseTilesOutputOptions,
+} from './lib/output-paths.mjs'
+
+const { tilesDir, tilesUrlTemplate } = parseTilesOutputOptions()
 
 const tilejson = {
 	tilejson: '2.0.0',
@@ -12,7 +19,7 @@ const tilejson = {
 	bounds: [-180, -85.051129, 180, 85.05112900000002],
 	attribution:
 		'MapLibre demotiles base geometry; Natural Earth fallback; REST Countries; Wikidata',
-	tiles: ['/map/tiles/{z}/{x}/{y}.pbf'],
+	tiles: [tilesUrlTemplate],
 	center: [0, 2.5444437451708134e-14, 1],
 	vector_layers: [
 		{
@@ -86,10 +93,7 @@ const tilejson = {
 	],
 }
 
-fs.mkdirSync('dist', { recursive: true })
-fs.writeFileSync(
-	'dist/tiles/tiles.json',
-	JSON.stringify(tilejson, null, 2),
-	'utf8',
-)
-console.log('Wrote dist/tiles/tiles.json')
+ensureDir(tilesDir)
+const outputPath = path.join(tilesDir, 'tiles.json')
+fs.writeFileSync(outputPath, JSON.stringify(tilejson, null, 2), 'utf8')
+console.log(`Wrote ${outputPath}`)

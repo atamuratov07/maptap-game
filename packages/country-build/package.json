@@ -1,0 +1,14 @@
+{
+	"name": "@maptap/country-build",
+	"private": true,
+	"type": "commonjs",
+	"scripts": {
+		"build:data": "node scripts/03_build_data.mjs",
+		"build:registry": "bash scripts/06_build_registry.sh",
+		"build:tiles": "bash scripts/04_build_tiles.sh"
+	},
+	"dependencies": {
+		"@turf/point-on-feature": "^7.3.4",
+		"shpjs": "^6.2.0"
+	}
+}

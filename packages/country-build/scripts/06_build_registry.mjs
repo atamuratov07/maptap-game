@@ -1,15 +1,31 @@
 import pointOnFeature from '@turf/point-on-feature'
 import fs from 'node:fs'
+import path from 'node:path'
 import { canonicalizeContinent, isGameContinent } from './lib/continent.mjs'
+import {
+	ensureDir,
+	parseRegistryOutputOptions,
+	resolvePackagePath,
+} from './lib/output-paths.mjs'
+import { fetchWdqsJson } from './lib/wdqs.mjs'
 
-const SEED_JSON = 'build/country_seed.json'
-const OVERRIDES_JSON = 'data/manual_overrides.json'
-const CENTROIDS_GEOJSON = 'build/centroids.geojson'
-const BASE_COUNTRIES_GEOJSON = 'build/base_countries.geojson'
-const SUPPLEMENTAL_COUNTRIES_GEOJSON = 'build/supplemental_countries.geojson'
+const SEED_JSON = resolvePackagePath('build', 'country_seed.json')
+const OVERRIDES_JSON = resolvePackagePath('data', 'manual_overrides.json')
+const CENTROIDS_GEOJSON = resolvePackagePath('build', 'centroids.geojson')
+const BASE_COUNTRIES_GEOJSON = resolvePackagePath('build', 'base_countries.geojson')
+const SUPPLEMENTAL_COUNTRIES_GEOJSON = resolvePackagePath(
+	'build',
+	'supplemental_countries.geojson',
+)
+const VALIDATOR_FAILURES_CSV = resolvePackagePath(
+	'build',
+	'validator_registry_failures.csv',
+)
+const BUILD_REPORT_JSON = resolvePackagePath('build', 'registry_build_report.json')
 
-fs.mkdirSync('build', { recursive: true })
-fs.mkdirSync('dist', { recursive: true })
+ensureDir(resolvePackagePath('build'))
+const { outDir } = parseRegistryOutputOptions()
+ensureDir(outDir)
 
 function readJson(path) {
 	return JSON.parse(fs.readFileSync(path, 'utf8'))
@@ -105,20 +121,6 @@ async function fetchJson(url) {
 	return res.json()
 }
 
-async function wdqs(query) {
-	const res = await fetch('https://query.wikidata.org/sparql', {
-		method: 'POST',
-		headers: {
-			'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-			accept: 'application/sparql-results+json',
-			'user-agent': 'maptap-registry-build/1.0',
-		},
-		body: new URLSearchParams({ query }),
-	})
-	if (!res.ok) throw new Error(`WDQS ${res.status}`)
-	return res.json()
-}
-
 function pickPrimaryCurrency(currenciesObj) {
 	const entries = Object.entries(currenciesObj ?? {}).sort((a, b) =>
 		a[0].localeCompare(b[0]),
@@ -197,7 +199,10 @@ for (const row of restMeta) {
 /**
  * Russian currency labels keyed by ISO 4217 code.
  */
-const wdCurrencies = await wdqs(`
+const wdCurrencies = await fetchWdqsJson({
+	cacheKey: 'wdqs-currency-labels',
+	cacheDir: resolvePackagePath('build', 'cache'),
+	query: `
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>
 PREFIX bd: <http://www.bigdata.com/rdf#>
 PREFIX wikibase: <http://wikiba.se/ontology#>
@@ -206,7 +211,8 @@ SELECT ?code ?currencyLabel WHERE {
   ?currency wdt:P498 ?code .
   SERVICE wikibase:label { bd:serviceParam wikibase:language "ru,en". }
 }
-`)
+`,
+})
 
 const currencyRuByCode = new Map()
 for (const row of wdCurrencies.results.bindings ?? []) {
@@ -366,14 +372,14 @@ registry.sort((a, b) =>
 )
 const playableRegistry = registry.filter(r => r.playable)
 
-writeJson('dist/countries.registry.json', {
+writeJson(path.join(outDir, 'countries.registry.json'), {
 	version: 1,
 	generated_at: new Date().toISOString(),
 	country_count: registry.length,
 	countries: registry,
 })
 
-writeJson('dist/countries.playable.json', {
+writeJson(path.join(outDir, 'countries.playable.json'), {
 	version: 1,
 	generated_at: new Date().toISOString(),
 	playable_count: playableRegistry.length,
@@ -381,12 +387,12 @@ writeJson('dist/countries.playable.json', {
 })
 
 writeCsv(
-	'build/validator_registry_failures.csv',
+	VALIDATOR_FAILURES_CSV,
 	['ADM0_A3', 'ID', 'NAME', 'MISSING'],
 	validatorFailures.map(r => [r.ADM0_A3, r.ID, r.NAME, r.MISSING]),
 )
 
-writeJson('build/registry_build_report.json', {
+writeJson(BUILD_REPORT_JSON, {
 	seed_country_count: seed.length,
 	final_registry_count: registry.length,
 	playable_registry_count: playableRegistry.length,
@@ -399,13 +405,11 @@ writeJson('build/registry_build_report.json', {
 if (validatorFailures.length > 0) {
 	console.error('Registry build blocked.')
 	console.error(
-		'Inspect build/validator_registry_failures.csv and build/registry_build_report.json',
+		`Inspect ${VALIDATOR_FAILURES_CSV} and ${BUILD_REPORT_JSON}`,
 	)
 	process.exitCode = 1
 } else {
 	console.log('OK')
 }
 
-console.log(
-	JSON.stringify(readJson('build/registry_build_report.json'), null, 2),
-)
+console.log(JSON.stringify(readJson(BUILD_REPORT_JSON), null, 2))

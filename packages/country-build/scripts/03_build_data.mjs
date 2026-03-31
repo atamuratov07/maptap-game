@@ -20,6 +20,7 @@ import pointOnFeature from '@turf/point-on-feature'
 import fs from 'node:fs'
 import shp from 'shpjs'
 import { canonicalizeContinent } from './lib/continent.mjs'
+import { fetchWdqsJson } from './lib/wdqs.mjs'
 
 const BASE_COUNTRIES = 'build/base_countries.geojson'
 const BASE_CENTROIDS_NDJSON = 'build/base_centroids_z0.geojson'
@@ -132,20 +133,6 @@ async function fetchJson(url) {
 		headers: { 'user-agent': 'demotiles-hybrid-build/1.0' },
 	})
 	if (!res.ok) throw new Error(`HTTP ${res.status} ${url}`)
-	return res.json()
-}
-
-async function wdqs(query) {
-	const res = await fetch('https://query.wikidata.org/sparql', {
-		method: 'POST',
-		headers: {
-			'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-			accept: 'application/sparql-results+json',
-			'user-agent': 'demotiles-hybrid-build/1.0',
-		},
-		body: new URLSearchParams({ query }),
-	})
-	if (!res.ok) throw new Error(`WDQS ${res.status}`)
 	return res.json()
 }
 
@@ -275,7 +262,9 @@ const restCountries = await fetchJson(
 	'https://restcountries.com/v3.1/all?fields=cca2,cca3,ccn3,name,translations,capital,capitalInfo,continents,independent',
 )
 
-const wikidata = await wdqs(`
+const wikidata = await fetchWdqsJson({
+	cacheKey: 'wdqs-country-capital-labels',
+	query: `
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>
 PREFIX bd: <http://www.bigdata.com/rdf#>
 PREFIX wikibase: <http://wikiba.se/ontology#>
@@ -285,7 +274,8 @@ SELECT ?iso3 ?countryLabel ?capitalLabel WHERE {
   OPTIONAL { ?country wdt:P36 ?capital . }
   SERVICE wikibase:label { bd:serviceParam wikibase:language "ru,en". }
 }
-`)
+`,
+})
 
 const restByA3 = new Map()
 for (const row of restCountries) {

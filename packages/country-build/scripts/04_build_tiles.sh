@@ -1,6 +1,39 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+TILES_DIR="dist/tiles"
+TILES_URL_TEMPLATE="/map/tiles/{z}/{x}/{y}.pbf"
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --tiles-dir)
+      TILES_DIR="$2"
+      shift 2
+      ;;
+    --tiles-dir=*)
+      TILES_DIR="${1#*=}"
+      shift
+      ;;
+    --tiles-url-template)
+      TILES_URL_TEMPLATE="$2"
+      shift 2
+      ;;
+    --tiles-url-template=*)
+      TILES_URL_TEMPLATE="${1#*=}"
+      shift
+      ;;
+    *)
+      echo "Unknown argument: $1" >&2
+      exit 1
+      ;;
+  esac
+done
+
+if [ -z "$TILES_DIR" ] || [ "$TILES_DIR" = "/" ] || [ "$TILES_DIR" = "." ]; then
+  echo "Unsafe tiles output directory: $TILES_DIR" >&2
+  exit 1
+fi
+
 rm -f \
   build/base_geolines_patched.mbtiles \
   build/base_attrs_patched.mbtiles \
@@ -10,7 +43,7 @@ rm -f \
   build/countries_extra.mbtiles \
   build/world_complete.mbtiles
 
-rm -rf dist/tiles
+rm -rf "$TILES_DIR"
 
 # 1) Patch original geolines with name_ru
 ./tools/tile-join -f -o build/base_geolines_patched.mbtiles \
@@ -58,7 +91,9 @@ else
 fi
 
 # 7) Export static pbf directory
-./tools/tile-join -f -e dist/tiles build/world_complete.mbtiles
+./tools/tile-join -f -e "$TILES_DIR" build/world_complete.mbtiles
 
 # 8) Generate tiles.json file
-node scripts/05_make_tilesjson.mjs
+node scripts/05_make_tilesjson.mjs \
+  --tiles-dir "$TILES_DIR" \
+  --tiles-url-template "$TILES_URL_TEMPLATE"

@@ -7,12 +7,12 @@
 		"packages/*"
 	],
 	"scripts": {
-		"dev": "npm run dev:web",
 		"dev:web": "npm run dev -w @maptap/web",
-		"build": "npm run build:web",
 		"build:web": "npm run build -w @maptap/web",
-		"preview": "npm run preview:web",
 		"preview:web": "npm run preview -w @maptap/web",
+		"build:data": "npm run build:data -w @maptap/country-build",
+		"build:registry": "npm run build:registry -w @maptap/country-build",
+		"build:tiles": "npm run build:tiles -w @maptap/country-build",
 		"lint": "eslint ."
 	},
 	"devDependencies": {
