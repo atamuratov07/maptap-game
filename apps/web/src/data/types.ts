@@ -1,4 +1,4 @@
-import type { GameContinent, GameDifficulty } from '../core/types'
+import type { GameContinent, GameDifficulty } from '@maptap/game-domain'
 
 export interface CountryInfo {
 	id: string

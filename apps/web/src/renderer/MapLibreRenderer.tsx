@@ -9,7 +9,6 @@ import Map, {
 	type MapRef,
 	type ProjectionSpecification,
 } from 'react-map-gl/maplibre'
-import type { GameContinent, GameScope } from '../core/types'
 import { normalizeCountryId } from '../data/gameData'
 import { CONTINENT_VIEW_PRESETS } from './continent-view'
 import {
@@ -24,6 +23,7 @@ import {
 	SOURCE_LAYER_ID,
 } from './map-styles'
 import type { MapRendererProps } from './types'
+import type { GameContinent, GameScope } from '@maptap/game-domain'
 
 const MAP_STYLE_URL = '/map/style.json'
 

@@ -1,4 +1,6 @@
+import { assertNever } from '../shared/errors'
 import { calculateQuestionScore } from './score'
+import { getAttemptsLeft, getTargetId } from './selectors'
 import type {
 	GameAction,
 	GameConfig,
@@ -7,38 +9,9 @@ import type {
 	PlayingGameState,
 	RevealedGameState,
 } from './types'
+import { DEFAULT_GAME_CONFIG } from './types'
 
-const DEFAULT_CONFIG: GameConfig = {
-	questionCount: 10,
-	attemptsPerQuestion: 3,
-	difficulty: 'easy',
-	scope: 'all',
-}
-
-function clampAttempts(value: number): number {
-	return Math.max(1, Math.floor(value))
-}
-
-function elapsedSeconds(start: number, end: number): number {
-	return Math.max(0, Math.floor((end - start) / 1000))
-}
-
-function assertNever(value: never): never {
-	throw new Error(`Unhandled action: ${JSON.stringify(value)}`)
-}
-
-function getCurrentQuestionId(state: {
-	index: number
-	questionIds: string[]
-}): string | undefined {
-	if (state.index < 0 || state.index >= state.questionIds.length) {
-		return undefined
-	}
-
-	return state.questionIds[state.index]
-}
-
-function createPlayingState(
+function createPlayingGameState(
 	session: GameSession,
 	now: number,
 ): PlayingGameState {
@@ -47,7 +20,6 @@ function createPlayingState(
 		config: session.config,
 		questionIds: session.questionIds,
 		index: 0,
-		attemptsLeft: session.config.attemptsPerQuestion,
 		wrongPicks: [],
 		score: 0,
 		correctCount: 0,
@@ -59,7 +31,7 @@ function revealCurrentQuestion(
 	state: PlayingGameState,
 	now: number,
 ): RevealedGameState {
-	const targetId = getCurrentQuestionId(state)
+	const targetId = getTargetId(state)
 	if (!targetId) {
 		throw new Error('Cannot reveal a question without a valid target.')
 	}
@@ -69,9 +41,7 @@ function revealCurrentQuestion(
 		config: state.config,
 		questionIds: state.questionIds,
 		index: state.index,
-		attemptsLeft: 0,
 		wrongPicks: state.wrongPicks,
-		revealedId: targetId,
 		score: state.score,
 		correctCount: state.correctCount,
 		questionStartedAt: state.questionStartedAt,
@@ -79,30 +49,35 @@ function revealCurrentQuestion(
 	}
 }
 
-export function createIdleState(
+export function createIdleGameState(
 	configOverride: Partial<GameConfig> = {},
 ): GameState {
 	return {
 		phase: 'idle',
 		config: {
-			...DEFAULT_CONFIG,
+			...DEFAULT_GAME_CONFIG,
 			...configOverride,
-			attemptsPerQuestion: clampAttempts(
+			questionCount:
+				configOverride.questionCount ?? DEFAULT_GAME_CONFIG.questionCount,
+
+			attemptsPerQuestion:
 				configOverride.attemptsPerQuestion ??
-					DEFAULT_CONFIG.attemptsPerQuestion,
-			),
+				DEFAULT_GAME_CONFIG.attemptsPerQuestion,
 		},
 	}
 }
 
-export function gameReducer(state: GameState, action: GameAction): GameState {
+export function reduceGameState(
+	state: GameState,
+	action: GameAction,
+): GameState {
 	switch (action.type) {
 		case 'START': {
 			if (action.session.questionIds.length === 0) {
 				throw new Error('START action requires at least one question.')
 			}
 
-			return createPlayingState(action.session, action.now)
+			return createPlayingGameState(action.session, action.now)
 		}
 
 		case 'PICK': {
@@ -110,14 +85,15 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 				return state
 			}
 
-			const targetId = getCurrentQuestionId(state)
+			const targetId = getTargetId(state)
 			if (!targetId) {
 				throw new Error('Playing state requires a valid target question.')
 			}
 
 			if (action.countryId === targetId) {
 				const questionScore = calculateQuestionScore(
-					elapsedSeconds(state.questionStartedAt, action.now),
+					state.questionStartedAt,
+					action.now,
 					state.wrongPicks.length,
 				)
 
@@ -126,9 +102,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 					config: state.config,
 					questionIds: state.questionIds,
 					index: state.index,
-					attemptsLeft: state.attemptsLeft,
 					wrongPicks: state.wrongPicks,
-					revealedId: targetId,
 					score: state.score + questionScore,
 					correctCount: state.correctCount + 1,
 					questionStartedAt: state.questionStartedAt,
@@ -140,36 +114,16 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 				return state
 			}
 
-			const wrongPicks = [...state.wrongPicks, action.countryId]
-			const attemptsLeft = Math.max(0, state.attemptsLeft - 1)
-
-			if (attemptsLeft === 0) {
-				return {
-					phase: 'revealed',
-					config: state.config,
-					questionIds: state.questionIds,
-					index: state.index,
-					attemptsLeft,
-					wrongPicks,
-					revealedId: targetId,
-					score: state.score,
-					correctCount: state.correctCount,
-					questionStartedAt: state.questionStartedAt,
-					questionResolvedAt: action.now,
-				}
+			const nextPlayingState: PlayingGameState = {
+				...state,
+				wrongPicks: [...state.wrongPicks, action.countryId],
 			}
 
-			return {
-				phase: 'playing',
-				config: state.config,
-				questionIds: state.questionIds,
-				index: state.index,
-				attemptsLeft,
-				wrongPicks,
-				score: state.score,
-				correctCount: state.correctCount,
-				questionStartedAt: state.questionStartedAt,
+			if (getAttemptsLeft(nextPlayingState) === 0) {
+				return revealCurrentQuestion(nextPlayingState, action.now)
 			}
+
+			return nextPlayingState
 		}
 
 		case 'GIVE_UP': {
@@ -194,8 +148,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 					index: nextIndex,
 					score: state.score,
 					correctCount: state.correctCount,
-					questionStartedAt: state.questionStartedAt,
 					questionResolvedAt: state.questionResolvedAt,
+					finishedAt: action.now,
 				}
 			}
 
@@ -204,14 +158,14 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 				config: state.config,
 				questionIds: state.questionIds,
 				index: nextIndex,
-				attemptsLeft: state.config.attemptsPerQuestion,
 				wrongPicks: [],
 				score: state.score,
 				correctCount: state.correctCount,
 				questionStartedAt: action.now,
 			}
 		}
-	}
 
-	return assertNever(action)
+		default:
+			return assertNever(action)
+	}
 }

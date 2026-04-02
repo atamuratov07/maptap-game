@@ -1,4 +1,4 @@
-import type { GameDifficulty, GameScope } from '../core/types'
+import type { GameDifficulty, GameScope } from '@maptap/game-domain'
 
 interface HomeScreenProps {
 	questionCount: number

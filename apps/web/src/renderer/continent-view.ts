@@ -1,4 +1,4 @@
-import type { GameContinent } from '../core/types'
+import type { GameContinent } from "@maptap/game-domain";
 
 export interface ContinentViewPreset {
 	focusBounds: [[number, number], [number, number]]

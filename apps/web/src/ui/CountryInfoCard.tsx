@@ -1,4 +1,4 @@
-﻿import type { CountryInfo } from '../data/types'
+import type { CountryInfo } from '../data/types'
 
 interface CountryInfoCardProps {
 	info: CountryInfo

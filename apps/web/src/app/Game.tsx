@@ -1,26 +1,38 @@
-import type { GameErrorCode } from '../core/errors'
-import { getCorrectCount, getQuestionCount, getScore } from '../core/selectors'
-import type { GameConfig } from '../core/types'
+import {
+	getCorrectCount,
+	getQuestionCount,
+	getScore,
+	type GameConfig,
+} from '@maptap/game-domain/singleplayer'
 import { GameScreen } from '../ui/GameScreen'
 import { ResultModal } from '../ui/ResultModal'
-import { useGameSession } from './useGameSession'
+import { useGameSession, type GameLoadErrorCode } from './useGameSession'
 
 interface GameProps {
 	config: GameConfig
 	onBackToHome: () => void
 }
 
-function getLoadErrorMessage(errorCode: GameErrorCode | null): string {
-	switch (errorCode) {
-		case 'no_playable_countries':
-			return 'Нет доступных стран для игры.'
-		case 'no_eligible_countries':
-			return 'Нет стран, подходящих для выбранных настроек.'
-		case 'load_failed':
-			return 'Не удалось загрузить данные игры.'
-		case null:
-			return 'Неизвестная ошибка.'
+function getLoadErrorMessage(errorCode: GameLoadErrorCode | null): string {
+	if (errorCode === 'no_playable_countries') {
+		return 'Не найдено ни одной игровой страны.'
 	}
+
+	if (
+		errorCode === 'no_eligible_countries' ||
+		errorCode === 'insufficient_eligible_countries' ||
+		errorCode === 'invalid_question_count' ||
+		errorCode === 'invalid_attempts_per_question' ||
+		errorCode === 'invalid_question_duration'
+	) {
+		return 'Для текущих настроек не найдено подходящих стран.'
+	}
+
+	if (errorCode === 'load_failed') {
+		return 'Не удалось загрузить данные игры.'
+	}
+
+	return 'Неизвестная ошибка.'
 }
 
 export function Game({ config, onBackToHome }: GameProps): JSX.Element {
@@ -45,7 +57,7 @@ export function Game({ config, onBackToHome }: GameProps): JSX.Element {
 						Загрузка MapTap
 					</h1>
 					<p className='text-slate-700'>
-						Загружаем игровые страны и данные о странах...
+						Подготавливаем страны и игровые данные...
 					</p>
 				</div>
 			</div>

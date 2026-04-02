@@ -1,5 +1,6 @@
+import type { GameDifficulty, GameScope } from '@maptap/game-domain'
+import type { GameConfig } from '@maptap/game-domain/singleplayer'
 import { useCallback, useState } from 'react'
-import type { GameConfig, GameDifficulty, GameScope } from '../core/types'
 import { HomeScreen } from '../ui/HomeScreen'
 import { Game } from './Game'
 
@@ -9,7 +10,7 @@ const DIFFICULTY_OPTIONS: Array<{
 	value: GameDifficulty
 	label: string
 }> = [
-	{ value: 'easy', label: 'Легкий (Самые известные страны мира)' },
+	{ value: 'easy', label: 'Легкий (самые известные страны мира)' },
 	{ value: 'medium', label: 'Средний' },
 	{ value: 'hard', label: 'Сложный' },
 ]

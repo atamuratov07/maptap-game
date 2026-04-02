@@ -1,4 +1,4 @@
-import type { GamePhase } from '../core/types'
+import type { GamePhase } from '@maptap/game-domain/singleplayer'
 import { QuestionTimer } from './QuestionTimer'
 
 interface HeaderBarProps {

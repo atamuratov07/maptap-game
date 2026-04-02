@@ -1,6 +1,11 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./apps/web/tsconfig.json" }
-  ]
+	"files": [],
+	"references": [
+		{
+			"path": [
+				"./apps/web/tsconfig.json",
+				"./packages/game-domain/tsconfig.json"
+			]
+		}
+	]
 }

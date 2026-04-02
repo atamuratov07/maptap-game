@@ -1,5 +1,5 @@
+import type { GameScope } from '@maptap/game-domain'
 import type { ReactNode } from 'react'
-import type { GameScope } from '../core/types'
 
 export interface MapRendererProps {
 	onPick: (countryId: string) => void

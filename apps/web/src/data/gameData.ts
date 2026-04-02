@@ -1,4 +1,8 @@
-import type { SessionCountryPool } from '../core/types'
+import type {
+	CountryId,
+	CountryPool,
+	CountryPoolEntry,
+} from '@maptap/game-domain'
 import type { CountryInfo, GameData } from './types'
 
 const PLAYABLE_COUNTRY_REGISTRY_URL =
@@ -192,22 +196,15 @@ export async function loadGameData(signal?: AbortSignal): Promise<GameData> {
 	}
 }
 
-export function toSessionCountryPool(gameData: GameData): SessionCountryPool {
-	const countriesById = new Map<
-		string,
-		{
-			difficulty: CountryInfo['difficulty']
-			continent: CountryInfo['continent']
-		}
-	>()
-
+export function toSessionCountryPool(gameData: GameData): CountryPool {
+	const countriesById: Record<CountryId, CountryPoolEntry> = {}
 	for (const id of gameData.countryIds) {
 		const country = gameData.countriesInfo.get(id)
 		if (country) {
-			countriesById.set(id, {
+			countriesById[id] = {
 				difficulty: country.difficulty,
 				continent: country.continent,
-			})
+			}
 		}
 	}
 
