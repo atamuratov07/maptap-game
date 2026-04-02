@@ -9,7 +9,8 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
-		"@maptap/game-domain": "^1.0.0",
+		"@maptap/country-catalog": "*",
+		"@maptap/game-domain": "*",
 		"maplibre-gl": "^5.19.0",
 		"react": "^18.3.1",
 		"react-dom": "^18.3.1",

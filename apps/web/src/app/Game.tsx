@@ -20,10 +20,7 @@ function getLoadErrorMessage(errorCode: GameLoadErrorCode | null): string {
 
 	if (
 		errorCode === 'no_eligible_countries' ||
-		errorCode === 'insufficient_eligible_countries' ||
-		errorCode === 'invalid_question_count' ||
-		errorCode === 'invalid_attempts_per_question' ||
-		errorCode === 'invalid_question_duration'
+		errorCode === 'insufficient_eligible_countries'
 	) {
 		return 'Для текущих настроек не найдено подходящих стран.'
 	}
@@ -91,7 +88,7 @@ export function Game({ config, onBackToHome }: GameProps): JSX.Element {
 			<GameScreen
 				state={engineState}
 				eligibleIds={eligibleIds}
-				countriesInfo={gameData.countriesInfo}
+				countriesInfo={gameData.countriesById}
 				onPick={handlePick}
 				onGiveUp={handleGiveUp}
 				onNext={handleNext}

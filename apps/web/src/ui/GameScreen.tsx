@@ -1,10 +1,4 @@
-import { useMemo } from 'react'
-import type { CountryInfo } from '../data/types'
-import { MapLibreRenderer } from '../renderer/MapLibreRenderer'
-import type { MapRendererProps } from '../renderer/types'
-import { CountryInfoCard } from './CountryInfoCard'
-import { HeaderBar } from './HeaderBar'
-import { Hearts } from './Hearts'
+import type { CountryInfo } from '@maptap/country-catalog'
 import {
 	getAttemptsLeft,
 	getQuestionCount,
@@ -17,6 +11,12 @@ import {
 	isPickAllowed,
 	type GameState,
 } from '@maptap/game-domain/singleplayer'
+import { useMemo } from 'react'
+import { MapLibreRenderer } from '../renderer/MapLibreRenderer'
+import type { MapRendererProps } from '../renderer/types'
+import { CountryInfoCard } from './CountryInfoCard'
+import { HeaderBar } from './HeaderBar'
+import { Hearts } from './Hearts'
 
 interface GameScreenProps {
 	state: GameState

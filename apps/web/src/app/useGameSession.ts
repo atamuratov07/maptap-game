@@ -1,3 +1,8 @@
+import {
+	countryCatalog,
+	playableCountryPool,
+	type GameData,
+} from '@maptap/country-catalog'
 import type { SessionPreparationError } from '@maptap/game-domain'
 import {
 	createIdleGameState,
@@ -9,13 +14,9 @@ import {
 import {
 	useCallback,
 	useEffect,
-	useMemo,
 	useReducer,
-	useRef,
 	useState,
 } from 'react'
-import { loadGameData, toSessionCountryPool } from '../data/gameData'
-import type { GameData } from '../data/types'
 
 export type GameLoadErrorCode =
 	| SessionPreparationError['code']
@@ -35,82 +36,28 @@ interface UseGameSessionResult {
 	handleNext: () => void
 }
 
+const gameData: GameData | null =
+	countryCatalog.countryIds.length > 0 ? countryCatalog : null
+
 export function useGameSession(config: GameConfig): UseGameSessionResult {
-	const [gameData, setGameData] = useState<GameData | null>(null)
 	const [eligibleIds, setEligibleIds] = useState<string[]>([])
-	const [isLoading, setIsLoading] = useState(true)
 	const [loadErrorCode, setLoadErrorCode] = useState<GameLoadErrorCode | null>(
-		null,
+		gameData ? null : 'no_playable_countries',
 	)
 
 	const [engineState, dispatchEngineState] = useReducer(
 		reduceGameState,
 		createIdleGameState(),
 	)
-	const loadControllerRef = useRef<AbortController | null>(null)
-
-	const sessionPool = useMemo(
-		() => (gameData ? toSessionCountryPool(gameData) : null),
-		[gameData],
-	)
-
-	const reloadGameData = useCallback(async () => {
-		loadControllerRef.current?.abort()
-
-		const controller = new AbortController()
-		loadControllerRef.current = controller
-
-		setIsLoading(true)
-		setLoadErrorCode(null)
-
-		try {
-			const loaded = await loadGameData(controller.signal)
-			if (controller.signal.aborted) {
-				return
-			}
-
-			if (loaded.countryIds.length === 0) {
-				setLoadErrorCode('no_playable_countries')
-				setGameData(null)
-				return
-			}
-
-			setGameData(loaded)
-		} catch (error) {
-			if ((error as { name?: string })?.name === 'AbortError') {
-				return
-			}
-
-			if (loadControllerRef.current !== controller) {
-				return
-			}
-
-			setGameData(null)
-			setLoadErrorCode('load_failed')
-		} finally {
-			if (loadControllerRef.current === controller) {
-				loadControllerRef.current = null
-				setIsLoading(false)
-			}
-		}
-	}, [])
-
-	useEffect(() => {
-		void reloadGameData()
-
-		return () => {
-			loadControllerRef.current?.abort()
-			loadControllerRef.current = null
-		}
-	}, [reloadGameData])
 
 	const prepareAndStartGame = useCallback(
 		(nextConfig: GameConfig) => {
-			if (!sessionPool) {
+			if (!gameData) {
+				setLoadErrorCode('no_playable_countries')
 				return
 			}
 
-			const result = prepareGameSession(sessionPool, nextConfig)
+			const result = prepareGameSession(playableCountryPool, nextConfig)
 			if (!result.ok) {
 				setLoadErrorCode(result.error.code)
 				return
@@ -124,16 +71,20 @@ export function useGameSession(config: GameConfig): UseGameSessionResult {
 				now: Date.now(),
 			})
 		},
-		[sessionPool],
+		[gameData],
 	)
 
+	const reloadGameData = useCallback(async () => {
+		prepareAndStartGame(config)
+	}, [config, prepareAndStartGame])
+
 	useEffect(() => {
-		if (!sessionPool || engineState.phase !== 'idle') {
+		if (!gameData || engineState.phase !== 'idle') {
 			return
 		}
 
 		prepareAndStartGame(config)
-	}, [config, engineState.phase, prepareAndStartGame, sessionPool])
+	}, [config, engineState.phase, gameData, prepareAndStartGame])
 
 	const handleTryAgain = useCallback(() => {
 		prepareAndStartGame(engineState.config)
@@ -141,7 +92,7 @@ export function useGameSession(config: GameConfig): UseGameSessionResult {
 
 	const handlePick = useCallback(
 		(countryId: string) => {
-			if (!gameData?.countriesInfo.has(countryId)) {
+			if (!gameData?.countriesById.has(countryId)) {
 				return
 			}
 
@@ -170,7 +121,7 @@ export function useGameSession(config: GameConfig): UseGameSessionResult {
 
 	return {
 		gameData,
-		isLoading,
+		isLoading: false,
 		loadErrorCode,
 		engineState,
 		eligibleIds,
