@@ -1,5 +1,5 @@
 import { useState, type FormEvent, type JSX } from 'react'
-import { useNavigate } from 'react-router'
+import { useNavigate } from 'react-router-dom'
 
 export function JoinRoomForm(): JSX.Element {
 	const navigate = useNavigate()

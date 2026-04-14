@@ -1,4 +1,4 @@
-import { Link } from 'react-router'
+import { Link } from 'react-router-dom'
 import { QuestionTimer } from './QuestionTimer'
 
 interface GameHeaderBarProps {
