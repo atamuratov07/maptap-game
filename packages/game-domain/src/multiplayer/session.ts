@@ -3,7 +3,7 @@ import type { CountryPool } from '../catalog/types'
 import type { SessionPreparationError } from '../shared/errors'
 import { pickRandomIds, type RandomNumberGenerator } from '../shared/random'
 import { err, ok, type Result } from '../shared/result'
-import type { GameConfig, GameSession } from './types'
+import type { GameConfig, Session } from './types'
 
 function normalizeQuestionCount(
 	value: number,
@@ -21,7 +21,7 @@ export function prepareGameSession(
 	pool: CountryPool,
 	config: GameConfig,
 	rng: RandomNumberGenerator = Math.random,
-): Result<GameSession, SessionPreparationError> {
+): Result<Session, SessionPreparationError> {
 	const normalizedQuestionCount = normalizeQuestionCount(config.questionCount)
 	if (!normalizedQuestionCount.ok) {
 		return normalizedQuestionCount
