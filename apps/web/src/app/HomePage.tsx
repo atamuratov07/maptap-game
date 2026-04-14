@@ -1,4 +1,4 @@
-import { Link } from 'react-router'
+import { Link } from 'react-router-dom'
 import { GameCard } from '../shared/components/GameCard'
 
 export function HomePage(): JSX.Element {

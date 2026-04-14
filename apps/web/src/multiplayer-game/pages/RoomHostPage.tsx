@@ -1,4 +1,4 @@
-import { useParams } from 'react-router'
+import { useParams } from 'react-router-dom'
 import { RoomGameScene } from '../components/game/GameScene'
 import { RoomClosedScreen } from '../components/screens/RoomClosedScreen'
 import { RoomErrorScreen } from '../components/screens/RoomErrorScreen'

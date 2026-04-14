@@ -3,7 +3,7 @@ import {
 	type GameConfig,
 } from '@maptap/game-domain/singleplayer'
 import { useCallback, useState } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { Link, useNavigate } from 'react-router-dom'
 import {
 	ATTEMPTS_PER_QUESTION_OPTIONS,
 	buildGamePath,

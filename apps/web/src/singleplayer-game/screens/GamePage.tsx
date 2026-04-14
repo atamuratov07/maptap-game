@@ -5,7 +5,7 @@ import {
 	type GameConfig,
 } from '@maptap/game-domain/singleplayer'
 import { useMemo } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { GameResultModal } from '../components/GameResultModal'
 import { parseGameConfig } from '../core/config'
 import { useGameSession, type GameLoadErrorCode } from '../core/useGameSession'
