@@ -1,4 +1,3 @@
-import type { GamePhase } from '@maptap/game-domain/singleplayer'
 import { useEffect, useMemo, useState } from 'react'
 
 interface QuestionTimerProps {
