@@ -1,14 +1,14 @@
 import type {
-	ActiveGameRoundState,
-	GameLeaderboardEntry,
+	ActiveRoundGameState,
 	GamePlayerState,
-	GameRoomState,
 	PlayerId,
+	RoomLeaderboardEntry,
+	RoomState,
 } from './types'
 
 function getActiveRoundState(
-	state: GameRoomState,
-): ActiveGameRoundState | undefined {
+	state: RoomState,
+): ActiveRoundGameState | undefined {
 	return state.phase === 'question_open' ||
 		state.phase === 'question_revealed' ||
 		state.phase === 'leaderboard'
@@ -16,10 +16,7 @@ function getActiveRoundState(
 		: undefined
 }
 
-function comparePlayers(
-	left: GamePlayerState,
-	right: GamePlayerState,
-): number {
+function comparePlayers(left: GamePlayerState, right: GamePlayerState): number {
 	if (right.score !== left.score) {
 		return right.score - left.score
 	}
@@ -41,13 +38,13 @@ function comparePlayers(
 }
 
 export function getPlayer(
-	state: GameRoomState,
+	state: RoomState,
 	playerId: PlayerId,
 ): GamePlayerState | undefined {
 	return state.playersById[playerId]
 }
 
-export function getPlayers(state: GameRoomState): GamePlayerState[] {
+export function getPlayers(state: RoomState): GamePlayerState[] {
 	return state.playerOrder.flatMap(playerId => {
 		const player = state.playersById[playerId]
 		return player ? [player] : []
@@ -55,16 +52,16 @@ export function getPlayers(state: GameRoomState): GamePlayerState[] {
 }
 
 export function getActiveRound(
-	state: GameRoomState,
-): ActiveGameRoundState | undefined {
+	state: RoomState,
+): ActiveRoundGameState | undefined {
 	return getActiveRoundState(state)
 }
 
-export function getCurrentQuestionId(state: GameRoomState): string | undefined {
+export function getCurrentQuestionId(state: RoomState): string | undefined {
 	return getActiveRoundState(state)?.questionId
 }
 
-export function getCurrentQuestionIndex(state: GameRoomState): number {
+export function getCurrentQuestionIndex(state: RoomState): number {
 	const activeRound = getActiveRoundState(state)
 	if (activeRound) {
 		return activeRound.questionIndex
@@ -73,7 +70,7 @@ export function getCurrentQuestionIndex(state: GameRoomState): number {
 	return state.phase === 'finished' ? state.questionIds.length : 0
 }
 
-export function getCurrentQuestionNumber(state: GameRoomState): number {
+export function getCurrentQuestionNumber(state: RoomState): number {
 	const activeRound = getActiveRoundState(state)
 	if (activeRound) {
 		return activeRound.questionIndex + 1
@@ -82,15 +79,15 @@ export function getCurrentQuestionNumber(state: GameRoomState): number {
 	return state.phase === 'finished' ? state.questionIds.length : 0
 }
 
-export function getQuestionCount(state: GameRoomState): number {
+export function getQuestionCount(state: RoomState): number {
 	return state.questionIds.length
 }
 
-export function getConnectedPlayerCount(state: GameRoomState): number {
+export function getConnectedPlayerCount(state: RoomState): number {
 	return getPlayers(state).filter(player => player.connected).length
 }
 
-export function getAnsweredPlayerCount(state: GameRoomState): number {
+export function getAnsweredPlayerCount(state: RoomState): number {
 	const activeRound = getActiveRoundState(state)
 	if (!activeRound) {
 		return 0
@@ -106,7 +103,7 @@ export function getAnsweredPlayerCount(state: GameRoomState): number {
 }
 
 export function hasPlayerSubmitted(
-	state: GameRoomState,
+	state: RoomState,
 	playerId: PlayerId,
 ): boolean {
 	const submission = getPlayerSubmission(state, playerId)
@@ -117,17 +114,12 @@ export function hasPlayerSubmitted(
 	return submission.countryId !== null
 }
 
-export function getPlayerSubmission(
-	state: GameRoomState,
-	playerId: PlayerId,
-) {
+export function getPlayerSubmission(state: RoomState, playerId: PlayerId) {
 	const activeRound = getActiveRoundState(state)
 	return activeRound?.submissions[playerId]
 }
 
-export function getLeaderboard(
-	state: GameRoomState,
-): GameLeaderboardEntry[] {
+export function getLeaderboard(state: RoomState): RoomLeaderboardEntry[] {
 	const rankedPlayers = [...getPlayers(state)].sort(comparePlayers)
 
 	return rankedPlayers.map((player, index) => ({

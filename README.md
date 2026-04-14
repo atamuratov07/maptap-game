@@ -2,6 +2,10 @@
 
 MapTap is a small educational geography game built with React + TypeScript + Tailwind CSS.
 
+## Project Guide
+
+For a current repo-wide architecture map, see [docs/project-architecture.md](docs/project-architecture.md).
+
 ## Features
 
 - Home screen with:

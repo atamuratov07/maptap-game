@@ -10,13 +10,13 @@ import {
 } from './selectors'
 import type {
 	EvaluatedGameSubmission,
-	GameLeaderboardEntry,
-	GameRoomState,
 	PlayerId,
 	PlayerRole,
+	RoomLeaderboardEntry,
+	RoomState,
 } from './types'
 
-export interface VisiblePlayerSummary {
+export interface VisiblePlayerInfo {
 	playerId: PlayerId
 	name: string
 	role: PlayerRole
@@ -38,7 +38,7 @@ export interface EvaluatedViewerSubmissionState {
 	scoreAwarded: number
 }
 
-interface VisibleRoundStateBase {
+interface RoundViewBase {
 	questionNumber: number
 	questionCount: number
 	startedAt: number
@@ -47,30 +47,31 @@ interface VisibleRoundStateBase {
 	connectedPlayerCount: number
 }
 
-export interface OpenPlayerRoundView extends VisibleRoundStateBase {
+export interface OpenRoundPlayerView extends RoundViewBase {
 	phase: 'open'
-	selfSubmission: ViewerSubmissionState | null
+	questionCountryId: string
+	submission: ViewerSubmissionState | null
 }
 
-export interface RevealedPlayerRoundView extends VisibleRoundStateBase {
+export interface RevealedRoundPlayerView extends RoundViewBase {
 	phase: 'revealed'
 	revealedAt: number
 	correctCountryId: string
-	selfSubmission: EvaluatedViewerSubmissionState | null
+	submission: EvaluatedViewerSubmissionState | null
 }
 
-export interface LeaderboardPlayerRoundView extends VisibleRoundStateBase {
+export interface LeaderboardRoundPlayerView extends RoundViewBase {
 	phase: 'leaderboard'
 	revealedAt: number
 	leaderboardShownAt: number
 	correctCountryId: string
-	selfSubmission: EvaluatedViewerSubmissionState | null
+	submission: EvaluatedViewerSubmissionState | null
 }
 
-export type PlayerRoundView =
-	| OpenPlayerRoundView
-	| RevealedPlayerRoundView
-	| LeaderboardPlayerRoundView
+export type RoundPlayerView =
+	| OpenRoundPlayerView
+	| RevealedRoundPlayerView
+	| LeaderboardRoundPlayerView
 
 export interface HostSubmissionView {
 	playerId: PlayerId
@@ -80,62 +81,63 @@ export interface HostSubmissionView {
 	scoreAwarded: number
 }
 
-export interface OpenHostRoundView extends VisibleRoundStateBase {
+export interface OpenRoundHostView extends RoundViewBase {
 	phase: 'open'
-	selfSubmission: ViewerSubmissionState | null
+	questionCountryId: string
+	submission: ViewerSubmissionState | null
 }
 
-export interface RevealedHostRoundView extends VisibleRoundStateBase {
+export interface RevealedRoundHostView extends RoundViewBase {
 	phase: 'revealed'
 	revealedAt: number
 	correctCountryId: string
-	selfSubmission: EvaluatedViewerSubmissionState | null
+	submission: EvaluatedViewerSubmissionState | null
 	submissions: HostSubmissionView[]
 }
 
-export interface LeaderboardHostRoundView
-	extends VisibleRoundStateBase {
+export interface LeaderboardRoundHostView extends RoundViewBase {
 	phase: 'leaderboard'
 	revealedAt: number
 	leaderboardShownAt: number
 	correctCountryId: string
-	selfSubmission: EvaluatedViewerSubmissionState | null
+	submission: EvaluatedViewerSubmissionState | null
 	submissions: HostSubmissionView[]
 }
 
-export type HostRoundView =
-	| OpenHostRoundView
-	| RevealedHostRoundView
-	| LeaderboardHostRoundView
+export type RoundHostView =
+	| OpenRoundHostView
+	| RevealedRoundHostView
+	| LeaderboardRoundHostView
 
-interface GameRoomViewBase {
+interface RoomViewBase {
 	roomId: string
 	roomCode: string
-	phase: GameRoomState['phase']
+	phase: RoomState['phase']
 	hostPlayerId: PlayerId
 	viewerPlayerId: PlayerId
+	scope: RoomState['config']['scope']
 	questionCount: number
 	currentQuestionNumber: number
-	players: VisiblePlayerSummary[]
-	leaderboard: GameLeaderboardEntry[] | null
+	players: VisiblePlayerInfo[]
+	leaderboard: RoomLeaderboardEntry[] | null
 }
 
-export interface PlayerRoomView extends GameRoomViewBase {
+export interface RoomPlayerView extends RoomViewBase {
 	role: 'player'
-	currentRound: PlayerRoundView | null
+	currentRound: RoundPlayerView | null
 }
 
-export interface HostRoomView extends GameRoomViewBase {
+export interface RoomHostView extends RoomViewBase {
 	role: 'host'
-	currentRound: HostRoundView | null
+	currentRound: RoundHostView | null
 }
 
 function toVisiblePlayers(
-	state: GameRoomState,
+	state: RoomState,
 	options: {
 		hideCompetitiveStats?: boolean
 	} = {},
-): VisiblePlayerSummary[] {
+): VisiblePlayerInfo[] {
 	const { hideCompetitiveStats = false } = options
 
 	return getLeaderboard(state).map(entry => ({
@@ -172,7 +174,7 @@ function toHostSubmissionView(
 	}
 }
 
-function getSharedRoundState(state: GameRoomState) {
+function getSharedRoundState(state: RoomState) {
 	const activeRound = getActiveRound(state)
 	if (!activeRound) {
 		return null
@@ -188,17 +190,17 @@ function getSharedRoundState(state: GameRoomState) {
 }
 
 function getVisibleLeaderboard(
-	state: GameRoomState,
-): GameLeaderboardEntry[] | null {
+	state: RoomState,
+): RoomLeaderboardEntry[] | null {
 	return state.phase === 'leaderboard' || state.phase === 'finished'
 		? getLeaderboard(state)
 		: null
 }
 
 export function toPlayerRoomView(
-	state: GameRoomState,
+	state: RoomState,
 	viewerPlayerId: PlayerId,
-): PlayerRoomView | undefined {
+): RoomPlayerView | undefined {
 	const viewer = getPlayer(state, viewerPlayerId)
 	if (!viewer || viewer.role === 'host') {
 		return undefined
@@ -207,7 +209,7 @@ export function toPlayerRoomView(
 	const sharedRoundState = getSharedRoundState(state)
 	const viewerSubmission = getPlayerSubmission(state, viewerPlayerId)
 
-	let currentRound: PlayerRoundView | null = null
+	let currentRound: RoundPlayerView | null = null
 
 	if (sharedRoundState) {
 		const roundBase = {
@@ -226,8 +228,8 @@ export function toPlayerRoomView(
 			currentRound = {
 				phase: 'open',
 				...roundBase,
-				selfSubmission:
-					viewerSubmission
+				questionCountryId: sharedRoundState.activeRound.questionId,
+				submission: viewerSubmission
 					? {
 							countryId: viewerSubmission.countryId,
 							submittedAt: viewerSubmission.submittedAt,
@@ -240,7 +242,7 @@ export function toPlayerRoomView(
 				...roundBase,
 				revealedAt: sharedRoundState.activeRound.revealedAt,
 				correctCountryId: sharedRoundState.activeRound.questionId,
-				selfSubmission:
+				submission:
 					viewerSubmission && 'isCorrect' in viewerSubmission
 						? toEvaluatedSubmissionView(viewerSubmission)
 						: null,
@@ -252,7 +254,7 @@ export function toPlayerRoomView(
 				revealedAt: sharedRoundState.activeRound.revealedAt,
 				leaderboardShownAt: sharedRoundState.activeRound.leaderboardShownAt,
 				correctCountryId: sharedRoundState.activeRound.questionId,
-				selfSubmission:
+				submission:
 					viewerSubmission && 'isCorrect' in viewerSubmission
 						? toEvaluatedSubmissionView(viewerSubmission)
 						: null,
@@ -266,6 +268,7 @@ export function toPlayerRoomView(
 		phase: state.phase,
 		hostPlayerId: state.hostPlayerId,
 		viewerPlayerId,
+		scope: state.config.scope,
 		role: 'player',
 		questionCount: getQuestionCount(state),
 		currentQuestionNumber: getCurrentQuestionNumber(state),
@@ -279,9 +282,9 @@ export function toPlayerRoomView(
 }
 
 export function toHostRoomView(
-	state: GameRoomState,
+	state: RoomState,
 	viewerPlayerId: PlayerId,
-): HostRoomView | undefined {
+): RoomHostView | undefined {
 	const viewer = getPlayer(state, viewerPlayerId)
 	if (!viewer || viewer.role !== 'host') {
 		return undefined
@@ -290,7 +293,7 @@ export function toHostRoomView(
 	const sharedRoundState = getSharedRoundState(state)
 	const viewerSubmission = getPlayerSubmission(state, viewerPlayerId)
 
-	let currentRound: HostRoundView | null = null
+	let currentRound: RoundHostView | null = null
 
 	if (sharedRoundState) {
 		const roundBase = {
@@ -309,8 +312,8 @@ export function toHostRoomView(
 			currentRound = {
 				phase: 'open',
 				...roundBase,
-				selfSubmission:
-					viewerSubmission
+				questionCountryId: sharedRoundState.activeRound.questionId,
+				submission: viewerSubmission
 					? {
 							countryId: viewerSubmission.countryId,
 							submittedAt: viewerSubmission.submittedAt,
@@ -328,7 +331,7 @@ export function toHostRoomView(
 					...roundBase,
 					revealedAt: sharedRoundState.activeRound.revealedAt,
 					correctCountryId: sharedRoundState.activeRound.questionId,
-					selfSubmission:
+					submission:
 						viewerSubmission && 'isCorrect' in viewerSubmission
 							? toEvaluatedSubmissionView(viewerSubmission)
 							: null,
@@ -342,7 +345,7 @@ export function toHostRoomView(
 					leaderboardShownAt:
 						sharedRoundState.activeRound.leaderboardShownAt,
 					correctCountryId: sharedRoundState.activeRound.questionId,
-					selfSubmission:
+					submission:
 						viewerSubmission && 'isCorrect' in viewerSubmission
 							? toEvaluatedSubmissionView(viewerSubmission)
 							: null,
@@ -353,30 +356,17 @@ export function toHostRoomView(
 	}
 
 	return {
+		role: 'host',
 		roomId: state.roomId,
 		roomCode: state.roomCode,
 		phase: state.phase,
 		hostPlayerId: state.hostPlayerId,
 		viewerPlayerId,
-		role: 'host',
+		scope: state.config.scope,
 		questionCount: getQuestionCount(state),
 		currentQuestionNumber: getCurrentQuestionNumber(state),
 		players: toVisiblePlayers(state),
 		leaderboard: getVisibleLeaderboard(state),
 		currentRound,
 	}
-}
-
-export function toRoomView(
-	state: GameRoomState,
-	viewerPlayerId: PlayerId,
-): HostRoomView | PlayerRoomView | undefined {
-	const viewer = getPlayer(state, viewerPlayerId)
-	if (!viewer) {
-		return undefined
-	}
-
-	return viewer.role === 'host'
-		? toHostRoomView(state, viewerPlayerId)
-		: toPlayerRoomView(state, viewerPlayerId)
 }

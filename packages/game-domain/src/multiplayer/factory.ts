@@ -1,14 +1,29 @@
 import type { CommandError, SessionPreparationError } from '../shared/errors'
 import { err, ok, type Result } from '../shared/result'
-import type { CreateGameRoomInput, GameRoomState } from './types'
+import type {
+	GameSession,
+	PlayerId,
+	RoomCode,
+	RoomId,
+	RoomState,
+} from './types'
 
 export function normalizePlayerName(name: string): string {
 	return name.trim()
 }
 
+export interface CreateRoomInput {
+	roomId: RoomId
+	roomCode: RoomCode
+	hostPlayerId: PlayerId
+	hostName: string
+	session: GameSession
+	now: number
+}
+
 export function createGameRoom(
-	input: CreateGameRoomInput,
-): Result<GameRoomState, CommandError | SessionPreparationError> {
+	input: CreateRoomInput,
+): Result<RoomState, CommandError | SessionPreparationError> {
 	const hostName = normalizePlayerName(input.hostName)
 	if (hostName.length === 0) {
 		return err({

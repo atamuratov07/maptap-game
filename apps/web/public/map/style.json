@@ -331,7 +331,7 @@
 			"type": "circle",
 			"source": "world",
 			"source-layer": "capitals",
-			"minzoom": 3.5,
+			"minzoom": 3,
 			"paint": {
 				"circle-color": "#0f172a",
 				"circle-radius": {

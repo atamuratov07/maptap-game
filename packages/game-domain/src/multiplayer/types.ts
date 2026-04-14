@@ -6,12 +6,14 @@ export type PlayerId = string
 
 export type PlayerRole = 'host' | 'player'
 
-export type GamePhase =
-	| 'lobby'
-	| 'question_open'
-	| 'question_revealed'
-	| 'leaderboard'
-	| 'finished'
+export const ROOM_PHASES = [
+	'lobby',
+	'question_open',
+	'question_revealed',
+	'leaderboard',
+	'finished',
+] as const
+export type RoomPhase = (typeof ROOM_PHASES)[number]
 
 export interface GameConfig extends GameQuestionSetConfig {
 	questionDurationMs: number
@@ -42,13 +44,13 @@ export interface GamePlayerState {
 	correctCount: number
 }
 
-interface SubmissionBase {
+interface GameSubmissionBase {
 	playerId: PlayerId
 	countryId: CountryId
 	submittedAt: number
 }
 
-export interface LockedGameSubmission extends SubmissionBase {}
+export interface LockedGameSubmission extends GameSubmissionBase {}
 
 export interface EvaluatedGameSubmission {
 	playerId: PlayerId
@@ -58,47 +60,43 @@ export interface EvaluatedGameSubmission {
 	score: number
 }
 
-interface GameRoundIdentity {
+interface GameStateBase {
 	questionIndex: number
 	questionId: CountryId
-}
-
-interface GameQuestionRoundBase extends GameRoundIdentity {
 	startedAt: number
 	deadlineAt: number
 }
 
-export interface OpenGameRoundState extends GameQuestionRoundBase {
+export interface OpenRoundGameState extends GameStateBase {
 	phase: 'open'
 	submissions: Record<PlayerId, LockedGameSubmission>
 }
 
-export interface RevealedGameRoundState extends GameQuestionRoundBase {
+export interface RevealedRoundGameState extends GameStateBase {
 	phase: 'revealed'
 	revealedAt: number
 	submissions: Record<PlayerId, EvaluatedGameSubmission>
 }
 
-export interface LeaderboardGameRoundState
-	extends GameQuestionRoundBase {
+export interface LeaderboardGRoundGameState extends GameStateBase {
 	phase: 'leaderboard'
 	revealedAt: number
 	leaderboardShownAt: number
 	submissions: Record<PlayerId, EvaluatedGameSubmission>
 }
 
-export type ActiveGameRoundState =
-	| OpenGameRoundState
-	| RevealedGameRoundState
-	| LeaderboardGameRoundState
+export type ActiveRoundGameState =
+	| OpenRoundGameState
+	| RevealedRoundGameState
+	| LeaderboardGRoundGameState
 
-export interface ArchivedGameRoundState extends GameQuestionRoundBase {
+export interface CompletedGameRoundState extends GameStateBase {
 	revealedAt: number
 	leaderboardShownAt: number | null
 	submissions: Record<PlayerId, EvaluatedGameSubmission>
 }
 
-interface GameRoomStateBase {
+interface RoomStateBase {
 	roomId: RoomId
 	roomCode: RoomCode
 	hostPlayerId: PlayerId
@@ -107,41 +105,41 @@ interface GameRoomStateBase {
 	playersById: Record<PlayerId, GamePlayerState>
 	playerOrder: PlayerId[]
 	createdAt: number
-	completedRounds: ArchivedGameRoundState[]
+	completedRounds: CompletedGameRoundState[]
 }
 
-export interface LobbyGameState extends GameRoomStateBase {
+export interface RoomLobbyState extends RoomStateBase {
 	phase: 'lobby'
 }
 
-export interface QuestionOpenGameState extends GameRoomStateBase {
+export interface RoomQuestionOpenState extends RoomStateBase {
 	phase: 'question_open'
-	activeRound: OpenGameRoundState
+	activeRound: OpenRoundGameState
 }
 
-export interface QuestionRevealedGameState extends GameRoomStateBase {
+export interface RoomQuestionRevealedState extends RoomStateBase {
 	phase: 'question_revealed'
-	activeRound: RevealedGameRoundState
+	activeRound: RevealedRoundGameState
 }
 
-export interface LeaderboardGameState extends GameRoomStateBase {
+export interface RoomLeaderboardState extends RoomStateBase {
 	phase: 'leaderboard'
-	activeRound: LeaderboardGameRoundState
+	activeRound: LeaderboardGRoundGameState
 }
 
-export interface FinishedGameState extends GameRoomStateBase {
+export interface RoomFinishedState extends RoomStateBase {
 	phase: 'finished'
 	finishedAt: number
 }
 
-export type GameRoomState =
-	| LobbyGameState
-	| QuestionOpenGameState
-	| QuestionRevealedGameState
-	| LeaderboardGameState
-	| FinishedGameState
+export type RoomState =
+	| RoomLobbyState
+	| RoomQuestionOpenState
+	| RoomQuestionRevealedState
+	| RoomLeaderboardState
+	| RoomFinishedState
 
-export interface GameLeaderboardEntry {
+export interface RoomLeaderboardEntry {
 	rank: number
 	playerId: PlayerId
 	name: string
@@ -149,13 +147,4 @@ export interface GameLeaderboardEntry {
 	connected: boolean
 	score: number
 	correctCount: number
-}
-
-export interface CreateGameRoomInput {
-	roomId: RoomId
-	roomCode: RoomCode
-	hostPlayerId: PlayerId
-	hostName: string
-	session: GameSession
-	now: number
 }

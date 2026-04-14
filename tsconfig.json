@@ -2,10 +2,19 @@
 	"files": [],
 	"references": [
 		{
-			"path": [
-				"./apps/web/tsconfig.json",
-				"./packages/game-domain/tsconfig.json"
-			]
+			"path": "./apps/web/tsconfig.json"
+		},
+		{
+			"path": "./apps/server/tsconfig.json"
+		},
+		{
+			"path": "./packages/game-domain/tsconfig.json"
+		},
+		{
+			"path": "./packages/country-catalog/tsconfig.json"
+		},
+		{
+			"path": "./packages/game-protocol/tsconfig.json"
 		}
 	]
 }

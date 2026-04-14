@@ -1,8 +1,67 @@
-export * from './commands'
-export * from './engine'
-export * from './factory'
-export * from './score'
-export * from './selectors'
-export * from './session'
-export * from './types'
-export * from './visibility'
+export { applyRoomCommand, type RoomCommand } from './commands'
+export {
+	createGameRoom,
+	normalizePlayerName,
+	type CreateRoomInput,
+} from './factory'
+export { calculateAnswerScore } from './score'
+export {
+	getActiveRound,
+	getAnsweredPlayerCount,
+	getConnectedPlayerCount,
+	getCurrentQuestionId,
+	getCurrentQuestionIndex,
+	getCurrentQuestionNumber,
+	getLeaderboard,
+	getPlayer,
+	getPlayers,
+	getPlayerSubmission,
+	getQuestionCount,
+	hasPlayerSubmitted,
+} from './selectors'
+export { prepareGameSession } from './session'
+export { applyRoomTransition, type RoomTransition } from './transitions'
+export {
+	DEFAULT_GAME_CONFIG,
+	ROOM_PHASES,
+	type ActiveRoundGameState,
+	type CompletedGameRoundState,
+	type EvaluatedGameSubmission,
+	type GameConfig,
+	type GamePlayerState,
+	type GameSession,
+	type LeaderboardGRoundGameState,
+	type LockedGameSubmission,
+	type OpenRoundGameState,
+	type PlayerId,
+	type PlayerRole,
+	type RevealedRoundGameState,
+	type RoomCode,
+	type RoomFinishedState,
+	type RoomId,
+	type RoomLeaderboardEntry,
+	type RoomLeaderboardState,
+	type RoomLobbyState,
+	type RoomPhase,
+	type RoomQuestionOpenState,
+	type RoomQuestionRevealedState,
+	type RoomState,
+} from './types'
+export {
+	toHostRoomView,
+	toPlayerRoomView,
+	type EvaluatedViewerSubmissionState,
+	type HostSubmissionView,
+	type LeaderboardRoundHostView,
+	type LeaderboardRoundPlayerView,
+	type OpenRoundHostView,
+	type OpenRoundPlayerView,
+	type RevealedRoundHostView,
+	type RevealedRoundPlayerView,
+	type RoomHostView,
+	type RoomPlayerView,
+	type RoundHostView,
+	type RoundPlayerView,
+	type ViewerSubmissionState,
+	type VisiblePlayerInfo,
+} from './visibility'

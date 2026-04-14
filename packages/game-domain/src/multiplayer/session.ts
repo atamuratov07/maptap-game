@@ -5,27 +5,11 @@ import { pickRandomIds, type RandomNumberGenerator } from '../shared/random'
 import { err, ok, type Result } from '../shared/result'
 import type { GameConfig, GameSession } from './types'
 
-function normalizeQuestionCount(
-	value: number,
-): Result<number, SessionPreparationError> {
-	if (!Number.isFinite(value) || Math.floor(value) < 1) {
-		return err({
-			code: 'invalid_question_count',
-		})
-	}
-
-	return ok(Math.floor(value))
-}
-
 export function prepareGameSession(
 	pool: CountryPool,
 	config: GameConfig,
 	rng: RandomNumberGenerator = Math.random,
 ): Result<GameSession, SessionPreparationError> {
-	const normalizedQuestionCount = normalizeQuestionCount(config.questionCount)
-	if (!normalizedQuestionCount.ok) {
-		return normalizedQuestionCount
-	}
 	const eligibleIds = selectEligibleCountryIds(pool, config)
 	if (eligibleIds.length === 0) {
 		return err({
@@ -33,9 +17,17 @@ export function prepareGameSession(
 		})
 	}
 
+	if (eligibleIds.length < config.questionCount) {
+		return err({
+			code: 'insufficient_eligible_countries',
+			questionCount: config.questionCount,
+			countryCount: eligibleIds.length,
+		})
+	}
+
 	const questionIds = pickRandomIds(
 		eligibleIds,
-		Math.min(normalizedQuestionCount.value, eligibleIds.length),
+		config.questionCount,
 		rng,
 	)
 

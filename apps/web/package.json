@@ -11,10 +11,13 @@
 	"dependencies": {
 		"@maptap/country-catalog": "*",
 		"@maptap/game-domain": "*",
+		"@maptap/game-protocol": "*",
 		"maplibre-gl": "^5.19.0",
 		"react": "^18.3.1",
 		"react-dom": "^18.3.1",
-		"react-map-gl": "^8.1.0"
+		"react-map-gl": "^8.1.0",
+		"react-router-dom": "^7.14.0",
+		"socket.io-client": "^4.8.3"
 	},
 	"devDependencies": {
 		"@tailwindcss/vite": "^4.2.1",
