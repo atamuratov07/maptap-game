@@ -7,21 +7,22 @@ interface RoomGameHeaderProps {
 	viewerScore?: number | null
 	viewerRank?: number | null
 	secondsLeft: number | null
-	statusLabel: string
 }
 
 function HeaderChip({
 	label,
 	value,
 	emphasized = false,
+	className,
 }: {
 	label: string
 	value: string
 	emphasized?: boolean
+	className?: string
 }): JSX.Element {
 	return (
 		<div
-			className={`rounded-full px-3 py-2 text-left ${emphasized ? 'bg-amber-400 text-slate-950' : 'bg-white/12 text-slate-100'}`}
+			className={`rounded-full px-3 py-2 text-left ${emphasized ? 'bg-amber-400 text-slate-950' : 'bg-white/12 text-slate-100'} ${className ?? ''}`}
 		>
 			<p className='text-[10px] font-black uppercase tracking-[0.18em] opacity-70'>
 				{label}
@@ -40,11 +41,10 @@ export function GameHeader({
 	viewerScore,
 	viewerRank,
 	secondsLeft,
-	statusLabel,
 }: RoomGameHeaderProps): JSX.Element {
 	return (
-		<header className='absolute inset-x-0 top-0 z-30 border-b border-white/12 bg-slate-950/88 px-4 py-3 text-white backdrop-blur-md'>
-			<div className='mx-auto flex max-w-450 flex-col gap-3 xl:flex-row xl:items-center xl:justify-between'>
+		<header className='w-full border-b border-white/12 bg-slate-950/88 px-4 py-3 text-white backdrop-blur-md'>
+			<div className='relative mx-auto flex max-w-450 flex-col gap-3 xl:flex-row xl:items-center xl:justify-between'>
 				<div className='flex flex-wrap items-center gap-2'>
 					<HeaderChip label='Раунд' value={progressLabel} />
 					<HeaderChip label='Игрок' value={viewerName} />
@@ -72,17 +72,15 @@ export function GameHeader({
 							/>
 						) : null}
 					</div>
-				</div>
 
-				<div className='flex flex-wrap items-center justify-end gap-2 xl:max-w-70'>
 					{secondsLeft !== null ? (
 						<HeaderChip
 							label='Время'
 							value={`${secondsLeft}с`}
 							emphasized
+							className='absolute right-0 top-0'
 						/>
 					) : null}
-					<HeaderChip label='Статус' value={statusLabel} />
 				</div>
 			</div>
 		</header>

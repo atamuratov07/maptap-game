@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom'
-import { RoomGameScene } from '../components/game/GameScene'
+import { GameScene } from '../components/game/GameScene'
 import { RoomClosedScreen } from '../components/screens/RoomClosedScreen'
 import { RoomErrorScreen } from '../components/screens/RoomErrorScreen'
 import { RoomFinishedScreen } from '../components/screens/RoomFinishedScreen'
@@ -76,7 +76,7 @@ export function RoomHostPage(): JSX.Element {
 	}
 
 	return (
-		<RoomGameScene
+		<GameScene
 			room={room}
 			submitPending={actionPending === 'submit'}
 			actionErrorMessage={actionErrorMessage}

@@ -46,27 +46,7 @@ function FloatingNotice({
 	)
 }
 
-function getStatusLabel(
-	phase: 'open' | 'revealed' | 'leaderboard',
-	hasSubmission: boolean,
-	submitPending: boolean,
-): string {
-	if (phase === 'open') {
-		if (submitPending) {
-			return 'Отправка ответа'
-		}
-
-		return hasSubmission ? 'Ответ принят' : 'Ждём ответ'
-	}
-
-	if (phase === 'revealed') {
-		return 'Правильный ответ'
-	}
-
-	return 'Результаты раунда'
-}
-
-export function RoomGameScene({
+export function GameScene({
 	room,
 	submitPending,
 	actionErrorMessage,
@@ -115,18 +95,9 @@ export function RoomGameScene({
 		round.phase === 'open'
 			? null
 			: (round.submission as EvaluatedViewerSubmissionState | null)
-	const statusLabel = getStatusLabel(
-		round.phase,
-		Boolean(round.submission?.countryId),
-		submitPending,
-	)
 
 	return (
-		<main className='relative h-screen overflow-hidden bg-slate-950 text-white'>
-			<div className='absolute inset-0'>
-				<MapRenderer {...mapProps} />
-			</div>
-
+		<section className='flex h-full flex-col overflow-hidden bg-slate-950 text-white'>
 			<GameHeader
 				progressLabel={`${room.currentQuestionNumber} / ${room.questionCount}`}
 				targetLabel={
@@ -138,8 +109,10 @@ export function RoomGameScene({
 				viewerScore={viewerScore}
 				viewerRank={viewerRank}
 				secondsLeft={round.phase === 'open' ? secondsLeft : null}
-				statusLabel={statusLabel}
 			/>
+			<main className='relative min-h-0 flex-1'>
+				<MapRenderer {...mapProps} />
+			</main>
 
 			{isReconnecting ? (
 				<FloatingNotice message='Переподключаемся к комнате...' />
@@ -172,6 +145,6 @@ export function RoomGameScene({
 					viewerPlayerId={room.viewerPlayerId}
 				/>
 			) : null}
-		</main>
+		</section>
 	)
 }
