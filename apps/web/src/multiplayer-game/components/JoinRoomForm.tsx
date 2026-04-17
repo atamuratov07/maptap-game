@@ -1,7 +1,11 @@
 import { useState, type FormEvent, type JSX } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-export function JoinRoomForm(): JSX.Element {
+export function JoinRoomForm({
+	className,
+}: {
+	className?: string
+}): JSX.Element {
 	const navigate = useNavigate()
 	const [roomCode, setRoomCode] = useState('')
 
@@ -17,7 +21,7 @@ export function JoinRoomForm(): JSX.Element {
 
 	return (
 		<form
-			className='rounded-[28px] h-fit border border-slate-200 bg-slate-950 p-6 text-slate-50 shadow-[0_28px_70px_rgba(15,23,42,0.18)]'
+			className={`rounded-[28px] h-fit border border-slate-200 bg-slate-950 p-6 text-slate-50 shadow-[0_28px_70px_rgba(15,23,42,0.18)] ${className ?? ''}`}
 			onSubmit={handleSubmit}
 		>
 			<p className='text-[11px] font-black uppercase tracking-[0.24em] text-amber-300'>

@@ -11,7 +11,7 @@ export const roomCodeSchema = z
 	.transform(value => value.toUpperCase())
 
 export const createRoomRequestSchema = z.object({
-	hostName: z.string().trim().min(1).max(32),
+	hostName: z.string().trim().min(1).max(20),
 	gameConfig: z.object({
 		questionCount: z.number().int().min(1).max(50),
 		difficulty: difficultySchema,
@@ -26,7 +26,7 @@ export const lookupRoomRequestSchema = z.object({
 
 export const joinRoomRequestSchema = z.object({
 	roomCode: roomCodeSchema,
-	playerName: z.string().trim().min(1).max(32),
+	playerName: z.string().trim().min(1).max(20),
 })
 
 export const resumeHostRoomRequestSchema = z.object({

@@ -45,6 +45,7 @@ interface CreateRoomFormProps {
 	onSubmit: (values: CreateRoomFormValues) => Promise<void> | void
 	pending: boolean
 	submitError: string | null
+	className?: string
 }
 
 const DEFAULT_FORM_STATE: CreateRoomFormValues = {
@@ -59,6 +60,7 @@ export function CreateRoomForm({
 	onSubmit,
 	pending,
 	submitError,
+	className,
 }: CreateRoomFormProps): JSX.Element {
 	const [formState, setFormState] =
 		useState<CreateRoomFormValues>(DEFAULT_FORM_STATE)
@@ -74,7 +76,7 @@ export function CreateRoomForm({
 
 	return (
 		<form
-			className='rounded-[29px] border border-white/60 bg-white/92 p-6 shadow-[0_28px_80px_rgba(15,23,42,0.12)] backdrop-blur sm:p-8'
+			className={`rounded-[29px] border border-white/60 bg-white/92 p-6 shadow-[0_28px_80px_rgba(15,23,42,0.12)] backdrop-blur sm:p-8 ${className ?? ''}`}
 			onSubmit={handleSubmit}
 		>
 			<p className='text-[11px] font-black uppercase tracking-[0.24em] text-amber-600'>
@@ -100,7 +102,7 @@ export function CreateRoomForm({
 								}))
 							}}
 							minLength={1}
-							maxLength={32}
+							maxLength={20}
 							className='w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-200'
 							placeholder='Введите имя'
 						/>
