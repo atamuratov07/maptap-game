@@ -1,14 +1,11 @@
 import { countryCatalog, type CountryInfo } from '@maptap/country-catalog'
 import type {
 	EvaluatedViewerSubmissionState,
-	RoomHostView,
 	RoomLeaderboardEntry,
-	RoomPlayerView,
+	RoomView,
 	VisiblePlayerInfo,
 } from '@maptap/game-domain/multiplayer'
 import type { RoomClosedEvent } from '@maptap/game-protocol'
-
-export type MultiplayerRoomView = RoomHostView | RoomPlayerView
 
 export function formatClosedReason(reason: RoomClosedEvent['reason']): string {
 	if (reason === 'host_terminated') {
@@ -32,9 +29,7 @@ export function getCountryInfo(
 	return countryCatalog.countriesById.get(countryId) ?? null
 }
 
-export function getViewerPlayer(
-	room: MultiplayerRoomView,
-): VisiblePlayerInfo | null {
+export function getViewerPlayer(room: RoomView): VisiblePlayerInfo | null {
 	return (
 		room.players.find(player => player.playerId === room.viewerPlayerId) ??
 		null
@@ -42,7 +37,7 @@ export function getViewerPlayer(
 }
 
 export function getViewerLeaderboardEntry(
-	room: MultiplayerRoomView,
+	room: RoomView,
 ): RoomLeaderboardEntry | null {
 	return (
 		room.leaderboard?.find(entry => entry.playerId === room.viewerPlayerId) ??
@@ -51,7 +46,7 @@ export function getViewerLeaderboardEntry(
 }
 
 export function getLeaderboard(
-	room: MultiplayerRoomView,
+	room: RoomView,
 	limit = 5,
 ): RoomLeaderboardEntry[] {
 	return room.leaderboard?.slice(0, limit) ?? []

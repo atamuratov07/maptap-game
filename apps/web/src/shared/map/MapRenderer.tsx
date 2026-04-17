@@ -239,7 +239,7 @@ function MapRendererInner({
 
 	const highlightLayer = useMemo(() => {
 		return buildHighlightLayer(highlights)
-	}, [markers])
+	}, [highlights])
 
 	const dimLayer = useMemo(() => {
 		return buildDimLayer(interactiveIds, true)
@@ -255,7 +255,7 @@ function MapRendererInner({
 			ids.add(popup.countryId)
 		}
 		return [...ids]
-	}, [markers, popup?.countryId])
+	}, [highlights, popup?.countryId])
 
 	const labelFilter = useMemo<FilterSpecification>(() => {
 		if (!labelIds.length) {
@@ -321,7 +321,7 @@ function MapRendererInner({
 				hoveredFeatureIdRef.current = hoveredId
 			}
 		},
-		[disabled, interactiveIds, markers, setFeatureHoverState],
+		[disabled, highlights, interactiveIds, setFeatureHoverState],
 	)
 
 	// Projection ================================================
@@ -331,6 +331,27 @@ function MapRendererInner({
 	const isMercatorProjection = projectionType === 'mercator'
 	const isGlobeProjection =
 		projectionType === 'globe' || projectionType === 'vertical-perspective'
+	const isProjectionSwitchingRef = useRef(false)
+
+	const switchProjection = useCallback(
+		(projection: ProjectionSpecification) => {
+			const map = mapRef.current?.getMap()
+			clearHover()
+			isProjectionSwitchingRef.current = true
+			setMapProjection(projection)
+
+			if (map) {
+				map.once('idle', () => {
+					isProjectionSwitchingRef.current = false
+				})
+			} else {
+				setTimeout(() => {
+					isProjectionSwitchingRef.current = false
+				}, 300)
+			}
+		},
+		[clearHover],
+	)
 
 	// Map ======================================================
 
@@ -402,9 +423,7 @@ function MapRendererInner({
 					aria-label='Плоская карта'
 					title='Плоская карта'
 					className={`${isMercatorProjection ? 'bg-blue-500 text-white' : 'bg-gray-500 text-slate-100'} inline-flex h-12 w-12 cursor-pointer items-center justify-center rounded-lg transition hover:bg-blue-700`}
-					onClick={() => {
-						setMapProjection(MERCATOR_PROJECTION)
-					}}
+					onClick={() => switchProjection(MERCATOR_PROJECTION)}
 				>
 					<svg
 						xmlns='http://www.w3.org/2000/svg'
@@ -430,7 +449,7 @@ function MapRendererInner({
 					className={`${isGlobeProjection ? 'bg-blue-500 text-white' : 'bg-gray-500 text-slate-100'} inline-flex h-12 w-12 items-center justify-center rounded-lg transition ${isContinentChosen ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-blue-700'}`}
 					onClick={() => {
 						if (!isContinentChosen) {
-							setMapProjection(GLOBE_PROJECTION)
+							switchProjection(GLOBE_PROJECTION)
 						}
 					}}
 					disabled={isContinentChosen}

@@ -1,13 +1,16 @@
-import { countryCatalog } from '@maptap/country-catalog'
-import { useMemo } from 'react'
+import type { RoomView } from '@maptap/game-domain/multiplayer'
+import { useCallback, useMemo } from 'react'
 import { CountryInfoCard } from '../../../shared/components/CountryInfoCard'
 import type { MapHighlight, MapRendererProps } from '../../../shared/map/types'
-import type { MultiplayerRoomView } from '../../core/roomView'
 import { getCountryInfo } from '../../core/roomView'
 import { SelectedAnswerMarker } from './SelectedAnswerMarker'
 
+const EMPTY_HIGHLIGHTS: readonly MapHighlight[] = []
+const EMPTY_MARKERS: NonNullable<MapRendererProps['markers']> = []
+const noopPick = () => undefined
+
 interface UseRoomGameMapArgs {
-	room: MultiplayerRoomView
+	room: RoomView
 	submitPending: boolean
 	onSubmitAnswer: (countryId: string) => void
 }
@@ -24,88 +27,101 @@ export function useGameMap({
 	submitPending,
 	onSubmitAnswer,
 }: UseRoomGameMapArgs): UseRoomGameMapResult {
-	const allCountryIds = useMemo<ReadonlySet<string>>(
-		() => new Set(countryCatalog.countryIds),
-		[],
+	const eligibleCountryIdsKey = room.eligibleCountryIds.join('|')
+	const interactiveIds = useMemo<ReadonlySet<string>>(
+		() => new Set(room.eligibleCountryIds),
+		// Room snapshots recreate arrays; the country pool itself is stable for
+		// the room, so key by contents instead of array identity.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[eligibleCountryIdsKey],
 	)
 
 	const round = room.currentRound
-	const promptCountryInfo = getCountryInfo(
-		round?.phase === 'open' ? round.questionCountryId : null,
+	const hasRound = Boolean(round)
+	const isRoundOpen = round?.phase === 'open'
+	const openQuestionCountryId =
+		round?.phase === 'open' ? round.questionCountryId : null
+	const correctCountryId =
+		round && round.phase !== 'open' ? round.correctCountryId : null
+	const submissionCountryId = round?.submission?.countryId ?? null
+
+	const promptCountryInfo = getCountryInfo(openQuestionCountryId)
+	const correctCountryInfo = getCountryInfo(correctCountryId)
+	const selectedCountryInfo = getCountryInfo(submissionCountryId)
+
+	const handlePick = useCallback(
+		(countryId: string) => {
+			void onSubmitAnswer(countryId)
+		},
+		[onSubmitAnswer],
 	)
-	const correctCountryInfo = getCountryInfo(
-		round?.phase === 'open' ? null : round?.correctCountryId,
-	)
-	const selectedCountryInfo = getCountryInfo(round?.submission?.countryId)
 
 	const mapProps = useMemo<MapRendererProps>(() => {
-		if (!round) {
+		if (!hasRound) {
 			return {
-				onPick: () => undefined,
-				interactiveIds: allCountryIds,
+				onPick: noopPick,
+				interactiveIds,
 				scope: room.scope,
-				highlights: [],
-				markers: [],
+				highlights: EMPTY_HIGHLIGHTS,
+				markers: EMPTY_MARKERS,
 				popup: null,
 				disabled: true,
 			}
 		}
 
-		if (round.phase === 'open') {
+		if (isRoundOpen) {
 			return {
-				onPick: countryId => {
-					void onSubmitAnswer(countryId)
-				},
-				interactiveIds: allCountryIds,
+				onPick: handlePick,
+				interactiveIds,
 				scope: room.scope,
-				highlights: round.submission?.countryId
+				highlights: submissionCountryId
 					? [
 							{
-								countryId: round.submission.countryId,
+								countryId: submissionCountryId,
 								tone: 'selected',
 							},
 						]
-					: [],
+					: EMPTY_HIGHLIGHTS,
 				markers:
-					round.submission?.countryId && selectedCountryInfo
+					submissionCountryId && selectedCountryInfo
 						? [
 								{
-									id: `selected-${round.submission.countryId}`,
+									id: `selected-${submissionCountryId}`,
 									longitude: selectedCountryInfo.centroidLng,
 									latitude: selectedCountryInfo.centroidLat,
 									element: <SelectedAnswerMarker />,
 								},
 							]
-						: [],
+						: EMPTY_MARKERS,
 				popup: null,
-				disabled: Boolean(round.submission?.countryId) || submitPending,
+				disabled: Boolean(submissionCountryId) || submitPending,
 			}
 		}
 
 		const highlights: NonNullable<MapHighlight[]> = []
-		if (round.correctCountryId) {
+		if (correctCountryId) {
 			highlights.push({
-				countryId: round.correctCountryId,
+				countryId: correctCountryId,
 				tone: 'correct',
 			})
 		}
 
 		if (
-			round.submission?.countryId &&
-			round.submission.countryId !== round.correctCountryId
+			submissionCountryId &&
+			submissionCountryId !== correctCountryId
 		) {
 			highlights.push({
-				countryId: round.submission.countryId,
+				countryId: submissionCountryId,
 				tone: 'wrong',
 			})
 		}
 
 		return {
-			onPick: () => undefined,
-			interactiveIds: allCountryIds,
+			onPick: noopPick,
+			interactiveIds,
 			scope: room.scope,
 			highlights: highlights,
-			markers: [],
+			markers: EMPTY_MARKERS,
 			popup: correctCountryInfo
 				? {
 						countryId: correctCountryInfo.id,
@@ -117,12 +133,15 @@ export function useGameMap({
 			disabled: true,
 		}
 	}, [
-		allCountryIds,
+		correctCountryId,
+		hasRound,
+		interactiveIds,
+		handlePick,
 		correctCountryInfo,
-		onSubmitAnswer,
+		isRoundOpen,
 		room.scope,
-		round,
 		selectedCountryInfo,
+		submissionCountryId,
 		submitPending,
 	])
 
