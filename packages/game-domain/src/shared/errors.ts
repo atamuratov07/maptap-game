@@ -31,6 +31,9 @@ export type CommandError =
 			code: 'room_already_finished'
 	  }
 	| {
+			code: 'country_not_eligible'
+	  }
+	| {
 			code: 'player_not_found'
 	  }
 	| {

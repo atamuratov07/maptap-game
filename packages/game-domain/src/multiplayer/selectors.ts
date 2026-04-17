@@ -67,7 +67,7 @@ export function getCurrentQuestionIndex(state: RoomState): number {
 		return activeRound.questionIndex
 	}
 
-	return state.phase === 'finished' ? state.questionIds.length : 0
+	return state.phase === 'finished' ? state.gameSession.questionIds.length : 0
 }
 
 export function getCurrentQuestionNumber(state: RoomState): number {
@@ -76,11 +76,11 @@ export function getCurrentQuestionNumber(state: RoomState): number {
 		return activeRound.questionIndex + 1
 	}
 
-	return state.phase === 'finished' ? state.questionIds.length : 0
+	return state.phase === 'finished' ? state.gameSession.questionIds.length : 0
 }
 
 export function getQuestionCount(state: RoomState): number {
-	return state.questionIds.length
+	return state.gameSession.questionIds.length
 }
 
 export function getConnectedPlayerCount(state: RoomState): number {

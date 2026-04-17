@@ -138,12 +138,9 @@ export class RoomsService {
 	createRoom(
 		input: CreateRoomInput,
 	): ServiceResult<BoundServiceResponse<CreateRoomResponse>> {
-		const preparedSession = prepareGameSession(
-			this.countryPool,
-			input.gameConfig,
-		)
-		if (!preparedSession.ok) {
-			return preparedSession
+		const session = prepareGameSession(this.countryPool, input.gameConfig)
+		if (!session.ok) {
+			return session
 		}
 
 		const roomId = createRoomId()
@@ -156,7 +153,7 @@ export class RoomsService {
 			roomCode,
 			hostPlayerId,
 			hostName: input.hostName,
-			session: preparedSession.value,
+			session: session.value,
 			now: this.now(),
 		})
 

@@ -1,14 +1,15 @@
+import type { CountryId } from '../shared/types'
 import type {
 	CompletedGameRoundState,
 	GameConfig,
-	LeaderboardGRoundGameState,
+	LeaderboardRoundGameState,
 	OpenRoundGameState,
 	RevealedRoundGameState,
 } from './types'
 
 export function createRound(
-	questionIds: string[],
-	config: GameConfig,
+	questionIds: readonly CountryId[],
+	config: Readonly<GameConfig>,
 	questionIndex: number,
 	now: number,
 ): OpenRoundGameState {
@@ -30,7 +31,7 @@ export function createRound(
 }
 
 export function archiveRound(
-	round: RevealedRoundGameState | LeaderboardGRoundGameState,
+	round: RevealedRoundGameState | LeaderboardRoundGameState,
 ): CompletedGameRoundState {
 	return {
 		questionIndex: round.questionIndex,

@@ -31,10 +31,21 @@ export function createGameRoom(
 		})
 	}
 
-	if (input.session.questionIds.length === 0) {
+	if (
+		input.session.questionIds.length === 0 ||
+		input.session.eligibleIds.length === 0
+	) {
 		return err({
 			code: 'no_eligible_countries',
 		})
+	}
+
+	for (const id of input.session.questionIds) {
+		if (!input.session.eligibleIds.includes(id)) {
+			return err({
+				code: 'country_not_eligible',
+			})
+		}
 	}
 
 	return ok({
@@ -42,8 +53,7 @@ export function createGameRoom(
 		roomId: input.roomId,
 		roomCode: input.roomCode,
 		hostPlayerId: input.hostPlayerId,
-		config: input.session.config,
-		questionIds: input.session.questionIds,
+		gameSession: input.session,
 		playersById: {
 			[input.hostPlayerId]: {
 				id: input.hostPlayerId,

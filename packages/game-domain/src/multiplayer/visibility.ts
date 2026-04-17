@@ -1,3 +1,4 @@
+import type { CountryId } from '../shared/types'
 import {
 	getActiveRound,
 	getAnsweredPlayerCount,
@@ -115,9 +116,10 @@ interface RoomViewBase {
 	phase: RoomState['phase']
 	hostPlayerId: PlayerId
 	viewerPlayerId: PlayerId
-	scope: RoomState['config']['scope']
+	scope: RoomState['gameSession']['config']['scope']
 	questionCount: number
 	currentQuestionNumber: number
+	eligibleCountryIds: readonly CountryId[]
 	players: VisiblePlayerInfo[]
 	leaderboard: RoomLeaderboardEntry[] | null
 }
@@ -131,6 +133,8 @@ export interface RoomHostView extends RoomViewBase {
 	role: 'host'
 	currentRound: RoundHostView | null
 }
+
+export type RoomView = RoomPlayerView | RoomHostView
 
 function toVisiblePlayers(
 	state: RoomState,
@@ -268,10 +272,11 @@ export function toPlayerRoomView(
 		phase: state.phase,
 		hostPlayerId: state.hostPlayerId,
 		viewerPlayerId,
-		scope: state.config.scope,
+		scope: state.gameSession.config.scope,
 		role: 'player',
 		questionCount: getQuestionCount(state),
 		currentQuestionNumber: getCurrentQuestionNumber(state),
+		eligibleCountryIds: state.gameSession.eligibleIds,
 		players: toVisiblePlayers(state, {
 			hideCompetitiveStats:
 				state.phase !== 'leaderboard' && state.phase !== 'finished',
@@ -362,9 +367,10 @@ export function toHostRoomView(
 		phase: state.phase,
 		hostPlayerId: state.hostPlayerId,
 		viewerPlayerId,
-		scope: state.config.scope,
+		scope: state.gameSession.config.scope,
 		questionCount: getQuestionCount(state),
 		currentQuestionNumber: getCurrentQuestionNumber(state),
+		eligibleCountryIds: state.gameSession.eligibleIds,
 		players: toVisiblePlayers(state),
 		leaderboard: getVisibleLeaderboard(state),
 		currentRound,

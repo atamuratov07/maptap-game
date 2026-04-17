@@ -164,8 +164,8 @@ export function applyRoomCommand(
 				...state,
 				phase: 'question_open',
 				activeRound: createRound(
-					state.questionIds,
-					state.config,
+					state.gameSession.questionIds,
+					state.gameSession.config,
 					0,
 					command.now,
 				),
@@ -200,6 +200,12 @@ export function applyRoomCommand(
 				})
 			}
 
+			if (!state.gameSession.eligibleIds.includes(command.countryId)) {
+				return err({
+					code: 'country_not_eligible',
+				})
+			}
+
 			const submission: LockedGameSubmission = {
 				playerId: command.playerId,
 				countryId: command.countryId,
@@ -231,10 +237,9 @@ export function applyRoomCommand(
 					roomId: state.roomId,
 					roomCode: state.roomCode,
 					hostPlayerId: state.hostPlayerId,
-					config: state.config,
-					questionIds: state.questionIds,
 					playersById: state.playersById,
 					playerOrder: state.playerOrder,
+					gameSession: state.gameSession,
 					createdAt: state.createdAt,
 					completedRounds: state.completedRounds,
 					finishedAt: command.now,
@@ -248,10 +253,9 @@ export function applyRoomCommand(
 				roomId: state.roomId,
 				roomCode: state.roomCode,
 				hostPlayerId: state.hostPlayerId,
-				config: state.config,
-				questionIds: state.questionIds,
 				playersById: state.playersById,
 				playerOrder: state.playerOrder,
+				gameSession: state.gameSession,
 				createdAt: state.createdAt,
 				completedRounds: [...state.completedRounds, archivedRound],
 				finishedAt: command.now,

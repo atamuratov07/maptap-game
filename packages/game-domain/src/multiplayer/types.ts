@@ -27,9 +27,9 @@ export const DEFAULT_GAME_CONFIG: GameConfig = {
 }
 
 export interface GameSession {
-	config: GameConfig
-	eligibleIds: CountryId[]
-	questionIds: CountryId[]
+	readonly config: Readonly<GameConfig>
+	readonly eligibleIds: readonly CountryId[]
+	readonly questionIds: readonly CountryId[]
 }
 
 export interface GamePlayerState {
@@ -78,7 +78,7 @@ export interface RevealedRoundGameState extends GameStateBase {
 	submissions: Record<PlayerId, EvaluatedGameSubmission>
 }
 
-export interface LeaderboardGRoundGameState extends GameStateBase {
+export interface LeaderboardRoundGameState extends GameStateBase {
 	phase: 'leaderboard'
 	revealedAt: number
 	leaderboardShownAt: number
@@ -88,7 +88,7 @@ export interface LeaderboardGRoundGameState extends GameStateBase {
 export type ActiveRoundGameState =
 	| OpenRoundGameState
 	| RevealedRoundGameState
-	| LeaderboardGRoundGameState
+	| LeaderboardRoundGameState
 
 export interface CompletedGameRoundState extends GameStateBase {
 	revealedAt: number
@@ -100,8 +100,7 @@ interface RoomStateBase {
 	roomId: RoomId
 	roomCode: RoomCode
 	hostPlayerId: PlayerId
-	config: GameConfig
-	questionIds: CountryId[]
+	readonly gameSession: GameSession
 	playersById: Record<PlayerId, GamePlayerState>
 	playerOrder: PlayerId[]
 	createdAt: number
@@ -124,7 +123,7 @@ export interface RoomQuestionRevealedState extends RoomStateBase {
 
 export interface RoomLeaderboardState extends RoomStateBase {
 	phase: 'leaderboard'
-	activeRound: LeaderboardGRoundGameState
+	activeRound: LeaderboardRoundGameState
 }
 
 export interface RoomFinishedState extends RoomStateBase {

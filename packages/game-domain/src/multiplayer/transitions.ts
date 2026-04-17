@@ -162,13 +162,12 @@ export function applyRoomTransition(
 			const completedRounds = [...state.completedRounds, archivedRound]
 			const nextQuestionIndex = archivedRound.questionIndex + 1
 
-			if (nextQuestionIndex >= state.questionIds.length) {
+			if (nextQuestionIndex >= state.gameSession.questionIds.length) {
 				return ok({
 					roomId: state.roomId,
 					roomCode: state.roomCode,
 					hostPlayerId: state.hostPlayerId,
-					config: state.config,
-					questionIds: state.questionIds,
+					gameSession: state.gameSession,
 					playersById: state.playersById,
 					playerOrder: state.playerOrder,
 					createdAt: state.createdAt,
@@ -182,16 +181,15 @@ export function applyRoomTransition(
 				roomId: state.roomId,
 				roomCode: state.roomCode,
 				hostPlayerId: state.hostPlayerId,
-				config: state.config,
-				questionIds: state.questionIds,
+				gameSession: state.gameSession,
 				playersById: state.playersById,
 				playerOrder: state.playerOrder,
 				createdAt: state.createdAt,
 				completedRounds,
 				phase: 'question_open',
 				activeRound: createRound(
-					state.questionIds,
-					state.config,
+					state.gameSession.questionIds,
+					state.gameSession.config,
 					nextQuestionIndex,
 					command.now,
 				),

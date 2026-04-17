@@ -1,10 +1,7 @@
-import type { GameQuestionSetConfig } from '../shared/types'
+import type { CountryId, GameQuestionSetConfig } from '../shared/types'
 import type { CountryPool, CountryPoolEntry } from './types'
 
-const DIFFICULTY_RANK: Record<
-	GameQuestionSetConfig['difficulty'],
-	number
-> = {
+const DIFFICULTY_RANK: Record<GameQuestionSetConfig['difficulty'], number> = {
 	easy: 0,
 	medium: 1,
 	hard: 2,
@@ -15,8 +12,7 @@ function includesDifficulty(
 	selectedDifficulty: GameQuestionSetConfig['difficulty'],
 ): boolean {
 	return (
-		DIFFICULTY_RANK[countryDifficulty] <=
-		DIFFICULTY_RANK[selectedDifficulty]
+		DIFFICULTY_RANK[countryDifficulty] <= DIFFICULTY_RANK[selectedDifficulty]
 	)
 }
 
@@ -38,12 +34,11 @@ export function hasCountry(pool: CountryPool, countryId: string): boolean {
 export function selectEligibleCountryIds(
 	pool: CountryPool,
 	config: Pick<GameQuestionSetConfig, 'difficulty' | 'scope'>,
-): string[] {
+): CountryId[] {
 	return Object.entries(pool.countriesById)
 		.filter(([_, country]) => {
 			return (
-				(config.scope === 'all' ||
-					country.continent === config.scope) &&
+				(config.scope === 'all' || country.continent === config.scope) &&
 				includesDifficulty(country.difficulty, config.difficulty)
 			)
 		})
