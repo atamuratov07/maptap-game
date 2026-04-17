@@ -3,8 +3,8 @@ import { GameCard } from '../shared/components/GameCard'
 
 export function HomePage(): JSX.Element {
 	return (
-		<main className='min-h-screen px-5 py-8 sm:px-8 lg:px-10'>
-			<div className='mx-auto flex min-h-[calc(100vh-4rem)] max-w-6xl flex-col rounded-4xl border border-white/60 bg-white/82 p-6 shadow-[0_28px_80px_rgba(15,23,42,0.12)] backdrop-blur sm:p-8 lg:p-10'>
+		<main className='fixed inset-0 overflow-y-auto px-5 py-8 sm:px-8 lg:px-10'>
+			<div className='mx-auto flex min-h-[calc(100dvh-4rem)] max-w-6xl flex-col rounded-4xl border border-white/60 bg-white/82 p-6 shadow-[0_28px_80px_rgba(15,23,42,0.12)] backdrop-blur sm:p-8 lg:p-10'>
 				<header className='mb-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between'>
 					<div className='max-w-3xl'>
 						<p className='mb-4 text-xs font-black uppercase tracking-[0.3em] text-teal-700'>

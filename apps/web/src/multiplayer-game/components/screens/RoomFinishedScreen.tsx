@@ -1,12 +1,9 @@
+import type { RoomView } from '@maptap/game-domain/multiplayer'
 import { Link } from 'react-router-dom'
-import {
-	getLeaderboard,
-	getViewerLeaderboardEntry,
-	type MultiplayerRoomView,
-} from '../../core/roomView'
+import { getLeaderboard, getViewerLeaderboardEntry } from '../../core/roomView'
 
 interface RoomFinishedScreenProps {
-	room: MultiplayerRoomView
+	room: RoomView
 	isReconnecting: boolean
 }
 
@@ -18,7 +15,7 @@ export function RoomFinishedScreen({
 	const topEntries = getLeaderboard(room)
 
 	return (
-		<main className='grid min-h-screen place-items-center px-5 py-8'>
+		<main className='fixed inset-0 grid place-items-center overflow-y-auto px-5 py-8'>
 			<section className='w-full max-w-2xl rounded-[32px] border border-white/60 bg-white/92 p-6 shadow-[0_28px_80px_rgba(15,23,42,0.12)] backdrop-blur sm:p-8'>
 				<p className='text-center text-[11px] font-black uppercase tracking-[0.24em] text-slate-500'>
 					Завершено

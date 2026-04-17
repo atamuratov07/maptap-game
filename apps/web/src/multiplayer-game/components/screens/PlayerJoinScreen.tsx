@@ -21,8 +21,8 @@ export function PlayerJoinScreen({
 	const [playerName, setPlayerName] = useState('')
 
 	return (
-		<main className='grid min-h-screen place-items-center px-5 py-8'>
-			<section className='w-full max-w-3xl rounded-[32px] border border-white/60 bg-white/92 p-6 shadow-[0_28px_80px_rgba(15,23,42,0.12)] backdrop-blur sm:p-8'>
+		<main className='fixed inset-0 grid place-items-center overflow-y-auto px-5 py-8'>
+			<section className='w-full max-w-3xl rounded-4xl border border-white/60 bg-white/92 p-6 shadow-[0_28px_80px_rgba(15,23,42,0.12)] backdrop-blur sm:p-8'>
 				<div className='flex flex-wrap items-center justify-between gap-3'>
 					<div>
 						<p className='text-[11px] font-black uppercase tracking-[0.24em] text-amber-600'>
@@ -66,7 +66,7 @@ export function PlayerJoinScreen({
 							onChange={event => {
 								setPlayerName(event.target.value)
 							}}
-							maxLength={32}
+							maxLength={20}
 							className='w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-200'
 							placeholder='Введите имя'
 						/>
@@ -76,7 +76,9 @@ export function PlayerJoinScreen({
 						type='button'
 						className='mt-5 inline-flex items-center justify-center rounded-2xl bg-amber-500 px-5 py-3 text-sm font-black text-white transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60'
 						onClick={() => void onJoin(playerName)}
-						disabled={!joinable || playerName.trim().length === 0 || pending}
+						disabled={
+							!joinable || playerName.trim().length === 0 || pending
+						}
 					>
 						{pending ? 'Входим...' : 'Войти'}
 					</button>

@@ -35,7 +35,7 @@ export function SetupPage(): JSX.Element {
 			?.label ?? config.difficulty
 
 	return (
-		<main className='min-h-screen px-5 py-8 sm:px-8'>
+		<main className='fixed inset-0 overflow-y-auto px-5 py-8 sm:px-8'>
 			<div className='mx-auto max-w-3xl'>
 				<div className='mb-6 flex flex-wrap items-center justify-between gap-3'>
 					<Link
