@@ -10,6 +10,7 @@ export {
 	getQuestionResolvedAt,
 	getQuestionStartedAt,
 	getRevealedId,
+	getIsCorrect,
 	getScore,
 	getTargetId,
 	getWrongPicks,

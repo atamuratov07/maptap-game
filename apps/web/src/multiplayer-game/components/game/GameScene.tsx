@@ -1,23 +1,22 @@
-import type { EvaluatedViewerSubmissionState } from '@maptap/game-domain/multiplayer'
+import type { RoomView } from '@maptap/game-domain/multiplayer'
+import { useEffect, useRef } from 'react'
 import { MapRenderer } from '../../../shared/map/MapRenderer'
 import {
 	getLeaderboard,
 	getViewerLeaderboardEntry,
 	getViewerPlayer,
-	type MultiplayerRoomView,
 } from '../../core/roomView'
 import { useCountdown } from '../../core/useCountdown'
 import { useTimestampGate } from '../../core/useTimestampGate'
-import { GameHeader } from './GameHeader'
+import { GameQuestionBar } from './GameQuestionBar'
 import { RoomLeaderboardOverlay } from './LeaderboardOverlay'
-import { RoomScoreBanner } from './ScoreBanner'
+import { ScoreBanner } from './ScoreBanner'
 import { useGameMap } from './useGameMap'
 
 const LEADERBOARD_LIST_DELAY_MS = 1200
-const SCORE_BANNER_DELAY_MS = 1200
 
 interface RoomGameSceneProps {
-	room: MultiplayerRoomView
+	room: RoomView
 	submitPending: boolean
 	actionErrorMessage: string | null
 	isReconnecting: boolean
@@ -46,7 +45,7 @@ function FloatingNotice({
 	)
 }
 
-export function GameScene({
+export function GameScreen({
 	room,
 	submitPending,
 	actionErrorMessage,
@@ -64,14 +63,8 @@ export function GameScene({
 	const secondsLeft = useCountdown(
 		round?.phase === 'open' ? round.deadlineAt : null,
 	)
-	const revealStartedAt =
-		round && round.phase !== 'open' ? round.revealedAt : null
 	const leaderboardStartedAt =
 		round?.phase === 'leaderboard' ? round.leaderboardShownAt : null
-	const showScoreBanner = useTimestampGate(
-		revealStartedAt,
-		SCORE_BANNER_DELAY_MS,
-	)
 	const showLeaderboardList = useTimestampGate(
 		leaderboardStartedAt,
 		LEADERBOARD_LIST_DELAY_MS,
@@ -79,7 +72,7 @@ export function GameScene({
 
 	if (!round) {
 		return (
-			<main className='grid min-h-screen place-items-center bg-slate-950 px-5 py-8 text-white'>
+			<main className='grid h-full place-items-center bg-slate-950 px-5 py-8 text-white'>
 				<p className='text-sm font-semibold text-slate-300'>
 					Загружаем раунд...
 				</p>
@@ -91,28 +84,50 @@ export function GameScene({
 		round.phase === 'open' ? promptCountryInfo : correctCountryInfo
 	const viewerScore = viewerLeaderboardEntry?.score ?? viewer?.score ?? null
 	const viewerRank = viewerLeaderboardEntry?.rank ?? viewer?.rank ?? null
-	const evaluatedSubmission =
-		round.phase === 'open'
+	const evaluatedSubmission = round.phase === 'open' ? null : round.submission
+	const knownViewerScoreRef = useRef<number | null>(viewerScore ?? null)
+	const awardedScore = evaluatedSubmission?.scoreAwarded ?? 0
+	const isCorrect =
+		evaluatedSubmission?.countryId === null || evaluatedSubmission === null
 			? null
-			: (round.submission as EvaluatedViewerSubmissionState | null)
+			: evaluatedSubmission.isCorrect
+	const totalScore =
+		viewerScore ??
+		(knownViewerScoreRef.current !== null
+			? knownViewerScoreRef.current + awardedScore
+			: room.currentQuestionNumber === 1
+				? awardedScore
+				: null)
+
+	useEffect(() => {
+		if (viewerScore !== null && viewerScore !== undefined) {
+			knownViewerScoreRef.current = viewerScore
+		}
+	}, [viewerScore])
+
+	useEffect(() => {
+		if (round.phase === 'revealed' && totalScore !== null) {
+			knownViewerScoreRef.current = totalScore
+		}
+	}, [totalScore, round.phase])
 
 	return (
 		<section className='flex h-full flex-col overflow-hidden bg-slate-950 text-white'>
-			<GameHeader
+			<main className='relative min-h-0 flex-1'>
+				<MapRenderer {...mapProps} />
+			</main>
+
+			<GameQuestionBar
 				progressLabel={`${room.currentQuestionNumber} / ${room.questionCount}`}
-				targetLabel={
+				questionLabel={
 					round.phase === 'open' ? 'Найдите страну' : 'Правильный ответ'
 				}
 				targetName={targetInfo?.nameRu || targetInfo?.name || 'Страна'}
 				targetFlagUrl={targetInfo?.flagUrl}
 				viewerName={viewer?.name ?? 'Игрок'}
-				viewerScore={viewerScore}
 				viewerRank={viewerRank}
 				secondsLeft={round.phase === 'open' ? secondsLeft : null}
 			/>
-			<main className='relative min-h-0 flex-1'>
-				<MapRenderer {...mapProps} />
-			</main>
 
 			{isReconnecting ? (
 				<FloatingNotice message='Переподключаемся к комнате...' />
@@ -128,16 +143,12 @@ export function GameScene({
 				/>
 			) : null}
 
-			{showScoreBanner ? (
-				<div className='absolute inset-0 z-10 animate-[room-backdrop-fade_240ms_ease-out_both] bg-slate-950/56 backdrop-blur-[2px]' />
-			) : null}
-
-			{showScoreBanner ? (
-				<RoomScoreBanner
-					submission={evaluatedSubmission}
-					viewerScore={viewerScore}
-				/>
-			) : null}
+			<ScoreBanner
+				show={round.phase === 'revealed'}
+				isCorrect={isCorrect}
+				totalScore={totalScore}
+				awardedScore={awardedScore}
+			/>
 
 			{round.phase === 'leaderboard' && showLeaderboardList ? (
 				<RoomLeaderboardOverlay

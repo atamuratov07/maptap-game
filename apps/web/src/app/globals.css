@@ -84,6 +84,18 @@
 	}
 }
 
+@keyframes room-score-banner-out {
+	from {
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	to {
+		opacity: 0;
+		transform: translateY(-18px);
+	}
+}
+
 @keyframes room-overlay-panel {
 	from {
 		opacity: 0;

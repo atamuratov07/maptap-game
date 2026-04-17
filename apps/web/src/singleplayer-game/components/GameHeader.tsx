@@ -8,7 +8,7 @@ interface GameHeaderBarProps {
 	targetFlagUrl?: string
 	isPlaying: boolean
 	questionStartedAt: number
-	questionResolvedAt?: number
+	questionResolvedAt: number | null
 	onGiveUp: () => void
 }
 

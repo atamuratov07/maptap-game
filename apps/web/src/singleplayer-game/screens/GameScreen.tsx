@@ -1,22 +1,25 @@
 import type { CountryInfo } from '@maptap/country-catalog'
 import {
 	getAttemptsLeft,
+	getIsCorrect,
 	getQuestionCount,
 	getQuestionIndex,
 	getQuestionResolvedAt,
 	getQuestionStartedAt,
 	getRevealedId,
+	getScore,
 	getTargetId,
 	getWrongPicks,
 	isPickAllowed,
 	type GameState,
 } from '@maptap/game-domain/singleplayer'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { CountryInfoCard } from '../../shared/components/CountryInfoCard'
 import { MapRenderer } from '../../shared/map/MapRenderer'
 import type { MapHighlightTone, MapRendererProps } from '../../shared/map/types'
 import { GameHeader } from '../components/GameHeader'
 import { Hearts } from '../components/Hearts'
+import { ScoreBanner } from '../components/ScoreBanner'
 
 interface GameScreenProps {
 	state: GameState
@@ -44,6 +47,9 @@ export function GameScreen({
 	const questionStartedAt = getQuestionStartedAt(state)
 	const questionResolvedAt = getQuestionResolvedAt(state)
 	const attemptsLeft = getAttemptsLeft(state)
+	const totalScore = getScore(state)
+	const isCorrect = getIsCorrect(state)
+	const previousScoreRef = useRef(totalScore)
 
 	const popup = useMemo<MapRendererProps['popup']>(() => {
 		if (!revealedId) {
@@ -85,6 +91,7 @@ export function GameScreen({
 	}, [revealedId, wrongPicks])
 
 	const canPick = isPickAllowed(state)
+	const scoreAwarded = totalScore - previousScoreRef.current
 
 	const rendererProps: MapRendererProps = {
 		onPick: canPick ? onPick : () => undefined,
@@ -96,6 +103,13 @@ export function GameScreen({
 	}
 
 	const showHearts = state.phase === 'playing' || state.phase === 'revealed'
+
+	useEffect(() => {
+		if (state.phase === 'revealed') {
+			return
+		}
+		previousScoreRef.current = totalScore
+	}, [state.phase, totalScore])
 
 	return (
 		<section className='flex h-full flex-col overflow-hidden'>
@@ -114,6 +128,13 @@ export function GameScreen({
 
 			<main className='relative min-h-0 flex-1'>
 				<MapRenderer {...rendererProps} />
+
+				<ScoreBanner
+					triggerKey={questionResolvedAt}
+					isCorrect={isCorrect}
+					totalScore={totalScore}
+					awardedScore={scoreAwarded}
+				/>
 
 				{showHearts ? (
 					<div className='absolute right-5 top-3 z-20'>

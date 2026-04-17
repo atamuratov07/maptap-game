@@ -44,6 +44,7 @@ export interface PlayingGameState extends ActiveQuestionGameStateBase {
 export interface RevealedGameState extends ActiveQuestionGameStateBase {
 	phase: 'revealed'
 	wrongPicks: CountryId[]
+	isCorrect: boolean
 	questionResolvedAt: number
 }
 

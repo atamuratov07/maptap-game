@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 interface QuestionTimerProps {
 	isPlaying: boolean
 	questionStartedAt: number
-	questionResolvedAt?: number
+	questionResolvedAt: number | null
 }
 
 export function QuestionTimer({

@@ -13,6 +13,7 @@
 		"@maptap/game-domain": "*",
 		"@maptap/game-protocol": "*",
 		"maplibre-gl": "^5.19.0",
+		"motion": "^12.38.0",
 		"react": "^18.3.1",
 		"react-dom": "^18.3.1",
 		"react-map-gl": "^8.1.0",

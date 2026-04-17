@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom'
-import { GameScene } from '../components/game/GameScene'
+import { GameScreen } from '../components/game/GameScene'
 import { PlayerJoinScreen } from '../components/screens/PlayerJoinScreen'
 import { RoomClosedScreen } from '../components/screens/RoomClosedScreen'
 import { RoomErrorScreen } from '../components/screens/RoomErrorScreen'
@@ -75,6 +75,7 @@ export function RoomPlayerPage(): JSX.Element {
 		return (
 			<RoomLobbyScreen
 				role='player'
+				players={room.players}
 				actionErrorMessage={actionErrorMessage}
 				isReconnecting={isReconnecting}
 			/>
@@ -86,12 +87,14 @@ export function RoomPlayerPage(): JSX.Element {
 	}
 
 	return (
-		<GameScene
-			room={room}
-			submitPending={actionPending === 'submit'}
-			actionErrorMessage={actionErrorMessage}
-			isReconnecting={isReconnecting}
-			onSubmitAnswer={submitAnswer}
-		/>
+		<div className='fixed inset-0 overflow-hidden bg-slate-950'>
+			<GameScreen
+				room={room}
+				submitPending={actionPending === 'submit'}
+				actionErrorMessage={actionErrorMessage}
+				isReconnecting={isReconnecting}
+				onSubmitAnswer={submitAnswer}
+			/>
+		</div>
 	)
 }

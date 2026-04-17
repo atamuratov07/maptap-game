@@ -15,16 +15,16 @@ function isQuestionGameState(
 	return state.phase === 'playing' || state.phase === 'revealed'
 }
 
-export function getTargetId(state: GameState): string | undefined {
+export function getTargetId(state: GameState): string | null {
 	if (!isQuestionGameState(state)) {
-		return undefined
+		return null
 	}
 
 	return state.questionIds[state.index]
 }
 
-export function getRevealedId(state: GameState): string | undefined {
-	return state.phase === 'revealed' ? getTargetId(state) : undefined
+export function getRevealedId(state: GameState): string | null {
+	return state.phase === 'revealed' ? getTargetId(state) : null
 }
 
 export function getQuestionCount(state: GameState): number {
@@ -65,16 +65,18 @@ export function getQuestionStartedAt(state: GameState): number {
 	return isQuestionGameState(state) ? state.questionStartedAt : 0
 }
 
-export function getQuestionResolvedAt(
-	state: GameState,
-): number | undefined {
+export function getQuestionResolvedAt(state: GameState): number | null {
 	return state.phase === 'revealed' || state.phase === 'finished'
 		? state.questionResolvedAt
-		: undefined
+		: null
 }
 
-export function getFinishedAt(state: GameState): number | undefined {
-	return state.phase === 'finished' ? state.finishedAt : undefined
+export function getFinishedAt(state: GameState): number | null {
+	return state.phase === 'finished' ? state.finishedAt : null
+}
+
+export function getIsCorrect(state: GameState): boolean | null {
+	return state.phase === 'revealed' ? state.isCorrect : null
 }
 
 export function getScore(state: GameState): number {

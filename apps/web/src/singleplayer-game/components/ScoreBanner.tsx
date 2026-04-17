@@ -2,7 +2,7 @@ import { animate } from 'motion'
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 
-const DEFAULT_DELAY_MS = 1000
+const SCORE_VISIBLE_DURATION_MS = 1500
 const ENTER_DURATION_S = 0.3
 const ENTER_DURATION_MS = ENTER_DURATION_S * 1000
 const SCORE_EASE = [0.22, 1, 0.36, 1] as const
@@ -12,29 +12,21 @@ const SCORE_COUNT_DURATION_S = 0.72
 
 interface ScoreBannerSnapshot {
 	key: number
-	isCorrect: boolean | null
-	totalScore: number | null
+	totalScore: number
 	awardedScore: number
 }
 
 interface ScoreBannerProps {
-	show: boolean
+	triggerKey: number | null
 	isCorrect: boolean | null
-	totalScore: number | null
+	totalScore: number
 	awardedScore: number
-	delayMs?: number
+	durationMs?: number
 	className?: string
 }
 
 function formatAwardedScore(scoreDelta: number): string {
 	return scoreDelta >= 0 ? `+${scoreDelta}` : String(scoreDelta)
-}
-
-function getInitialScore(
-	totalScore: number | null,
-	awardedScore: number,
-): number | null {
-	return totalScore === null ? null : totalScore - awardedScore
 }
 
 function CorrectMark(): JSX.Element {
@@ -66,55 +58,48 @@ function IncorrectMark(): JSX.Element {
 	)
 }
 
-function ResultMark({ isCorrect }: { isCorrect: boolean }): JSX.Element {
-	return isCorrect ? <CorrectMark /> : <IncorrectMark />
-}
-
 export function ScoreBanner({
-	show,
-	isCorrect,
+	triggerKey,
 	totalScore,
+	isCorrect,
 	awardedScore,
-	delayMs = DEFAULT_DELAY_MS,
+	durationMs = SCORE_VISIBLE_DURATION_MS,
 	className,
 }: ScoreBannerProps): JSX.Element | null {
-	const snapshotKeyRef = useRef(0)
-	const wasShownRef = useRef(false)
 	const [snapshot, setSnapshot] = useState<ScoreBannerSnapshot | null>(null)
-	const [score, setScore] = useState<number | null>(null)
+	const [isVisible, setIsVisible] = useState(false)
+	const lastTriggerKeyRef = useRef<number | null>(null)
+	const [score, setScore] = useState(totalScore - awardedScore)
 	const [showAward, setShowAward] = useState(false)
 
 	useEffect(() => {
-		if (!show) {
-			wasShownRef.current = false
+		if (triggerKey === null || triggerKey === lastTriggerKeyRef.current) {
 			return
 		}
-
-		if (wasShownRef.current) {
-			return
-		}
-
-		wasShownRef.current = true
-		snapshotKeyRef.current += 1
+		lastTriggerKeyRef.current = triggerKey
 		setSnapshot({
-			key: snapshotKeyRef.current,
-			isCorrect,
+			key: triggerKey,
 			totalScore,
 			awardedScore,
 		})
-	}, [awardedScore, isCorrect, show, totalScore])
+		setIsVisible(true)
+
+		const hideTimeoutId = setTimeout(() => {
+			setIsVisible(false)
+		}, durationMs)
+		return () => {
+			clearTimeout(hideTimeoutId)
+		}
+	}, [triggerKey, totalScore, awardedScore, durationMs])
 
 	useEffect(() => {
-		if (!show || !snapshot) {
+		if (!isVisible || !snapshot || !snapshot.awardedScore) {
 			setShowAward(false)
 			return
 		}
 
-		const initialScore = getInitialScore(
-			snapshot.totalScore,
-			snapshot.awardedScore,
-		)
-		const awardRevealAt = delayMs + ENTER_DURATION_MS + AWARD_REVEAL_DELAY_MS
+		const initialScore = snapshot.totalScore - snapshot.awardedScore
+		const awardRevealAt = ENTER_DURATION_MS + AWARD_REVEAL_DELAY_MS
 		let awardRevealTimeoutId = 0
 		let awardHideTimeoutId = 0
 		let stopCounting: (() => void) | undefined
@@ -122,15 +107,11 @@ export function ScoreBanner({
 		setScore(initialScore)
 		setShowAward(false)
 
-		awardRevealTimeoutId = window.setTimeout(() => {
+		awardRevealTimeoutId = setTimeout(() => {
 			setShowAward(true)
 
-			awardHideTimeoutId = window.setTimeout(() => {
+			awardHideTimeoutId = setTimeout(() => {
 				setShowAward(false)
-
-				if (initialScore === null || snapshot.totalScore === null) {
-					return
-				}
 
 				stopCounting = animate(initialScore, snapshot.totalScore, {
 					duration: SCORE_COUNT_DURATION_S,
@@ -143,11 +124,11 @@ export function ScoreBanner({
 		}, awardRevealAt)
 
 		return () => {
-			window.clearTimeout(awardRevealTimeoutId)
-			window.clearTimeout(awardHideTimeoutId)
+			clearTimeout(awardRevealTimeoutId)
+			clearTimeout(awardHideTimeoutId)
 			stopCounting?.()
 		}
-	}, [delayMs, show, snapshot])
+	}, [isVisible, snapshot])
 
 	if (!snapshot) {
 		return null
@@ -155,46 +136,45 @@ export function ScoreBanner({
 
 	return (
 		<div
-			className={`pointer-events-none absolute top-10 left-1/2 z-20 -translate-x-1/2 select-none ${className ?? ''}`}
+			className={`pointer-events-none absolute top-3 left-1/2 z-20 -translate-x-1/2 select-none ${className ?? ''}`}
 		>
 			<AnimatePresence
 				mode='wait'
 				onExitComplete={() => {
-					if (!show) {
+					if (!isVisible) {
 						setSnapshot(null)
 					}
 				}}
 			>
-				{show ? (
-					<div key={snapshot.key} className='relative text-center text-white'>
+				{isVisible ? (
+					<div
+						key={snapshot.key}
+						className='relative text-center text-white'
+					>
 						<motion.div
 							aria-hidden='true'
-							className='absolute top-[45%] left-1/2 -z-10 h-34 w-20 -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-slate-950/70 blur-xl'
+							className='absolute top-[45%] left-1/2 -z-10 h-34 w-20 -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-slate-950/85 blur-2xl'
 							initial={{ opacity: 0, scale: 0.1 }}
 							animate={{ opacity: 1, scale: 1 }}
 							exit={{ opacity: 0, scale: 0.1 }}
 							transition={{
-								delay: delayMs / 1000,
 								duration: ENTER_DURATION_S,
 								ease: SCORE_EASE,
 							}}
 						/>
 
-						{snapshot.isCorrect !== null ? (
-							<motion.div
-								className='flex justify-center'
-								initial={{ opacity: 0, y: -10 }}
-								animate={{ opacity: 1, y: 0 }}
-								exit={{ opacity: 0, y: -10 }}
-								transition={{
-									delay: delayMs / 1000,
-									duration: ENTER_DURATION_S,
-									ease: SCORE_EASE,
-								}}
-							>
-								<ResultMark isCorrect={snapshot.isCorrect} />
-							</motion.div>
-						) : null}
+						<motion.div
+							className='flex justify-center'
+							initial={{ opacity: 0, y: -10 }}
+							animate={{ opacity: 1, y: 0 }}
+							exit={{ opacity: 0, y: -10 }}
+							transition={{
+								duration: ENTER_DURATION_S,
+								ease: SCORE_EASE,
+							}}
+						>
+							{isCorrect ? <CorrectMark /> : <IncorrectMark />}
+						</motion.div>
 
 						<motion.div
 							className='relative mx-auto mt-6 w-fit tabular-nums text-white'
@@ -202,7 +182,6 @@ export function ScoreBanner({
 							animate={{ opacity: 1, y: 0 }}
 							exit={{ opacity: 0, y: -10 }}
 							transition={{
-								delay: delayMs / 1000,
 								duration: ENTER_DURATION_S,
 								ease: SCORE_EASE,
 							}}
@@ -211,7 +190,7 @@ export function ScoreBanner({
 								Ваш счет
 							</p>
 							<p className='text-[clamp(1.5rem,8vw,2.5rem)] font-black tracking-[-0.04em]'>
-								{score ?? '-'}
+								{score}
 							</p>
 
 							{showAward ? (
