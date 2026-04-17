@@ -4,12 +4,8 @@ const envSchema = z.object({
 	PORT: z.coerce.number().int().positive().default(3001),
 	HOST: z.string().min(1).default('0.0.0.0'),
 	CORS_ORIGIN: z.string().default('http://localhost:5173'),
-	REVEAL_DURATION_MS: z.coerce.number().int().min(1_000).default(5_000),
-	LEADERBOARD_DURATION_MS: z.coerce
-		.number()
-		.int()
-		.min(1_000)
-		.default(4_000),
+	REVEAL_DURATION_MS: z.coerce.number().int().min(1_000).default(3_000),
+	LEADERBOARD_DURATION_MS: z.coerce.number().int().min(1_000).default(3_000),
 })
 
 export interface AppEnv {
