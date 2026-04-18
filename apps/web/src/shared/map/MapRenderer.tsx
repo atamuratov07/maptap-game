@@ -82,6 +82,7 @@ function MapRendererInner({
 	popup = null,
 	disabled = false,
 	className,
+	resetViewKey = null,
 }: MapRendererProps): JSX.Element {
 	const mapRef = useRef<MapRef | null>(null)
 
@@ -232,7 +233,7 @@ function MapRendererInner({
 		})
 
 		return () => {
-			window.clearTimeout(popupRevealTimer)
+			clearTimeout(popupRevealTimer)
 			map.off('moveend', handleMoveEnd)
 		}
 	}, [isLoaded, popup])
@@ -364,6 +365,72 @@ function MapRendererInner({
 		console.error('Maplibre error:', event.error)
 		setTimeout(() => setHasFailure(true), 0)
 	}, [])
+
+	const resetView = useCallback(
+		(duration = 650) => {
+			const map = mapRef.current
+			if (!map || !isLoaded) {
+				return
+			}
+
+			clearHover()
+			setIsPopupVisible(false)
+
+			if (activePreset) {
+				const camera = map.cameraForBounds(activePreset.focusBounds, {
+					padding: activePreset.padding,
+				})
+
+				if (!camera) {
+					return
+				}
+
+				setContinentMinZoom(camera.zoom)
+				map.easeTo({
+					essential: true,
+					center: camera.center,
+					zoom: camera.zoom,
+					bearing: 0,
+					pitch: 0,
+					offset: [0, 0],
+					duration,
+				})
+				return
+			}
+
+			setContinentMinZoom(undefined)
+			map.easeTo({
+				essential: true,
+				center: DEFAULT_MAP_CENTER,
+				zoom: DEFAULT_MAP_ZOOM,
+				bearing: 0,
+				pitch: 0,
+				offset: [0, 0],
+				duration,
+			})
+		},
+		[activePreset, clearHover, isLoaded],
+	)
+
+	const previousResetViewKeyRef = useRef(resetViewKey)
+
+	useEffect(() => {
+		if (
+			!isLoaded ||
+			resetViewKey === null ||
+			resetViewKey === undefined ||
+			resetViewKey === previousResetViewKeyRef.current
+		) {
+			return
+		}
+
+		previousResetViewKeyRef.current = resetViewKey
+		const resetTimer = setTimeout(resetView, 0)
+
+		return () => {
+			clearTimeout(resetTimer)
+		}
+	}, [isLoaded, resetViewKey, resetView])
 
 	return (
 		<div

@@ -100,6 +100,10 @@ export function GameScreen({
 		highlights: highlights,
 		popup,
 		disabled: !canPick,
+		resetViewKey:
+			state.phase === 'playing'
+				? `${questionIndex}:${questionStartedAt}`
+				: null,
 	}
 
 	const showHearts = state.phase === 'playing' || state.phase === 'revealed'

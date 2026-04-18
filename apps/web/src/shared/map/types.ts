@@ -20,6 +20,7 @@ export interface MapRendererProps {
 	onPick: (countryId: string) => void
 	interactiveIds: ReadonlySet<string>
 	scope: GameScope
+	resetViewKey?: string | number | null
 	highlights?: readonly MapHighlight[]
 	markers?: readonly MapMarker[]
 	popup?: null | {

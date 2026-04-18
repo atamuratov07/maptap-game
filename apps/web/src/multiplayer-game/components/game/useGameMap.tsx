@@ -30,6 +30,9 @@ export function useGameMap({
 	const eligibleCountryIdsKey = room.eligibleCountryIds.join('|')
 	const interactiveIds = useMemo<ReadonlySet<string>>(
 		() => new Set(room.eligibleCountryIds),
+		// Room snapshots recreate arrays; the country pool itself is stable for
+		// the room, so key by contents instead of array identity.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[eligibleCountryIdsKey],
 	)
 
@@ -53,6 +56,11 @@ export function useGameMap({
 		[onSubmitAnswer],
 	)
 
+	const resetViewKey =
+		round?.phase === 'open'
+			? `${round.questionNumber}:${round.startedAt}`
+			: null
+
 	const mapProps = useMemo<MapRendererProps>(() => {
 		if (!hasRound) {
 			return {
@@ -63,6 +71,7 @@ export function useGameMap({
 				markers: EMPTY_MARKERS,
 				popup: null,
 				disabled: true,
+				resetViewKey,
 			}
 		}
 
@@ -92,6 +101,7 @@ export function useGameMap({
 						: EMPTY_MARKERS,
 				popup: null,
 				disabled: Boolean(submissionCountryId) || submitPending,
+				resetViewKey,
 			}
 		}
 
@@ -125,6 +135,7 @@ export function useGameMap({
 					}
 				: null,
 			disabled: true,
+			resetViewKey,
 		}
 	}, [
 		correctCountryId,
@@ -134,6 +145,7 @@ export function useGameMap({
 		correctCountryInfo,
 		isRoundOpen,
 		room.scope,
+		resetViewKey,
 		selectedCountryInfo,
 		submissionCountryId,
 		submitPending,
