@@ -20,6 +20,7 @@ import {
 	BASE_STYLE_LAYER_ID,
 	buildDimLayer,
 	buildHighlightLayer,
+	capitalDotLayer,
 	capitalLabelLayer,
 	countryLabelLayer,
 	hoverLayer,
@@ -457,6 +458,7 @@ function MapRendererInner({
 				<Layer {...dimLayer} beforeId={LABELS_BOTTOM_LAYER_ID} />
 				<Layer {...highlightLayer} beforeId={LABELS_BOTTOM_LAYER_ID} />
 				<Layer {...hoverLayer} beforeId={LABELS_BOTTOM_LAYER_ID} />
+				<Layer {...capitalDotLayer} filter={labelFilter} />
 				<Layer {...capitalLabelLayer} filter={labelFilter} />
 				<Layer {...countryLabelLayer} filter={labelFilter} />
 

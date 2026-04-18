@@ -327,25 +327,6 @@
 			"source-layer": "countries"
 		},
 		{
-			"id": "capitals-dot",
-			"type": "circle",
-			"source": "world",
-			"source-layer": "capitals",
-			"minzoom": 3,
-			"paint": {
-				"circle-color": "#0f172a",
-				"circle-radius": {
-					"stops": [
-						[1, 1.4],
-						[2, 1.8],
-						[6, 3.2]
-					]
-				},
-				"circle-stroke-color": "#ffffff",
-				"circle-stroke-width": 1
-			}
-		},
-		{
 			"id": "geolines",
 			"type": "line",
 			"paint": {

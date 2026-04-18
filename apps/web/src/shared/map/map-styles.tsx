@@ -1,4 +1,6 @@
+import type { DataDrivenPropertyValueSpecification } from 'maplibre-gl'
 import type {
+	CircleLayerSpecification,
 	FillLayerSpecification,
 	SymbolLayerSpecification,
 } from 'react-map-gl/maplibre'
@@ -16,7 +18,8 @@ export const HIGHLIGHT_LAYER_ID = 'countries-highlighted'
 export const DIM_LAYER_ID = 'countries-dimmed'
 export const COUNTRY_LABEL_LAYER_ID = 'countries-label'
 export const CAPITAL_LABEL_LAYER_ID = 'capitals-label'
-export const LABELS_BOTTOM_LAYER_ID = 'capitals-dot'
+export const CAPITAL_DOT_LAYER_ID = 'capitals-dot'
+export const LABELS_BOTTOM_LAYER_ID = 'geolines'
 
 export const WRONG_FILL = '#f87171'
 export const REVEALED_FILL = '#22c55e'
@@ -172,5 +175,31 @@ export const capitalLabelLayer: SymbolLayerSpecification = {
 		'text-color': '#0f172a',
 		'text-halo-color': '#ffffff',
 		'text-halo-width': 1,
+	},
+}
+
+const capitalRadiusByZoom: DataDrivenPropertyValueSpecification<number> = [
+	'interpolate',
+	['linear'],
+	['zoom'],
+	1,
+	1.4,
+	2,
+	1.8,
+	6,
+	3.2,
+]
+
+export const capitalDotLayer: CircleLayerSpecification = {
+	id: CAPITAL_DOT_LAYER_ID,
+	type: 'circle',
+	source: SOURCE_ID,
+	'source-layer': CAPITALS_LAYER,
+	minzoom: 3,
+	paint: {
+		'circle-color': '#0f172a',
+		'circle-radius': capitalRadiusByZoom,
+		'circle-stroke-color': '#ffffff',
+		'circle-stroke-width': 1,
 	},
 }
