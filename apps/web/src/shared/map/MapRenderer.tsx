@@ -14,6 +14,7 @@ import Map, {
 	type MapRef,
 	type ProjectionSpecification,
 } from 'react-map-gl/maplibre'
+import { IconButton } from '../ui'
 import { CONTINENT_VIEW_PRESETS } from './continent-view'
 import {
 	BASE_STYLE_LAYER_ID,
@@ -419,20 +420,20 @@ function MapRendererInner({
 			</Map>
 
 			<div className='absolute top-3.5 left-3.5 z-10 flex flex-col gap-2'>
-				<button
+				<IconButton
 					type='button'
 					aria-label='Плоская карта'
 					title='Плоская карта'
-					className={`${isMercatorProjection ? 'bg-blue-500 text-white' : 'bg-gray-500 text-slate-100'} inline-flex h-12 w-12 cursor-pointer items-center justify-center rounded-lg transition hover:bg-blue-700`}
+					active={isMercatorProjection}
 					onClick={() => switchProjection(MERCATOR_PROJECTION)}
 				>
 					<MapIcon aria-hidden='true' size={24} strokeWidth={2} />
-				</button>
-				<button
+				</IconButton>
+				<IconButton
 					type='button'
 					aria-label='Глобус'
 					title='Глобус'
-					className={`${isGlobeProjection ? 'bg-blue-500 text-white' : 'bg-gray-500 text-slate-100'} inline-flex h-12 w-12 items-center justify-center rounded-lg transition ${isContinentChosen ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-blue-700'}`}
+					active={isGlobeProjection}
 					onClick={() => {
 						if (!isContinentChosen) {
 							switchProjection(GLOBE_PROJECTION)
@@ -441,7 +442,7 @@ function MapRendererInner({
 					disabled={isContinentChosen}
 				>
 					<Globe aria-hidden='true' size={24} strokeWidth={2} />
-				</button>
+				</IconButton>
 			</div>
 
 			{hasFailure ? (

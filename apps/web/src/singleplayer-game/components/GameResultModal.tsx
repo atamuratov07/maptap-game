@@ -1,3 +1,5 @@
+import { Button, SurfacePanel } from '../../shared/ui'
+
 interface GameResultModalProps {
 	open: boolean
 	score: number
@@ -25,7 +27,10 @@ export function GameResultModal({
 			role='dialog'
 			aria-modal='true'
 		>
-			<section className='w-full max-w-105 rounded-[20px] border border-slate-300 bg-white p-6 text-center shadow-[0_24px_54px_rgba(15,23,42,0.24)]'>
+			<SurfacePanel
+				width='none'
+				className='max-w-105 rounded-[20px] bg-white text-center shadow-[0_24px_54px_rgba(15,23,42,0.24)]'
+			>
 				<h2 className='m-0 text-2xl font-bold text-slate-900'>
 					Сессия завершена
 				</h2>
@@ -40,22 +45,26 @@ export function GameResultModal({
 				</div>
 
 				<div className='flex flex-wrap justify-center gap-2.5'>
-					<button
+					<Button
 						type='button'
-						className='rounded-lg bg-teal-700 px-4 py-2 text-sm font-bold text-white shadow transition hover:-translate-y-0.5 hover:bg-teal-600'
+						variant='teal'
+						size='sm'
+						className='hover:-translate-y-0.5'
 						onClick={onTryAgain}
 					>
 						Сыграть ещё раз
-					</button>
-					<button
+					</Button>
+					<Button
 						type='button'
-						className='rounded-lg bg-slate-200 px-4 py-2 text-sm font-bold text-slate-900 transition hover:-translate-y-0.5 hover:bg-slate-300'
+						variant='soft'
+						size='sm'
+						className='hover:-translate-y-0.5'
 						onClick={onHome}
 					>
 						На главную
-					</button>
+					</Button>
 				</div>
-			</section>
+			</SurfacePanel>
 		</div>
 	)
 }

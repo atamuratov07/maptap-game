@@ -9,12 +9,12 @@ export function useCountdown(deadlineAt: number | null): number {
 		}
 
 		setNow(Date.now())
-		const intervalId = window.setInterval(() => {
+		const intervalId = setInterval(() => {
 			setNow(Date.now())
 		}, 1000)
 
 		return () => {
-			window.clearInterval(intervalId)
+			clearInterval(intervalId)
 		}
 	}, [deadlineAt])
 

@@ -3,11 +3,11 @@ import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 
 const DEFAULT_DELAY_MS = 1000
-const ENTER_DURATION_S = 0.3
+const ENTER_DURATION_S = 0.4
 const ENTER_DURATION_MS = ENTER_DURATION_S * 1000
 const SCORE_EASE = [0.22, 1, 0.36, 1] as const
-const AWARD_REVEAL_DELAY_MS = 0
-const AWARD_VISIBLE_DURATION_MS = 700
+const AWARD_REVEAL_DELAY_MS = 0.2
+const AWARD_VISIBLE_DURATION_MS = 800
 const SCORE_COUNT_DURATION_S = 0.72
 
 interface ScoreBannerSnapshot {
@@ -122,10 +122,10 @@ export function ScoreBanner({
 		setScore(initialScore)
 		setShowAward(false)
 
-		awardRevealTimeoutId = window.setTimeout(() => {
+		awardRevealTimeoutId = setTimeout(() => {
 			setShowAward(true)
 
-			awardHideTimeoutId = window.setTimeout(() => {
+			awardHideTimeoutId = setTimeout(() => {
 				setShowAward(false)
 
 				if (initialScore === null || snapshot.totalScore === null) {
@@ -143,8 +143,8 @@ export function ScoreBanner({
 		}, awardRevealAt)
 
 		return () => {
-			window.clearTimeout(awardRevealTimeoutId)
-			window.clearTimeout(awardHideTimeoutId)
+			clearTimeout(awardRevealTimeoutId)
+			clearTimeout(awardHideTimeoutId)
 			stopCounting?.()
 		}
 	}, [delayMs, show, snapshot])
@@ -166,10 +166,13 @@ export function ScoreBanner({
 				}}
 			>
 				{show ? (
-					<div key={snapshot.key} className='relative text-center text-white'>
+					<div
+						key={snapshot.key}
+						className='relative text-center text-white'
+					>
 						<motion.div
 							aria-hidden='true'
-							className='absolute top-[45%] left-1/2 -z-10 h-34 w-20 -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-slate-950/70 blur-xl'
+							className='absolute top-1/2 left-1/2 -z-10 h-40 w-28 -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-slate-950/85 blur-2xl'
 							initial={{ opacity: 0, scale: 0.1 }}
 							animate={{ opacity: 1, scale: 1 }}
 							exit={{ opacity: 0, scale: 0.1 }}
@@ -222,7 +225,7 @@ export function ScoreBanner({
 										duration: 0.28,
 										ease: SCORE_EASE,
 									}}
-									className='absolute top-1/2 left-full ml-2 -translate-y-1/2 text-xl font-black tracking-tight text-amber-300'
+									className='absolute top-1/2 left-full -translate-y-1/2 text-xl font-black tracking-tight text-amber-300'
 								>
 									{formatAwardedScore(snapshot.awardedScore)}
 								</motion.p>

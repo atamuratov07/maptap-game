@@ -18,12 +18,12 @@ export function QuestionTimer({
 			return
 		}
 
-		const intervalId = window.setInterval(() => {
+		const intervalId = setInterval(() => {
 			setNow(Date.now())
 		}, 1000)
 
 		return () => {
-			window.clearInterval(intervalId)
+			clearInterval(intervalId)
 		}
 	}, [isPlaying, questionStartedAt])
 

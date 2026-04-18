@@ -21,12 +21,12 @@ export function useTimestampGate(
 		}
 
 		setIsReady(false)
-		const timeoutId = window.setTimeout(() => {
+		const timeoutId = setTimeout(() => {
 			setIsReady(true)
 		}, remainingMs)
 
 		return () => {
-			window.clearTimeout(timeoutId)
+			clearTimeout(timeoutId)
 		}
 	}, [delayMs, startedAt])
 

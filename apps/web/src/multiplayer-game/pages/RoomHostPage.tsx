@@ -61,6 +61,7 @@ export function RoomHostPage(): JSX.Element {
 		return (
 			<RoomLobbyScreen
 				role='host'
+				roomCode={roomCode}
 				players={room.players}
 				startPending={actionPending === 'start'}
 				actionErrorMessage={actionErrorMessage}

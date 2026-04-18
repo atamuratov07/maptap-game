@@ -3,7 +3,15 @@ import {
 	type GameConfig,
 } from '@maptap/game-domain/singleplayer'
 import { useCallback, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import {
+	Button,
+	ButtonLink,
+	Field,
+	ScreenShell,
+	SelectControl,
+	SurfacePanel,
+} from '../../shared/ui'
 import {
 	ATTEMPTS_PER_QUESTION_OPTIONS,
 	buildGamePath,
@@ -35,19 +43,23 @@ export function SetupPage(): JSX.Element {
 			?.label ?? config.difficulty
 
 	return (
-		<main className='fixed inset-0 overflow-y-auto px-5 py-8 sm:px-8'>
+		<ScreenShell className='sm:px-8'>
 			<div className='mx-auto max-w-3xl'>
 				<div className='mb-6 flex flex-wrap items-center justify-between gap-3'>
-					<Link
+					<ButtonLink
 						to='/'
-						className='inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white/85 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-950'
+						variant='nav'
+						size='pill'
 					>
 						<span aria-hidden='true'>&larr;</span>
 						К режимам
-					</Link>
+					</ButtonLink>
 				</div>
 
-				<section className='rounded-[28px] border border-white/60 bg-white/90 p-6 shadow-[0_28px_80px_rgba(15,23,42,0.12)] backdrop-blur sm:p-8'>
+				<SurfacePanel
+					width='xl'
+					className='border-white/60 bg-white/90 shadow-[0_28px_80px_rgba(15,23,42,0.12)] backdrop-blur sm:p-8'
+				>
 					<h1 className='mb-2 text-5xl font-black leading-none tracking-tight text-slate-950'>
 						Одиночная игра
 					</h1>
@@ -56,12 +68,10 @@ export function SetupPage(): JSX.Element {
 					</p>
 
 					<div className='grid gap-4 sm:grid-cols-2'>
-						<label className='block'>
-							<span className='mb-2 block text-sm font-semibold text-slate-800'>
-								Количество вопросов
-							</span>
-							<select
-								className='w-full rounded-lg border border-slate-400 bg-white px-3 py-2 text-slate-900 shadow-sm outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-300'
+						<Field label='Количество вопросов'>
+							<SelectControl
+								accent='teal'
+								className='rounded-lg border-slate-400 py-2 shadow-sm'
 								value={config.questionCount}
 								onChange={event => {
 									updateConfig({
@@ -74,15 +84,13 @@ export function SetupPage(): JSX.Element {
 										{option}
 									</option>
 								))}
-							</select>
-						</label>
+							</SelectControl>
+						</Field>
 
-						<label className='block'>
-							<span className='mb-2 block text-sm font-semibold text-slate-800'>
-								Попыток на вопрос
-							</span>
-							<select
-								className='w-full rounded-lg border border-slate-400 bg-white px-3 py-2 text-slate-900 shadow-sm outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-300'
+						<Field label='Попыток на вопрос'>
+							<SelectControl
+								accent='teal'
+								className='rounded-lg border-slate-400 py-2 shadow-sm'
 								value={config.attemptsPerQuestion}
 								onChange={event => {
 									updateConfig({
@@ -95,15 +103,13 @@ export function SetupPage(): JSX.Element {
 										{option}
 									</option>
 								))}
-							</select>
-						</label>
+							</SelectControl>
+						</Field>
 
-						<label className='block'>
-							<span className='mb-2 block text-sm font-semibold text-slate-800'>
-								Область карты
-							</span>
-							<select
-								className='w-full rounded-lg border border-slate-400 bg-white px-3 py-2 text-slate-900 shadow-sm outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-300'
+						<Field label='Область карты'>
+							<SelectControl
+								accent='teal'
+								className='rounded-lg border-slate-400 py-2 shadow-sm'
 								value={config.scope}
 								onChange={event => {
 									updateConfig({
@@ -116,15 +122,13 @@ export function SetupPage(): JSX.Element {
 										{option.label}
 									</option>
 								))}
-							</select>
-						</label>
+							</SelectControl>
+						</Field>
 
-						<label className='block'>
-							<span className='mb-2 block text-sm font-semibold text-slate-800'>
-								Предел сложности
-							</span>
-							<select
-								className='w-full rounded-lg border border-slate-400 bg-white px-3 py-2 text-slate-900 shadow-sm outline-none transition focus:border-teal-600 focus:ring-2 focus:ring-teal-300'
+						<Field label='Предел сложности'>
+							<SelectControl
+								accent='teal'
+								className='rounded-lg border-slate-400 py-2 shadow-sm'
 								value={config.difficulty}
 								onChange={event => {
 									updateConfig({
@@ -138,8 +142,8 @@ export function SetupPage(): JSX.Element {
 										{option.label}
 									</option>
 								))}
-							</select>
-						</label>
+							</SelectControl>
+						</Field>
 					</div>
 
 					<div className='mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4'>
@@ -166,16 +170,17 @@ export function SetupPage(): JSX.Element {
 							</span>
 						</div>
 
-						<button
+						<Button
 							type='button'
-							className='inline-flex items-center justify-center rounded-2xl bg-teal-700 px-4 py-3 text-sm font-black text-white shadow transition hover:-translate-y-0.5 hover:bg-teal-600'
+							variant='teal'
+							className='hover:-translate-y-0.5'
 							onClick={handleStart}
 						>
 							Начать игру
-						</button>
+						</Button>
 					</div>
-				</section>
+				</SurfacePanel>
 			</div>
-		</main>
+		</ScreenShell>
 	)
 }

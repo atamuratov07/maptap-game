@@ -1,8 +1,12 @@
 import type { VisiblePlayerInfo } from '@maptap/game-domain/multiplayer'
 import { UserRound } from 'lucide-react'
+import { useMemo } from 'react'
+import { AlertMessage, Button, CopyButton } from '../../../shared/ui'
+import { cn } from '../../../shared/utils'
 
 interface RoomLobbyScreenProps {
 	role: 'host' | 'player'
+	roomCode: string
 	players: VisiblePlayerInfo[]
 	startPending?: boolean
 	actionErrorMessage?: string | null
@@ -10,11 +14,62 @@ interface RoomLobbyScreenProps {
 	onStartGame?: () => void
 }
 
+function InvitePanel({ roomCode }: { roomCode: string }): JSX.Element {
+	const inviteUrl = useMemo(() => {
+		if (typeof window === 'undefined') {
+			return `/multiplayer/room/${roomCode}`
+		}
+
+		return new URL(
+			`/multiplayer/room/${roomCode}`,
+			location.origin,
+		).toString()
+	}, [roomCode])
+
+	return (
+		<section
+			aria-label='Приглашение в игру'
+			className='mx-auto mt-6 flex w-full max-w-2xl flex-col items-center gap-4 rounded-[28px] border border-white/70 bg-white/90 px-5 py-4 shadow-[0_18px_54px_rgba(15,23,42,0.12)] backdrop-blur sm:flex-row sm:justify-between'
+		>
+			<div className='text-center sm:text-left'>
+				<p className='text-[10px] font-black uppercase tracking-[0.22em] text-slate-500'>
+					Код комнаты
+				</p>
+				<p className='mt-1 font-mono text-3xl font-black tracking-[0.2em] text-slate-950'>
+					{roomCode}
+				</p>
+			</div>
+
+			<div className='flex flex-wrap justify-center gap-2'>
+				<CopyButton
+					textToCopy={roomCode}
+					title='Скопировать код комнаты'
+					className='min-h-11 border-slate-200 py-2.5 shadow-sm hover:-translate-y-0.5 hover:border-amber-300'
+				>
+					Код
+				</CopyButton>
+				<CopyButton
+					textToCopy={inviteUrl}
+					title='Скопировать ссылку на комнату'
+					className='min-h-11 border-slate-200 py-2.5 shadow-sm hover:-translate-y-0.5 hover:border-amber-300'
+				>
+					Ссылка
+				</CopyButton>
+			</div>
+		</section>
+	)
+}
+
 function PlayerTile({ player }: { player: VisiblePlayerInfo }): JSX.Element {
 	return (
 		<li className='flex min-w-0 flex-col items-center gap-3 text-center'>
 			<div
-				className={`grid h-20 w-20 place-items-center rounded-full border-2 bg-white shadow-[0_16px_42px_rgba(15,23,42,0.12)] sm:h-24 sm:w-24 ${player.connected ? 'border-amber-300' : 'border-slate-200 opacity-55'}`}
+				className={cn(
+					'grid h-20 w-20 place-items-center rounded-full border-2 bg-white shadow-[0_16px_42px_rgba(15,23,42,0.12)] sm:h-24 sm:w-24',
+					player.connected
+						? 'border-amber-300'
+						: 'border-slate-200 opacity-55',
+				)}
 			>
 				<UserRound
 					aria-hidden='true'
@@ -32,6 +87,7 @@ function PlayerTile({ player }: { player: VisiblePlayerInfo }): JSX.Element {
 
 export function RoomLobbyScreen({
 	role,
+	roomCode,
 	players,
 	startPending = false,
 	actionErrorMessage = null,
@@ -56,16 +112,18 @@ export function RoomLobbyScreen({
 				</p>
 
 				{isReconnecting ? (
-					<p className='mx-auto mt-5 max-w-xl rounded-2xl border border-slate-200 bg-white/85 px-4 py-3 text-sm font-medium text-slate-700 shadow-sm'>
+					<AlertMessage className='mx-auto mt-5 max-w-xl'>
 						Переподключаемся к комнате...
-					</p>
+					</AlertMessage>
 				) : null}
 
 				{actionErrorMessage ? (
-					<p className='mx-auto mt-5 max-w-xl rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700 shadow-sm'>
+					<AlertMessage tone='error' className='mx-auto mt-5 max-w-xl'>
 						{actionErrorMessage}
-					</p>
+					</AlertMessage>
 				) : null}
+
+				<InvitePanel roomCode={roomCode} />
 			</header>
 
 			<section
@@ -81,14 +139,15 @@ export function RoomLobbyScreen({
 
 			<footer className='fixed inset-x-0 bottom-10 z-20 flex justify-center px-5 sm:bottom-12'>
 				{isHost ? (
-					<button
+					<Button
 						type='button'
-						className='inline-flex min-h-12 items-center justify-center rounded-2xl bg-amber-500 px-7 py-3 text-sm font-black text-white shadow-[0_14px_36px_rgba(245,158,11,0.28)] transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-60'
+						size='lg'
+						className='shadow-[0_14px_36px_rgba(245,158,11,0.28)]'
 						onClick={onStartGame}
 						disabled={startPending}
 					>
 						{startPending ? 'Запуск...' : 'Начать игру'}
-					</button>
+					</Button>
 				) : (
 					<p className='rounded-full border border-slate-200 bg-white/90 px-5 py-3 text-sm font-black text-slate-700 shadow-[0_14px_36px_rgba(15,23,42,0.14)]'>
 						Ждём, когда хост начнёт игру

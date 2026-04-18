@@ -75,6 +75,7 @@ export function RoomPlayerPage(): JSX.Element {
 		return (
 			<RoomLobbyScreen
 				role='player'
+				roomCode={roomCode}
 				players={room.players}
 				actionErrorMessage={actionErrorMessage}
 				isReconnecting={isReconnecting}

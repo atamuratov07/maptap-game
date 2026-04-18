@@ -1,3 +1,5 @@
+import { ScreenShell, SurfacePanel } from '../../../shared/ui'
+
 interface RoomLoadingScreenProps {
 	label: string
 	title: string
@@ -10,8 +12,8 @@ export function RoomLoadingScreen({
 	message,
 }: RoomLoadingScreenProps): JSX.Element {
 	return (
-		<main className='fixed inset-0 grid place-items-center overflow-y-auto px-5 py-8'>
-			<section className='w-full max-w-lg rounded-[28px] border border-slate-300 bg-white/94 p-6 text-center shadow-[0_24px_54px_rgba(15,23,42,0.14)]'>
+		<ScreenShell center>
+			<SurfacePanel width='sm' className='text-center'>
 				<p className='text-[11px] font-black uppercase tracking-[0.22em] text-amber-700'>
 					{label}
 				</p>
@@ -19,7 +21,7 @@ export function RoomLoadingScreen({
 					{title}
 				</h1>
 				<p className='mt-3 text-sm leading-7 text-slate-600'>{message}</p>
-			</section>
-		</main>
+			</SurfacePanel>
+		</ScreenShell>
 	)
 }

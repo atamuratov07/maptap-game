@@ -14,9 +14,9 @@ import {
 	type GameState,
 } from '@maptap/game-domain/singleplayer'
 import { useEffect, useMemo, useRef } from 'react'
-import { CountryInfoCard } from '../../shared/components/CountryInfoCard'
 import { MapRenderer } from '../../shared/map/MapRenderer'
 import type { MapHighlightTone, MapRendererProps } from '../../shared/map/types'
+import { CountryInfoCard } from '../../shared/widgets/CountryInfoCard'
 import { GameHeader } from '../components/GameHeader'
 import { Hearts } from '../components/Hearts'
 import { ScoreBanner } from '../components/ScoreBanner'
@@ -93,7 +93,7 @@ export function GameScreen({
 	const canPick = isPickAllowed(state)
 	const scoreAwarded = totalScore - previousScoreRef.current
 
-	const rendererProps: MapRendererProps = {
+	const mapProps: MapRendererProps = {
 		onPick: canPick ? onPick : () => undefined,
 		interactiveIds,
 		scope: state.config.scope,
@@ -127,7 +127,7 @@ export function GameScreen({
 			/>
 
 			<main className='relative min-h-0 flex-1'>
-				<MapRenderer {...rendererProps} />
+				<MapRenderer {...mapProps} />
 
 				<ScoreBanner
 					triggerKey={questionResolvedAt}

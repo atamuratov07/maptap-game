@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom'
+import { getButtonClassName, type ButtonVariant } from '../ui'
+import { cn } from '../utils'
 
 interface GameCardProps {
 	eyebrow: string
@@ -14,15 +16,22 @@ const CARD_TONE_STYLES = {
 		surface:
 			'from-teal-600/16 via-white to-white shadow-[0_24px_50px_rgba(13,148,136,0.14)]',
 		accent: 'bg-teal-600 text-teal-950',
-		button: 'bg-teal-700 hover:bg-teal-600',
+		buttonVariant: 'teal',
 	},
 	amber: {
 		surface:
 			'from-amber-400/18 via-white to-white shadow-[0_24px_50px_rgba(217,119,6,0.14)]',
 		accent: 'bg-amber-400 text-amber-950',
-		button: 'bg-amber-500 hover:bg-amber-400',
+		buttonVariant: 'amber',
 	},
-} as const
+} satisfies Record<
+	GameCardProps['tone'],
+	{
+		surface: string
+		accent: string
+		buttonVariant: ButtonVariant
+	}
+>
 
 export function GameCard({
 	eyebrow,
@@ -37,7 +46,10 @@ export function GameCard({
 	return (
 		<Link
 			to={to}
-			className={`group flex h-full flex-col rounded-[28px] border border-slate-200 bg-linear-to-br ${styles.surface} p-6 transition duration-200 hover:-translate-y-1 hover:border-slate-300`}
+			className={cn(
+				'group flex h-full flex-col rounded-[28px] border border-slate-200 bg-linear-to-br p-6 transition duration-200 hover:-translate-y-1 hover:border-slate-300',
+				styles.surface,
+			)}
 		>
 			<div className='mb-5 flex items-center justify-between gap-3'>
 				<span
@@ -60,7 +72,10 @@ export function GameCard({
 			<div className='flex-1' />
 
 			<div
-				className={`inline-flex items-center justify-center rounded-2xl px-4 py-3 text-sm font-black text-white transition ${styles.button}`}
+				className={getButtonClassName({
+					variant: styles.buttonVariant,
+					size: 'md',
+				})}
 			>
 				{ctaLabel}
 			</div>

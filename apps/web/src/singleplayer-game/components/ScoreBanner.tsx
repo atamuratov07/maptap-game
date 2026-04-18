@@ -2,17 +2,19 @@ import { animate } from 'motion'
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 
-const SCORE_VISIBLE_DURATION_MS = 1500
-const ENTER_DURATION_S = 0.3
+const SCORE_VISIBLE_DURATION_MS = 3000
+const ENTER_DURATION_S = 0.4
 const ENTER_DURATION_MS = ENTER_DURATION_S * 1000
 const SCORE_EASE = [0.22, 1, 0.36, 1] as const
-const AWARD_REVEAL_DELAY_MS = 0
-const AWARD_VISIBLE_DURATION_MS = 700
+const AWARD_REVEAL_DELAY_MS = 0.2
+const AWARD_VISIBLE_DURATION_MS = 800
 const SCORE_COUNT_DURATION_S = 0.72
 
 interface ScoreBannerSnapshot {
 	key: number
+	isCorrect: boolean | null
 	totalScore: number
+
 	awardedScore: number
 }
 
@@ -58,6 +60,13 @@ function IncorrectMark(): JSX.Element {
 	)
 }
 
+function ScoreMark({ isCorrect }: { isCorrect: boolean }): JSX.Element {
+	if (isCorrect) {
+		return <CorrectMark />
+	}
+	return <IncorrectMark />
+}
+
 export function ScoreBanner({
 	triggerKey,
 	totalScore,
@@ -73,13 +82,19 @@ export function ScoreBanner({
 	const [showAward, setShowAward] = useState(false)
 
 	useEffect(() => {
-		if (triggerKey === null || triggerKey === lastTriggerKeyRef.current) {
+		if (triggerKey === null) {
+			setIsVisible(false)
 			return
 		}
+		if (triggerKey === lastTriggerKeyRef.current) {
+			return
+		}
+
 		lastTriggerKeyRef.current = triggerKey
 		setSnapshot({
 			key: triggerKey,
 			totalScore,
+			isCorrect,
 			awardedScore,
 		})
 		setIsVisible(true)
@@ -153,7 +168,7 @@ export function ScoreBanner({
 					>
 						<motion.div
 							aria-hidden='true'
-							className='absolute top-[45%] left-1/2 -z-10 h-34 w-20 -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-slate-950/85 blur-2xl'
+							className='absolute top-1/2 left-1/2 -z-10 h-40 w-28 -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-slate-950/85 blur-2xl'
 							initial={{ opacity: 0, scale: 0.1 }}
 							animate={{ opacity: 1, scale: 1 }}
 							exit={{ opacity: 0, scale: 0.1 }}
@@ -173,7 +188,9 @@ export function ScoreBanner({
 								ease: SCORE_EASE,
 							}}
 						>
-							{isCorrect ? <CorrectMark /> : <IncorrectMark />}
+							{snapshot.isCorrect !== null ? (
+								<ScoreMark isCorrect={snapshot.isCorrect} />
+							) : null}
 						</motion.div>
 
 						<motion.div
@@ -201,7 +218,7 @@ export function ScoreBanner({
 										duration: 0.28,
 										ease: SCORE_EASE,
 									}}
-									className='absolute top-1/2 left-full ml-2 -translate-y-1/2 text-xl font-black tracking-tight text-amber-300'
+									className='absolute top-1/2 left-full -translate-y-1/2 text-xl font-black tracking-tight text-amber-300'
 								>
 									{formatAwardedScore(snapshot.awardedScore)}
 								</motion.p>

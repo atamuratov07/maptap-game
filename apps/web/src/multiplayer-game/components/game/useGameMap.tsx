@@ -1,7 +1,7 @@
 import type { RoomView } from '@maptap/game-domain/multiplayer'
 import { useCallback, useMemo } from 'react'
-import { CountryInfoCard } from '../../../shared/components/CountryInfoCard'
 import type { MapHighlight, MapRendererProps } from '../../../shared/map/types'
+import { CountryInfoCard } from '../../../shared/widgets/CountryInfoCard'
 import { getCountryInfo } from '../../core/roomView'
 import { SelectedAnswerMarker } from './SelectedAnswerMarker'
 
@@ -30,9 +30,6 @@ export function useGameMap({
 	const eligibleCountryIdsKey = room.eligibleCountryIds.join('|')
 	const interactiveIds = useMemo<ReadonlySet<string>>(
 		() => new Set(room.eligibleCountryIds),
-		// Room snapshots recreate arrays; the country pool itself is stable for
-		// the room, so key by contents instead of array identity.
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[eligibleCountryIdsKey],
 	)
 
@@ -106,10 +103,7 @@ export function useGameMap({
 			})
 		}
 
-		if (
-			submissionCountryId &&
-			submissionCountryId !== correctCountryId
-		) {
+		if (submissionCountryId && submissionCountryId !== correctCountryId) {
 			highlights.push({
 				countryId: submissionCountryId,
 				tone: 'wrong',

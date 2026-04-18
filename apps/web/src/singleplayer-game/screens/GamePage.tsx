@@ -5,7 +5,8 @@ import {
 	type GameConfig,
 } from '@maptap/game-domain/singleplayer'
 import { useMemo } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Button, ButtonLink, ScreenShell, SurfacePanel } from '../../shared/ui'
 import { GameResultModal } from '../components/GameResultModal'
 import { parseGameConfig } from '../core/config'
 import { useGameSession, type GameLoadErrorCode } from '../core/useGameSession'
@@ -56,8 +57,8 @@ function GameContent({ config }: { config: GameConfig }): JSX.Element {
 
 	if (loadErrorCode || !gameData) {
 		return (
-			<main className='fixed inset-0 grid place-items-center overflow-y-auto px-5 py-8'>
-				<section className='w-full max-w-xl rounded-[28px] border border-slate-300 bg-white/94 p-6 shadow-[0_24px_54px_rgba(15,23,42,0.14)]'>
+			<ScreenShell center>
+				<SurfacePanel>
 					<p className='text-[11px] font-black uppercase tracking-[0.22em] text-rose-700'>
 						Одиночная игра
 					</p>
@@ -68,22 +69,22 @@ function GameContent({ config }: { config: GameConfig }): JSX.Element {
 						{getLoadErrorMessage(loadErrorCode)}
 					</p>
 					<div className='mt-6 flex flex-wrap gap-3'>
-						<button
+						<Button
 							type='button'
-							className='rounded-2xl bg-teal-700 px-4 py-3 text-sm font-black text-white transition hover:bg-teal-600'
+							variant='teal'
 							onClick={handleTryAgain}
 						>
 							Повторить
-						</button>
-						<Link
+						</Button>
+						<ButtonLink
 							to='/singleplayer'
-							className='rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-800 transition hover:border-slate-400 hover:text-slate-950'
+							variant='secondary'
 						>
 							Изменить настройки
-						</Link>
+						</ButtonLink>
 					</div>
-				</section>
-			</main>
+				</SurfacePanel>
+			</ScreenShell>
 		)
 	}
 

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import { ButtonLink, ScreenShell } from '../../shared/ui'
 import {
 	CreateRoomForm,
 	type CreateRoomFormValues,
@@ -59,15 +60,16 @@ export function HomePage(): JSX.Element {
 	)
 
 	return (
-		<main className='fixed inset-0 overflow-y-auto px-5 py-8 sm:px-8'>
+		<ScreenShell className='sm:px-8'>
 			<div className='mx-auto max-w-6xl'>
 				<div className='mb-6 flex flex-wrap items-center justify-between gap-3'>
-					<Link
+					<ButtonLink
 						to='/'
-						className='inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white/85 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-950'
+						variant='nav'
+						size='pill'
 					>
 						<span aria-hidden='true'>&larr;</span>К режимам
-					</Link>
+					</ButtonLink>
 				</div>
 
 				<div className='grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] [&>*:first-child]:order-1 [&>*:last-child]:order-2 lg:[&>*:first-child]:order-2 lg:[&>*:last-child]:order-1'>
@@ -80,6 +82,6 @@ export function HomePage(): JSX.Element {
 					/>
 				</div>
 			</div>
-		</main>
+		</ScreenShell>
 	)
 }

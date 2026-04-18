@@ -1,5 +1,6 @@
 import type { RoomView } from '@maptap/game-domain/multiplayer'
-import { Link } from 'react-router-dom'
+import { ButtonLink, ScreenShell, SurfacePanel } from '../../../shared/ui'
+import { cn } from '../../../shared/utils'
 import { getLeaderboard, getViewerLeaderboardEntry } from '../../core/roomView'
 
 interface RoomFinishedScreenProps {
@@ -15,8 +16,11 @@ export function RoomFinishedScreen({
 	const topEntries = getLeaderboard(room)
 
 	return (
-		<main className='fixed inset-0 grid place-items-center overflow-y-auto px-5 py-8'>
-			<section className='w-full max-w-2xl rounded-[32px] border border-white/60 bg-white/92 p-6 shadow-[0_28px_80px_rgba(15,23,42,0.12)] backdrop-blur sm:p-8'>
+		<ScreenShell center>
+			<SurfacePanel
+				width='lg'
+				className='rounded-[32px] border-white/60 bg-white/92 shadow-[0_28px_80px_rgba(15,23,42,0.12)] backdrop-blur sm:p-8'
+			>
 				<p className='text-center text-[11px] font-black uppercase tracking-[0.24em] text-slate-500'>
 					Завершено
 				</p>
@@ -42,7 +46,12 @@ export function RoomFinishedScreen({
 							return (
 								<div
 									key={entry.playerId}
-									className={`flex items-center justify-between gap-3 rounded-2xl border px-4 py-3 ${isViewer ? 'border-amber-300 bg-amber-50' : 'border-slate-200 bg-slate-50'}`}
+									className={cn(
+										'flex items-center justify-between gap-3 rounded-2xl border px-4 py-3',
+										isViewer
+											? 'border-amber-300 bg-amber-50'
+											: 'border-slate-200 bg-slate-50',
+									)}
 								>
 									<div className='min-w-0'>
 										<p className='truncate text-base font-black text-slate-950'>
@@ -62,20 +71,19 @@ export function RoomFinishedScreen({
 				) : null}
 
 				<div className='mt-8 flex flex-wrap justify-center gap-3'>
-					<Link
+					<ButtonLink
 						to='/multiplayer'
-						className='rounded-2xl bg-amber-500 px-4 py-3 text-sm font-black text-white transition hover:bg-amber-400'
 					>
 						К мультиплееру
-					</Link>
-					<Link
+					</ButtonLink>
+					<ButtonLink
 						to='/'
-						className='rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-800 transition hover:border-slate-400 hover:text-slate-950'
+						variant='secondary'
 					>
 						На главную
-					</Link>
+					</ButtonLink>
 				</div>
-			</section>
-		</main>
+			</SurfacePanel>
+		</ScreenShell>
 	)
 }
