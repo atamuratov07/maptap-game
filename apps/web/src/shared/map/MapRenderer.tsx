@@ -1,5 +1,6 @@
 import { normalizeCountryId } from '@maptap/country-catalog'
 import type { GameContinent, GameScope } from '@maptap/game-domain'
+import { Globe, Map as MapIcon } from 'lucide-react'
 import type { FilterSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -425,22 +426,7 @@ function MapRendererInner({
 					className={`${isMercatorProjection ? 'bg-blue-500 text-white' : 'bg-gray-500 text-slate-100'} inline-flex h-12 w-12 cursor-pointer items-center justify-center rounded-lg transition hover:bg-blue-700`}
 					onClick={() => switchProjection(MERCATOR_PROJECTION)}
 				>
-					<svg
-						xmlns='http://www.w3.org/2000/svg'
-						width='24'
-						height='24'
-						viewBox='0 0 24 24'
-						fill='none'
-						stroke='currentColor'
-						strokeWidth='2'
-						strokeLinecap='round'
-						strokeLinejoin='round'
-						aria-hidden='true'
-					>
-						<path d='M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z' />
-						<path d='M15 5.764v15' />
-						<path d='M9 3.236v15' />
-					</svg>
+					<MapIcon aria-hidden='true' size={24} strokeWidth={2} />
 				</button>
 				<button
 					type='button'
@@ -454,22 +440,7 @@ function MapRendererInner({
 					}}
 					disabled={isContinentChosen}
 				>
-					<svg
-						xmlns='http://www.w3.org/2000/svg'
-						width='24'
-						height='24'
-						viewBox='0 0 24 24'
-						fill='none'
-						stroke='currentColor'
-						strokeWidth='2'
-						strokeLinecap='round'
-						strokeLinejoin='round'
-						aria-hidden='true'
-					>
-						<circle cx='12' cy='12' r='10' />
-						<path d='M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20' />
-						<path d='M2 12h20' />
-					</svg>
+					<Globe aria-hidden='true' size={24} strokeWidth={2} />
 				</button>
 			</div>
 

@@ -1,4 +1,5 @@
 import type { VisiblePlayerInfo } from '@maptap/game-domain/multiplayer'
+import { UserRound } from 'lucide-react'
 
 interface RoomLobbyScreenProps {
 	role: 'host' | 'player'
@@ -15,22 +16,12 @@ function PlayerTile({ player }: { player: VisiblePlayerInfo }): JSX.Element {
 			<div
 				className={`grid h-20 w-20 place-items-center rounded-full border-2 bg-white shadow-[0_16px_42px_rgba(15,23,42,0.12)] sm:h-24 sm:w-24 ${player.connected ? 'border-amber-300' : 'border-slate-200 opacity-55'}`}
 			>
-				<svg
-					xmlns='http://www.w3.org/2000/svg'
-					width='42'
-					height='42'
-					viewBox='0 0 24 24'
-					fill='none'
-					stroke='currentColor'
-					strokeWidth='2'
-					strokeLinecap='round'
-					strokeLinejoin='round'
+				<UserRound
 					aria-hidden='true'
+					size={42}
+					strokeWidth={2}
 					className='text-slate-700'
-				>
-					<path d='M20 21a8 8 0 0 0-16 0' />
-					<circle cx='12' cy='7' r='4' />
-				</svg>
+				/>
 			</div>
 			<span className='block w-full truncate px-1 text-sm font-black text-slate-950 sm:text-base'>
 				{player.name}

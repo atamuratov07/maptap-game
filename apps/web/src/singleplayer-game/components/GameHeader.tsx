@@ -1,3 +1,4 @@
+import { Flag, LogOut } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { QuestionTimer } from './QuestionTimer'
 
@@ -40,23 +41,12 @@ export function GameHeader({
 						aria-label='Выйти'
 						className='inline-flex items-center justify-center rounded-lg  bg-white/90 px-3 py-2 text-sm font-bold text-slate-700 transition  hover:text-slate-950 sm:px-3.5'
 					>
-						<svg
-							xmlns='http://www.w3.org/2000/svg'
-							width='20'
-							height='20'
-							viewBox='0 0 24 24'
-							fill='none'
-							stroke='currentColor'
-							strokeWidth='2'
-							strokeLinecap='round'
-							strokeLinejoin='round'
+						<LogOut
 							className='shrink-0 rotate-180 sm:hidden'
 							aria-hidden='true'
-						>
-							<path d='m16 17 5-5-5-5' />
-							<path d='M21 12H9' />
-							<path d='M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4' />
-						</svg>
+							size={20}
+							strokeWidth={2}
+						/>
 						<span className='hidden sm:inline'>Выйти</span>
 					</Link>
 
@@ -85,21 +75,12 @@ export function GameHeader({
 						onClick={onGiveUp}
 						disabled={!isPlaying}
 					>
-						<svg
-							xmlns='http://www.w3.org/2000/svg'
-							width='20'
-							height='20'
-							viewBox='0 0 24 24'
-							fill='none'
-							stroke='currentColor'
-							strokeWidth='2'
-							strokeLinecap='round'
-							strokeLinejoin='round'
+						<Flag
 							className='shrink-0 sm:hidden'
 							aria-hidden='true'
-						>
-							<path d='M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528' />
-						</svg>
+							size={20}
+							strokeWidth={2}
+						/>
 						<span className='hidden sm:inline'>Сдаться</span>
 					</button>
 				</div>
