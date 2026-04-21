@@ -8,7 +8,8 @@
 	"exports": {
 		".": "./src/index.ts",
 		"./singleplayer": "./src/singleplayer/index.ts",
-		"./multiplayer": "./src/multiplayer/index.ts"
+		"./multiplayer": "./src/multiplayer/index.ts",
+		"./multiplayer-next": "./src/multiplayer+/index.ts"
 	},
 	"sideEffects": false
 }
