@@ -4,6 +4,8 @@ import {
 	advanceGame,
 	applyGameCommand,
 	createGame,
+	getNextGameAdvanceAt,
+	type GameAdvanceScheduleConfig,
 	type GameCommand,
 	type GameSession,
 } from './game'
@@ -68,6 +70,18 @@ export function submitRoomGameAnswer(
 		...room,
 		activeGame: gameResult.value,
 	})
+}
+
+export function getNextActiveRoomGameAdvanceAt(
+	room: RoomState,
+	config: GameAdvanceScheduleConfig,
+	now: number,
+): number | null {
+	if (room.phase !== 'active') {
+		return null
+	}
+
+	return getNextGameAdvanceAt(room.activeGame, config, now)
 }
 
 export function advanceActiveRoomGame(

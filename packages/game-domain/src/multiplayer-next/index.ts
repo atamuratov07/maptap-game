@@ -4,9 +4,9 @@ export {
 	type DomainError,
 	type SessionPreparationError,
 } from './errors'
-
 export {
 	advanceActiveRoomGame,
+	getNextActiveRoomGameAdvanceAt,
 	startRoomGame,
 	submitRoomGameAnswer,
 	type StartRoomGameInput,

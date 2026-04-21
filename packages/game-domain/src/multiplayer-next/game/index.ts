@@ -1,5 +1,9 @@
 export { applyGameCommand, type GameCommand } from './commands'
 export { createGame, type CreateGameInput } from './factory'
+export {
+	getNextGameAdvanceAt,
+	type GameAdvanceScheduleConfig,
+} from './scheduling'
 export { calculateAnswerScore } from './scoring'
 export {
 	getAnsweredParticipantCount,
@@ -49,8 +53,8 @@ export {
 	type RevealedRoundState,
 } from './types'
 export {
-	toHostGameView,
 	toGameView,
+	toHostGameView,
 	toPlayerGameView,
 	type CompletedGameView,
 	type EvaluatedViewerSubmissionView,
@@ -58,15 +62,15 @@ export {
 	type GameViewOptions,
 	type HostGameView,
 	type HostSubmissionView,
-	type LeaderboardGameView,
 	type LeaderboardGameHostView,
 	type LeaderboardGamePlayerView,
-	type OpenGameView,
+	type LeaderboardGameView,
 	type OpenGameHostView,
 	type OpenGamePlayerView,
+	type OpenGameView,
 	type PlayerGameView,
-	type RevealedGameView,
 	type RevealedGameHostView,
 	type RevealedGamePlayerView,
+	type RevealedGameView,
 	type ViewerSubmissionView,
 } from './visibility'
