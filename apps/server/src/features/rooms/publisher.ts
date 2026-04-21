@@ -1,16 +1,16 @@
+import type { RoomClosedEvent } from '@maptap/game-protocol'
+
+import type { MemberId } from '@maptap/game-domain/multiplayer-next'
 import {
 	toHostRoomView,
 	toPlayerRoomView,
-	type PlayerId,
 	type RoomId,
-} from '@maptap/game-domain/multiplayer'
-import type { RoomClosedEvent } from '@maptap/game-protocol'
-
+} from '@maptap/game-domain/multiplayer-next/room'
 import type { RoomsRepository } from './repository.js'
 import type { GameNamespace } from './types.js'
 
 export interface PublishRoomOptions {
-	excludePlayerId?: PlayerId
+	excludeMemberId?: MemberId
 }
 
 interface RoomPublisherOptions {
@@ -31,16 +31,16 @@ export function createRoomPublisher({
 			return
 		}
 
-		for (const session of repository.listPlayerSessions(roomId)) {
+		for (const session of repository.listMemberSessions(roomId)) {
 			if (
 				!session.socketId ||
-				session.playerId === options.excludePlayerId
+				session.memberId === options.excludeMemberId
 			) {
 				continue
 			}
 
 			if (session.role === 'host') {
-				const snapshot = toHostRoomView(context.state, session.playerId)
+				const snapshot = toHostRoomView(context.state, session.memberId)
 				if (!snapshot) {
 					continue
 				}
@@ -51,7 +51,7 @@ export function createRoomPublisher({
 				})
 			}
 			if (session.role === 'player') {
-				const snapshot = toPlayerRoomView(context.state, session.playerId)
+				const snapshot = toPlayerRoomView(context.state, session.memberId)
 				if (!snapshot) {
 					continue
 				}
@@ -68,7 +68,7 @@ export function createRoomPublisher({
 		roomId: RoomId,
 		reason: RoomClosedEvent['reason'],
 	): void {
-		for (const session of repository.listPlayerSessions(roomId)) {
+		for (const session of repository.listMemberSessions(roomId)) {
 			if (!session.socketId) {
 				continue
 			}

@@ -10,7 +10,7 @@ import {
 } from '@maptap/game-protocol'
 import type { ZodType } from 'zod'
 
-import type { PlayerRole } from '@maptap/game-domain/multiplayer'
+import type { RoomMemberRole } from '@maptap/game-domain/multiplayer-next/room'
 import type { RoomsService } from './service.js'
 import type { GameNamespace, GameSocket } from './types.js'
 
@@ -56,10 +56,10 @@ function parsePayload<T>(
 function requireAuthenticated(
 	socket: GameSocket,
 ): { ok: true; value: string } | { ok: false } {
-	return socket.data.playerSessionToken
+	return socket.data.memberSessionToken
 		? {
 				ok: true,
-				value: socket.data.playerSessionToken,
+				value: socket.data.memberSessionToken,
 			}
 		: {
 				ok: false,
@@ -69,22 +69,23 @@ function requireAuthenticated(
 function bindSocketIdentity(
 	socket: GameSocket,
 	identity: {
-		role: PlayerRole
+		role: RoomMemberRole
 		roomId: string
-		playerId: string
-		playerSessionToken: string
+		memberId: string
+		memberSessionToken: string
 	},
 ): void {
 	socket.data.roomId = identity.roomId
 	socket.data.role = identity.role
-	socket.data.playerId = identity.playerId
-	socket.data.playerSessionToken = identity.playerSessionToken
+	socket.data.memberId = identity.memberId
+	socket.data.memberSessionToken = identity.memberSessionToken
 }
 
 function clearSocketIdentity(socket: GameSocket): void {
 	socket.data.roomId = undefined
-	socket.data.playerId = undefined
-	socket.data.playerSessionToken = undefined
+	socket.data.memberId = undefined
+	socket.data.memberSessionToken = undefined
+	socket.data.role = undefined
 }
 
 function disconnectReplacedSocket(
@@ -135,7 +136,6 @@ export function registerRoomHandlers({
 
 			const createdRoom = roomsService.createRoom({
 				hostName: parsed.value.hostName,
-				gameConfig: parsed.value.gameConfig,
 				socketId: socket.id,
 			})
 			if (!createdRoom.ok) {
@@ -164,7 +164,7 @@ export function registerRoomHandlers({
 
 			const joinedRoom = roomsService.joinRoom({
 				roomCode: parsed.value.roomCode,
-				playerName: parsed.value.playerName,
+				memberName: parsed.value.memberName,
 				socketId: socket.id,
 			})
 
@@ -178,12 +178,6 @@ export function registerRoomHandlers({
 		})
 
 		socket.on('room:host-resume', (payload, ack) => {
-			if (!payload.playerSessionToken) {
-				return respondWithError(ack, {
-					code: 'unauthorized',
-				})
-			}
-
 			const parsed = parsePayload(resumeHostRoomRequestSchema, payload)
 			if (!parsed.ok) {
 				return respondWithError(ack, {
@@ -192,7 +186,7 @@ export function registerRoomHandlers({
 			}
 
 			const resumedRoom = roomsService.resumeHostRoom({
-				playerSessionToken: parsed.value.playerSessionToken,
+				memberSessionToken: parsed.value.memberSessionToken,
 				socketId: socket.id,
 			})
 
@@ -203,8 +197,8 @@ export function registerRoomHandlers({
 			bindSocketIdentity(socket, {
 				role: 'host',
 				roomId: resumedRoom.value.response.roomId,
-				playerId: resumedRoom.value.response.playerId,
-				playerSessionToken: parsed.value.playerSessionToken,
+				memberId: resumedRoom.value.response.memberId,
+				memberSessionToken: parsed.value.memberSessionToken,
 			})
 			disconnectReplacedSocket(
 				namespace,
@@ -216,12 +210,6 @@ export function registerRoomHandlers({
 		})
 
 		socket.on('room:player-resume', (payload, ack) => {
-			if (!payload.playerSessionToken) {
-				return respondWithError(ack, {
-					code: 'unauthorized',
-				})
-			}
-
 			const parsed = parsePayload(resumePlayerRoomRequestSchema, payload)
 			if (!parsed.ok) {
 				return respondWithError(ack, {
@@ -230,7 +218,7 @@ export function registerRoomHandlers({
 			}
 
 			const resumedRoom = roomsService.resumePlayerRoom({
-				playerSessionToken: parsed.value.playerSessionToken,
+				memberSessionToken: parsed.value.memberSessionToken,
 				socketId: socket.id,
 			})
 
@@ -241,8 +229,8 @@ export function registerRoomHandlers({
 			bindSocketIdentity(socket, {
 				role: 'player',
 				roomId: resumedRoom.value.response.roomId,
-				playerId: resumedRoom.value.response.playerId,
-				playerSessionToken: parsed.value.playerSessionToken,
+				memberId: resumedRoom.value.response.memberId,
+				memberSessionToken: parsed.value.memberSessionToken,
 			})
 			disconnectReplacedSocket(
 				namespace,
@@ -269,7 +257,8 @@ export function registerRoomHandlers({
 			}
 
 			const startedGame = roomsService.startGame({
-				playerSessionToken: auth.value,
+				memberSessionToken: auth.value,
+				gameConfig: parsed.value.gameConfig,
 			})
 
 			if (!startedGame.ok) {
@@ -295,7 +284,7 @@ export function registerRoomHandlers({
 			}
 
 			const submittedAnswer = roomsService.submitAnswer({
-				playerSessionToken: auth.value,
+				memberSessionToken: auth.value,
 				countryId: parsed.value.countryId,
 			})
 

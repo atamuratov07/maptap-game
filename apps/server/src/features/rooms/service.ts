@@ -1,20 +1,4 @@
 import { err, ok, type CountryPool, type Result } from '@maptap/game-domain'
-import {
-	applyRoomCommand,
-	applyRoomTransition,
-	createGameRoom,
-	getAnsweredPlayerCount,
-	getConnectedPlayerCount,
-	prepareGameSession,
-	toHostRoomView,
-	toPlayerRoomView,
-	type GameConfig,
-	type PlayerId,
-	type RoomHostView,
-	type RoomId,
-	type RoomPlayerView,
-	type RoomState,
-} from '@maptap/game-domain/multiplayer'
 import type {
 	CreateRoomResponse,
 	EmptyAckData,
@@ -28,22 +12,41 @@ import type {
 } from '@maptap/game-protocol'
 
 import {
-	createPlayerId,
-	createPlayerSessionToken,
+	advanceActiveRoomGame,
+	getNextActiveRoomGameAdvanceAt,
+	startRoomGame,
+	submitRoomGameAnswer,
+} from '@maptap/game-domain/multiplayer-next'
+import {
+	getAnsweredParticipantCount,
+	prepareGameSession,
+	type GameConfig,
+} from '@maptap/game-domain/multiplayer-next/game'
+import {
+	applyRoomCommand,
+	createRoom,
+	toHostRoomView,
+	toPlayerRoomView,
+	type MemberId,
+	type RoomHostView,
+	type RoomId,
+	type RoomPlayerView,
+	type RoomState,
+} from '@maptap/game-domain/multiplayer-next/room'
+import {
+	createGameId,
+	createMemberId,
+	createMemberSessionToken,
 	createRoomCode,
 	createRoomId,
 } from './ids.js'
-import type {
-	PlayerSessionRecord,
-	RoomsRepository,
-	RoomTransitionAction,
-} from './repository.js'
-import type { BoundServiceResponse, PlayerSessionToken } from './types.js'
+import type { MemberSessionRecord, RoomsRepository } from './repository.js'
+import type { BoundServiceResponse, MemberSessionToken } from './types.js'
 
 type ServiceResult<T> = Result<T, GameProtocolError>
 
 interface RoomUpdateOptions {
-	excludePlayerId?: PlayerId
+	excludeMemberId?: MemberId
 }
 
 interface GameRoomServiceHooks {
@@ -62,31 +65,31 @@ export interface RoomsServiceOptions {
 
 export interface CreateRoomInput {
 	hostName: string
-	gameConfig: GameConfig
 	socketId: string
 }
 
 export interface JoinRoomInput {
 	roomCode: string
-	playerName: string
+	memberName: string
 	socketId: string
 }
 
 export interface ResumeHostRoomInput {
-	playerSessionToken: PlayerSessionToken
+	memberSessionToken: MemberSessionToken
 	socketId: string
 }
 export interface ResumePlayerRoomInput {
-	playerSessionToken: PlayerSessionToken
+	memberSessionToken: MemberSessionToken
 	socketId: string
 }
 
 export interface StartGameInput {
-	playerSessionToken: PlayerSessionToken
+	memberSessionToken: MemberSessionToken
+	gameConfig: GameConfig
 }
 
 export interface SubmitAnswerInput {
-	playerSessionToken: PlayerSessionToken
+	memberSessionToken: MemberSessionToken
 	countryId: string
 }
 
@@ -123,37 +126,31 @@ export class RoomsService {
 			}
 		}
 
-		const hostPlayer = context.state.playersById[context.state.hostPlayerId]
+		const host = context.state.membersById[context.state.hostId]
 
 		return {
 			exists: true,
 			roomCode: context.state.roomCode,
 			phase: context.state.phase,
 			joinable: context.state.phase === 'lobby',
-			playerCount: context.state.playerOrder.length,
-			hostName: hostPlayer?.name ?? 'Host',
+			memberCount: context.state.memberOrder.length,
+			hostName: host?.name ?? 'Host',
 		}
 	}
 
 	createRoom(
 		input: CreateRoomInput,
 	): ServiceResult<BoundServiceResponse<CreateRoomResponse>> {
-		const session = prepareGameSession(this.countryPool, input.gameConfig)
-		if (!session.ok) {
-			return session
-		}
-
 		const roomId = createRoomId()
 		const roomCode = createRoomCode(
 			code => !this.repository.hasRoomCode(code),
 		)
-		const hostPlayerId = createPlayerId()
-		const roomResult = createGameRoom({
+		const hostId = createMemberId()
+		const roomResult = createRoom({
 			roomId,
 			roomCode,
-			hostPlayerId,
+			hostId,
 			hostName: input.hostName,
-			session: session.value,
 			now: this.now(),
 		})
 
@@ -163,19 +160,16 @@ export class RoomsService {
 
 		this.repository.createRoom(roomResult.value)
 
-		const playerSessionToken = createPlayerSessionToken()
-		this.repository.createPlayerSession({
+		const hostSessionToken = createMemberSessionToken()
+		this.repository.createMemberSession({
 			role: 'host',
-			token: playerSessionToken,
+			token: hostSessionToken,
 			roomId,
-			playerId: hostPlayerId,
+			memberId: hostId,
 			socketId: input.socketId,
 		})
 
-		const snapshot = this.buildRoomHostSnapshot(
-			roomResult.value,
-			hostPlayerId,
-		)
+		const snapshot = this.buildRoomHostSnapshot(roomResult.value, hostId)
 		if (!snapshot.ok) {
 			return snapshot
 		}
@@ -185,8 +179,8 @@ export class RoomsService {
 				role: 'host',
 				roomId,
 				roomCode,
-				playerId: hostPlayerId,
-				playerSessionToken,
+				memberId: hostId,
+				memberSessionToken: hostSessionToken,
 				snapshot: snapshot.value,
 			},
 		})
@@ -202,11 +196,11 @@ export class RoomsService {
 			})
 		}
 
-		const playerId = createPlayerId()
+		const memberId = createMemberId()
 		const nextState = applyRoomCommand(context.state, {
-			type: 'JOIN_PLAYER',
-			playerId,
-			name: input.playerName,
+			type: 'JOIN_MEMBER',
+			id: memberId,
+			name: input.memberName,
 			now: this.now(),
 		})
 
@@ -215,19 +209,19 @@ export class RoomsService {
 		}
 
 		this.commitRoomState(context.state.roomId, nextState.value, {
-			excludePlayerId: playerId,
+			excludeMemberId: memberId,
 		})
 
-		const playerSessionToken = createPlayerSessionToken()
-		this.repository.createPlayerSession({
+		const memberSessionToken = createMemberSessionToken()
+		this.repository.createMemberSession({
 			role: 'player',
-			token: playerSessionToken,
+			token: memberSessionToken,
 			roomId: nextState.value.roomId,
-			playerId,
+			memberId,
 			socketId: input.socketId,
 		})
 
-		const snapshot = this.buildRoomPlayerSnapshot(nextState.value, playerId)
+		const snapshot = this.buildRoomPlayerSnapshot(nextState.value, memberId)
 		if (!snapshot.ok) {
 			return snapshot
 		}
@@ -237,8 +231,8 @@ export class RoomsService {
 				role: 'player',
 				roomId: nextState.value.roomId,
 				roomCode: nextState.value.roomCode,
-				playerId,
-				playerSessionToken,
+				memberId,
+				memberSessionToken,
 				snapshot: snapshot.value,
 			},
 		})
@@ -247,10 +241,10 @@ export class RoomsService {
 	resumeHostRoom(
 		input: ResumeHostRoomInput,
 	): ServiceResult<BoundServiceResponse<ResumeHostRoomResponse>> {
-		const session = this.repository.getPlayerSession(input.playerSessionToken)
+		const session = this.repository.getMemberSession(input.memberSessionToken)
 		if (!session) {
 			return err({
-				code: 'player_session_not_found',
+				code: 'member_session_not_found',
 			})
 		}
 		if (session.role !== 'host') {
@@ -264,18 +258,18 @@ export class RoomsService {
 			})
 		}
 
-		const player = context.state.playersById[session.playerId]
-		if (!player) {
+		const member = context.state.membersById[session.memberId]
+		if (!member) {
 			return err({
-				code: 'player_session_not_found',
+				code: 'member_session_not_found',
 			})
 		}
 
 		let nextState = context.state
-		if (!player.connected) {
+		if (!member.connected) {
 			const reconnectResult = applyRoomCommand(context.state, {
-				type: 'RECONNECT_PLAYER',
-				playerId: session.playerId,
+				type: 'RECONNECT_MEMBER',
+				id: session.memberId,
 				now: this.now(),
 			})
 
@@ -285,16 +279,16 @@ export class RoomsService {
 
 			nextState = reconnectResult.value
 			this.commitRoomState(nextState.roomId, nextState, {
-				excludePlayerId: session.playerId,
+				excludeMemberId: session.memberId,
 			})
 		}
 
 		const replacedSocketId = this.repository.bindSocketToSession(
-			input.playerSessionToken,
+			input.memberSessionToken,
 			input.socketId,
 		)
 
-		const snapshot = this.buildRoomHostSnapshot(nextState, session.playerId)
+		const snapshot = this.buildRoomHostSnapshot(nextState, session.memberId)
 		if (!snapshot.ok) {
 			return snapshot
 		}
@@ -302,7 +296,7 @@ export class RoomsService {
 		return ok({
 			response: {
 				roomId: nextState.roomId,
-				playerId: session.playerId,
+				memberId: session.memberId,
 				snapshot: snapshot.value,
 			},
 			replacedSocketId,
@@ -312,10 +306,10 @@ export class RoomsService {
 	resumePlayerRoom(
 		input: ResumePlayerRoomInput,
 	): ServiceResult<BoundServiceResponse<ResumePlayerRoomResponse>> {
-		const session = this.repository.getPlayerSession(input.playerSessionToken)
+		const session = this.repository.getMemberSession(input.memberSessionToken)
 		if (!session) {
 			return err({
-				code: 'player_session_not_found',
+				code: 'member_session_not_found',
 			})
 		}
 
@@ -330,18 +324,18 @@ export class RoomsService {
 			})
 		}
 
-		const player = context.state.playersById[session.playerId]
-		if (!player) {
+		const member = context.state.membersById[session.memberId]
+		if (!member) {
 			return err({
-				code: 'player_session_not_found',
+				code: 'member_session_not_found',
 			})
 		}
 
 		let nextState = context.state
-		if (!player.connected) {
+		if (!member.connected) {
 			const reconnectResult = applyRoomCommand(context.state, {
-				type: 'RECONNECT_PLAYER',
-				playerId: session.playerId,
+				type: 'RECONNECT_MEMBER',
+				id: session.memberId,
 				now: this.now(),
 			})
 
@@ -351,16 +345,16 @@ export class RoomsService {
 
 			nextState = reconnectResult.value
 			this.commitRoomState(nextState.roomId, nextState, {
-				excludePlayerId: session.playerId,
+				excludeMemberId: session.memberId,
 			})
 		}
 
 		const replacedSocketId = this.repository.bindSocketToSession(
-			input.playerSessionToken,
+			input.memberSessionToken,
 			input.socketId,
 		)
 
-		const snapshot = this.buildRoomPlayerSnapshot(nextState, session.playerId)
+		const snapshot = this.buildRoomPlayerSnapshot(nextState, session.memberId)
 		if (!snapshot.ok) {
 			return snapshot
 		}
@@ -368,7 +362,7 @@ export class RoomsService {
 		return ok({
 			response: {
 				roomId: nextState.roomId,
-				playerId: session.playerId,
+				memberId: session.memberId,
 				snapshot: snapshot.value,
 			},
 			replacedSocketId,
@@ -376,17 +370,24 @@ export class RoomsService {
 	}
 
 	startGame(input: StartGameInput): ServiceResult<EmptyAckData> {
-		const sessionContext = this.getSessionContext(input.playerSessionToken)
+		const gameSession = prepareGameSession(this.countryPool, input.gameConfig)
+		if (!gameSession.ok) {
+			return gameSession
+		}
+		const sessionContext = this.getMemberSessionContext(
+			input.memberSessionToken,
+		)
 		if (!sessionContext.ok) {
 			return sessionContext
 		}
 
-		const nextState = applyRoomCommand(sessionContext.value.state, {
-			type: 'START_GAME',
-			actorPlayerId: sessionContext.value.session.playerId,
+		const nextState = startRoomGame({
+			gameId: createGameId(),
+			room: sessionContext.value.state,
+			session: gameSession.value,
+			actorId: sessionContext.value.memberSession.memberId,
 			now: this.now(),
 		})
-
 		if (!nextState.ok) {
 			return nextState
 		}
@@ -397,15 +398,18 @@ export class RoomsService {
 	}
 
 	submitAnswer(input: SubmitAnswerInput): ServiceResult<SubmitAnswerResponse> {
-		const sessionContext = this.getSessionContext(input.playerSessionToken)
-		if (!sessionContext.ok) {
-			return sessionContext
+		const memberSessionContext = this.getMemberSessionContext(
+			input.memberSessionToken,
+		)
+		if (!memberSessionContext.ok) {
+			return memberSessionContext
 		}
+		const { memberSession, state: room } = memberSessionContext.value
 
 		const acceptedAt = this.now()
-		const submittedState = applyRoomCommand(sessionContext.value.state, {
+		const submittedState = submitRoomGameAnswer(room, {
 			type: 'SUBMIT_ANSWER',
-			playerId: sessionContext.value.session.playerId,
+			participantId: memberSession.memberId,
 			countryId: input.countryId,
 			now: acceptedAt,
 		})
@@ -416,17 +420,14 @@ export class RoomsService {
 
 		let nextState = submittedState.value
 		if (this.shouldRevealImmediately(nextState)) {
-			const revealedState = applyRoomTransition(nextState, {
-				type: 'REVEAL_QUESTION',
-				now: acceptedAt,
-			})
+			const revealedState = advanceActiveRoomGame(nextState, acceptedAt)
 
 			if (revealedState.ok) {
 				nextState = revealedState.value
 			}
 		}
 
-		this.commitRoomState(sessionContext.value.state.roomId, nextState)
+		this.commitRoomState(room.roomId, nextState)
 
 		return ok({
 			acceptedAt,
@@ -444,14 +445,14 @@ export class RoomsService {
 			return
 		}
 
-		const player = context.state.playersById[session.playerId]
-		if (!player || !player.connected) {
+		const member = context.state.membersById[session.memberId]
+		if (!member || !member.connected) {
 			return
 		}
 
 		const disconnectedState = applyRoomCommand(context.state, {
-			type: 'DISCONNECT_PLAYER',
-			playerId: session.playerId,
+			type: 'DISCONNECT_MEMBER',
+			id: session.memberId,
 			now: this.now(),
 		})
 
@@ -463,27 +464,37 @@ export class RoomsService {
 	}
 
 	shutdown(reason: RoomClosedEvent['reason'] = 'server_shutdown'): void {
-		this.repository.clearAllScheduledTransitions()
-
 		for (const context of this.repository.listRooms()) {
-			this.hooks.onRoomClosed(context.state.roomId, reason)
+			this.closeRoom(context.state.roomId, reason)
 		}
 	}
 
-	private getSessionContext(
-		playerSessionToken: PlayerSessionToken,
+	closeRoom(roomId: RoomId, reason: RoomClosedEvent['reason']): boolean {
+		const context = this.repository.getRoomById(roomId)
+		if (!context) {
+			return false
+		}
+
+		this.hooks.onRoomClosed(context.state.roomId, reason)
+		this.repository.deleteRoom(context.state.roomId)
+
+		return true
+	}
+
+	private getMemberSessionContext(
+		memberSessionToken: MemberSessionToken,
 	): ServiceResult<{
-		session: PlayerSessionRecord
+		memberSession: MemberSessionRecord
 		state: RoomState
 	}> {
-		const session = this.repository.getPlayerSession(playerSessionToken)
-		if (!session) {
+		const memberSession = this.repository.getMemberSession(memberSessionToken)
+		if (!memberSession) {
 			return err({
-				code: 'player_session_not_found',
+				code: 'member_session_not_found',
 			})
 		}
 
-		const context = this.repository.getRoomById(session.roomId)
+		const context = this.repository.getRoomById(memberSession.roomId)
 		if (!context) {
 			return err({
 				code: 'room_not_found',
@@ -491,16 +502,16 @@ export class RoomsService {
 		}
 
 		return ok({
-			session,
+			memberSession,
 			state: context.state,
 		})
 	}
 
 	private buildRoomHostSnapshot(
 		state: RoomState,
-		playerId: PlayerId,
+		memberId: MemberId,
 	): ServiceResult<RoomHostView> {
-		const snapshot = toHostRoomView(state, playerId)
+		const snapshot = toHostRoomView(state, memberId)
 
 		return snapshot
 			? ok(snapshot)
@@ -511,9 +522,9 @@ export class RoomsService {
 
 	private buildRoomPlayerSnapshot(
 		state: RoomState,
-		playerId: PlayerId,
+		memberId: MemberId,
 	): ServiceResult<RoomPlayerView> {
-		const snapshot = toPlayerRoomView(state, playerId)
+		const snapshot = toPlayerRoomView(state, memberId)
 
 		return snapshot
 			? ok(snapshot)
@@ -528,65 +539,51 @@ export class RoomsService {
 		options: RoomUpdateOptions = {},
 	): void {
 		this.repository.setRoomState(roomId, nextState)
-		this.rescheduleRoomTransition(roomId)
+		this.rescheduleRoomAdvance(roomId)
 		this.hooks.onRoomUpdated(roomId, options)
 	}
 
-	private rescheduleRoomTransition(roomId: RoomId): void {
+	private rescheduleRoomAdvance(roomId: RoomId): void {
 		const context = this.repository.getRoomById(roomId)
 		if (!context) {
 			return
 		}
 
-		let action: RoomTransitionAction | null = null
-		let dueAt: number | null = null
+		let dueAt = getNextActiveRoomGameAdvanceAt(
+			context.state,
+			{
+				revealDurationMs: this.revealDurationMs,
+				leaderboardDurationMs: this.leaderboardDurationMs,
+			},
+			this.now(),
+		)
 
-		if (context.state.phase === 'question_open') {
-			action = 'REVEAL_QUESTION'
-			dueAt = context.state.activeRound.deadlineAt
-		} else if (context.state.phase === 'question_revealed') {
-			action = 'SHOW_LEADERBOARD'
-			dueAt = context.state.activeRound.revealedAt + this.revealDurationMs
-		} else if (context.state.phase === 'leaderboard') {
-			action = 'ADVANCE_TO_NEXT_QUESTION'
-			dueAt =
-				context.state.activeRound.leaderboardShownAt +
-				this.leaderboardDurationMs
-		}
-
-		if (!action || dueAt === null) {
-			this.repository.setScheduledTransition(roomId, null)
+		if (dueAt === null) {
+			this.repository.setScheduledRoomAdvance(roomId, null)
 			return
 		}
 
 		const delayMs = Math.max(0, dueAt - this.now())
 		const handle = setTimeout(() => {
-			this.executeScheduledTransition(roomId, action)
+			this.executeScheduledRoomAdvance(roomId, dueAt)
 		}, delayMs)
 
-		this.repository.setScheduledTransition(roomId, {
-			action,
+		this.repository.setScheduledRoomAdvance(roomId, {
 			dueAt,
 			handle,
 		})
 	}
 
-	private executeScheduledTransition(
-		roomId: RoomId,
-		action: RoomTransitionAction,
-	): void {
+	private executeScheduledRoomAdvance(roomId: RoomId, dueAt: number): void {
 		const context = this.repository.getRoomById(roomId)
-		if (!context || context.scheduledTransition?.action !== action) {
+		if (!context || context.scheduledAdvance?.dueAt !== dueAt) {
 			return
 		}
 
-		const transitionedState = applyRoomTransition(context.state, {
-			type: action,
-			now: this.now(),
-		})
+		const transitionedState = advanceActiveRoomGame(context.state, this.now())
 
 		if (!transitionedState.ok) {
-			this.rescheduleRoomTransition(roomId)
+			this.rescheduleRoomAdvance(roomId)
 			return
 		}
 
@@ -594,15 +591,27 @@ export class RoomsService {
 	}
 
 	private shouldRevealImmediately(state: RoomState): boolean {
-		if (state.phase !== 'question_open') {
+		if (state.phase !== 'active') {
 			return false
 		}
 
-		const connectedPlayerCount = getConnectedPlayerCount(state)
-		if (connectedPlayerCount < 1) {
+		if (state.activeGame.phase !== 'open') {
 			return false
 		}
 
-		return getAnsweredPlayerCount(state) >= connectedPlayerCount
+		const connectedParticipantCount = Object.keys(
+			state.activeGame.participantsById,
+		).filter(participantId => {
+			return state.membersById[participantId]?.connected
+		}).length
+
+		if (connectedParticipantCount < 1) {
+			return false
+		}
+
+		return (
+			getAnsweredParticipantCount(state.activeGame) >=
+			connectedParticipantCount
+		)
 	}
 }

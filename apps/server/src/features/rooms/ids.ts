@@ -1,8 +1,8 @@
 import { randomBytes, randomInt, randomUUID } from 'node:crypto'
 
-import type { RoomCode } from '@maptap/game-domain/multiplayer'
+import type { RoomCode } from '@maptap/game-domain/multiplayer-next/room'
 
-import type { PlayerSessionToken } from './types.js'
+import type { MemberSessionToken } from './types.js'
 
 const ROOM_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
 const ROOM_CODE_LENGTH = 6
@@ -22,11 +22,15 @@ export function createRoomId(): string {
 	return randomUUID()
 }
 
-export function createPlayerId(): string {
+export function createGameId(): string {
 	return randomUUID()
 }
 
-export function createPlayerSessionToken(): PlayerSessionToken {
+export function createMemberId(): string {
+	return randomUUID()
+}
+
+export function createMemberSessionToken(): MemberSessionToken {
 	return randomBytes(24).toString('base64url')
 }
 

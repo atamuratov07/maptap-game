@@ -1,8 +1,8 @@
 import type {
-	PlayerId,
-	PlayerRole,
+	MemberId,
 	RoomId,
-} from '@maptap/game-domain/multiplayer'
+	RoomMemberRole,
+} from '@maptap/game-domain/multiplayer-next/room'
 import type {
 	ClientToServerEvents,
 	InterServerEvents,
@@ -10,13 +10,13 @@ import type {
 } from '@maptap/game-protocol'
 import type { Namespace, Socket } from 'socket.io'
 
-export type PlayerSessionToken = string
+export type MemberSessionToken = string
 
 export interface GameSocketData {
-	role?: PlayerRole
+	role?: RoomMemberRole
 	roomId?: RoomId
-	playerId?: PlayerId
-	playerSessionToken?: PlayerSessionToken
+	memberId?: MemberId
+	memberSessionToken?: MemberSessionToken
 }
 
 export type GameNamespace = Namespace<

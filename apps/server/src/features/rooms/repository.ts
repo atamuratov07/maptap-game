@@ -1,67 +1,63 @@
+import type { MemberId } from '@maptap/game-domain/multiplayer-next'
 import type {
-	PlayerId,
-	PlayerRole,
 	RoomCode,
 	RoomId,
+	RoomMemberRole,
 	RoomState,
-	RoomTransition,
-} from '@maptap/game-domain/multiplayer'
+} from '@maptap/game-domain/multiplayer-next/room'
+import type { MemberSessionToken } from './types'
 
-import type { PlayerSessionToken } from './types.js'
+export interface MemberSessionRecord {
+	token: MemberSessionToken
+	roomId: RoomId
+	memberId: MemberId
+	role: RoomMemberRole
+	socketId: string | null
+}
 
-export type RoomTransitionAction = RoomTransition['type']
-export interface ScheduledRoomTransition {
-	action: RoomTransitionAction
+export interface ScheduledRoomAdvance {
 	dueAt: number
 	handle: NodeJS.Timeout
 }
 
-export interface PlayerSessionRecord {
-	token: PlayerSessionToken
-	roomId: RoomId
-	playerId: PlayerId
-	role: PlayerRole
-	socketId: string | null
-}
-
 export interface RoomContext {
 	state: RoomState
-	playerSessionTokensByPlayerId: Map<PlayerId, PlayerSessionToken>
-	scheduledTransition: ScheduledRoomTransition | null
+	memberSessionTokensByMemberId: Map<MemberId, MemberSessionToken>
+	scheduledAdvance: ScheduledRoomAdvance | null
 }
 
 export class RoomsRepository {
 	private readonly roomsById = new Map<RoomId, RoomContext>()
-	private readonly roomIdByCode = new Map<RoomCode, RoomId>()
+	private readonly roomIdsByCode = new Map<RoomCode, RoomId>()
 	private readonly sessionsByToken = new Map<
-		PlayerSessionToken,
-		PlayerSessionRecord
+		MemberSessionToken,
+		MemberSessionRecord
 	>()
-	private readonly sessionTokenBySocketId = new Map<
+	private readonly sessionTokensBySocketId = new Map<
 		string,
-		PlayerSessionToken
+		MemberSessionToken
 	>()
 
 	hasRoomCode(roomCode: RoomCode): boolean {
-		return this.roomIdByCode.has(roomCode)
+		return this.roomIdsByCode.has(roomCode)
 	}
 
 	createRoom(state: RoomState): RoomContext {
 		if (
 			this.roomsById.has(state.roomId) ||
-			this.roomIdByCode.has(state.roomCode)
+			this.roomIdsByCode.has(state.roomCode)
 		) {
 			throw new Error(`Room ${state.roomId} already exists.`)
 		}
 
 		const context: RoomContext = {
 			state,
-			playerSessionTokensByPlayerId: new Map(),
-			scheduledTransition: null,
+			memberSessionTokensByMemberId: new Map(),
+			scheduledAdvance: null,
 		}
 
 		this.roomsById.set(state.roomId, context)
-		this.roomIdByCode.set(state.roomCode, state.roomId)
+		this.roomIdsByCode.set(state.roomCode, state.roomId)
 
 		return context
 	}
@@ -71,7 +67,7 @@ export class RoomsRepository {
 	}
 
 	getRoomByCode(roomCode: RoomCode): RoomContext | undefined {
-		const roomId = this.roomIdByCode.get(roomCode)
+		const roomId = this.roomIdsByCode.get(roomCode)
 		return roomId ? this.roomsById.get(roomId) : undefined
 	}
 
@@ -90,81 +86,106 @@ export class RoomsRepository {
 		}
 
 		if (context.state.roomCode !== newState.roomCode) {
-			this.roomIdByCode.delete(context.state.roomCode)
-			this.roomIdByCode.set(newState.roomCode, roomId)
+			this.roomIdsByCode.delete(context.state.roomCode)
+			this.roomIdsByCode.set(newState.roomCode, roomId)
 		}
 
 		context.state = newState
 		return context
 	}
 
-	setScheduledTransition(
+	setScheduledRoomAdvance(
 		roomId: RoomId,
-		scheduledTransition: ScheduledRoomTransition | null,
+		scheduledRoomAdvance: ScheduledRoomAdvance | null,
 	): void {
 		const context = this.roomsById.get(roomId)
 		if (!context) {
 			return
 		}
 
-		if (context.scheduledTransition) {
-			clearTimeout(context.scheduledTransition.handle)
+		if (context.scheduledAdvance) {
+			clearTimeout(context.scheduledAdvance.handle)
 		}
 
-		context.scheduledTransition = scheduledTransition
+		context.scheduledAdvance = scheduledRoomAdvance
 	}
 
-	createPlayerSession(session: PlayerSessionRecord): PlayerSessionRecord {
+	deleteRoom(roomId: RoomId): RoomContext | undefined {
+		const context = this.roomsById.get(roomId)
+		if (!context) {
+			return undefined
+		}
+
+		if (context.scheduledAdvance) {
+			clearTimeout(context.scheduledAdvance.handle)
+		}
+
+		for (const token of context.memberSessionTokensByMemberId.values()) {
+			const session = this.sessionsByToken.get(token)
+			if (session?.socketId) {
+				this.sessionTokensBySocketId.delete(session.socketId)
+			}
+
+			this.sessionsByToken.delete(token)
+		}
+
+		this.roomIdsByCode.delete(context.state.roomCode)
+		this.roomsById.delete(roomId)
+
+		return context
+	}
+
+	createMemberSession(session: MemberSessionRecord): MemberSessionRecord {
 		if (this.sessionsByToken.has(session.token)) {
-			throw new Error(`Player session ${session.token} already exists.`)
+			throw new Error(`Member session ${session.token} already exists.`)
 		}
 
 		this.sessionsByToken.set(session.token, session)
 		const context = this.roomsById.get(session.roomId)
-		context?.playerSessionTokensByPlayerId.set(
-			session.playerId,
+		context?.memberSessionTokensByMemberId.set(
+			session.memberId,
 			session.token,
 		)
 
 		if (session.socketId) {
-			this.sessionTokenBySocketId.set(session.socketId, session.token)
+			this.sessionTokensBySocketId.set(session.socketId, session.token)
 		}
 
 		return session
 	}
 
-	getPlayerSession(
-		playerSessionToken: PlayerSessionToken,
-	): PlayerSessionRecord | undefined {
-		return this.sessionsByToken.get(playerSessionToken)
+	getMemberSession(
+		MemberSessionToken: MemberSessionToken,
+	): MemberSessionRecord | undefined {
+		return this.sessionsByToken.get(MemberSessionToken)
 	}
 
-	getPlayerSessionBySocketId(
+	getMemberSessionBySocketId(
 		socketId: string,
-	): PlayerSessionRecord | undefined {
-		const playerSessionToken = this.sessionTokenBySocketId.get(socketId)
-		return playerSessionToken
-			? this.sessionsByToken.get(playerSessionToken)
+	): MemberSessionRecord | undefined {
+		const MemberSessionToken = this.sessionTokensBySocketId.get(socketId)
+		return MemberSessionToken
+			? this.sessionsByToken.get(MemberSessionToken)
 			: undefined
 	}
 
 	bindSocketToSession(
-		playerSessionToken: PlayerSessionToken,
+		MemberSessionToken: MemberSessionToken,
 		socketId: string,
 	): string | undefined {
-		const session = this.sessionsByToken.get(playerSessionToken)
+		const session = this.sessionsByToken.get(MemberSessionToken)
 		if (!session) {
 			return undefined
 		}
 
-		const previousToken = this.sessionTokenBySocketId.get(socketId)
-		if (previousToken && previousToken !== playerSessionToken) {
+		const previousToken = this.sessionTokensBySocketId.get(socketId)
+		if (previousToken && previousToken !== MemberSessionToken) {
 			const previousSession = this.sessionsByToken.get(previousToken)
 			if (previousSession && previousSession.socketId === socketId) {
 				previousSession.socketId = null
 			}
 
-			this.sessionTokenBySocketId.delete(socketId)
+			this.sessionTokensBySocketId.delete(socketId)
 		}
 
 		const previousSocketId =
@@ -173,24 +194,24 @@ export class RoomsRepository {
 				: undefined
 
 		if (previousSocketId) {
-			this.sessionTokenBySocketId.delete(previousSocketId)
+			this.sessionTokensBySocketId.delete(previousSocketId)
 		}
 
 		session.socketId = socketId
-		this.sessionTokenBySocketId.set(socketId, playerSessionToken)
+		this.sessionTokensBySocketId.set(socketId, MemberSessionToken)
 
 		return previousSocketId
 	}
 
-	unbindSocket(socketId: string): PlayerSessionRecord | undefined {
-		const playerSessionToken = this.sessionTokenBySocketId.get(socketId)
-		if (!playerSessionToken) {
+	unbindSocket(socketId: string): MemberSessionRecord | undefined {
+		const MemberSessionToken = this.sessionTokensBySocketId.get(socketId)
+		if (!MemberSessionToken) {
 			return undefined
 		}
 
-		this.sessionTokenBySocketId.delete(socketId)
+		this.sessionTokensBySocketId.delete(socketId)
 
-		const session = this.sessionsByToken.get(playerSessionToken)
+		const session = this.sessionsByToken.get(MemberSessionToken)
 		if (session && session.socketId === socketId) {
 			session.socketId = null
 		}
@@ -198,13 +219,13 @@ export class RoomsRepository {
 		return session
 	}
 
-	listPlayerSessions(roomId: RoomId): PlayerSessionRecord[] {
+	listMemberSessions(roomId: RoomId): MemberSessionRecord[] {
 		const context = this.roomsById.get(roomId)
 		if (!context) {
 			return []
 		}
 
-		return [...context.playerSessionTokensByPlayerId.values()].flatMap(
+		return [...context.memberSessionTokensByMemberId.values()].flatMap(
 			token => {
 				const session = this.sessionsByToken.get(token)
 				return session ? [session] : []
@@ -215,7 +236,6 @@ export class RoomsRepository {
 	getConnectedSessionCount(): number {
 		let connectedSessionCount = 0
 
-		console.log(Array.from(this.sessionsByToken.values()))
 		for (const session of this.sessionsByToken.values()) {
 			if (session.socketId) {
 				connectedSessionCount += 1
@@ -225,11 +245,11 @@ export class RoomsRepository {
 		return connectedSessionCount
 	}
 
-	clearAllScheduledTransitions(): void {
+	clearAllScheduledRoomAdvances(): void {
 		for (const context of this.roomsById.values()) {
-			if (context.scheduledTransition) {
-				clearTimeout(context.scheduledTransition.handle)
-				context.scheduledTransition = null
+			if (context.scheduledAdvance) {
+				clearTimeout(context.scheduledAdvance.handle)
+				context.scheduledAdvance = null
 			}
 		}
 	}
