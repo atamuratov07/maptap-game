@@ -12,12 +12,6 @@ export const roomCodeSchema = z
 
 export const createRoomRequestSchema = z.object({
 	hostName: z.string().trim().min(1).max(20),
-	gameConfig: z.object({
-		questionCount: z.number().int().min(1).max(50),
-		difficulty: difficultySchema,
-		scope: scopeSchema,
-		questionDurationMs: z.number().int().min(5_000).max(120_000),
-	}),
 })
 
 export const lookupRoomRequestSchema = z.object({
@@ -26,18 +20,25 @@ export const lookupRoomRequestSchema = z.object({
 
 export const joinRoomRequestSchema = z.object({
 	roomCode: roomCodeSchema,
-	playerName: z.string().trim().min(1).max(20),
+	memberName: z.string().trim().min(1).max(20),
 })
 
 export const resumeHostRoomRequestSchema = z.object({
-	playerSessionToken: z.string().min(1),
+	memberSessionToken: z.string().min(1),
 })
 
 export const resumePlayerRoomRequestSchema = z.object({
-	playerSessionToken: z.string().min(1),
+	memberSessionToken: z.string().min(1),
 })
 
-export const startGameRequestSchema = z.object({})
+export const startGameRequestSchema = z.object({
+	gameConfig: z.object({
+		questionCount: z.number().int().min(1).max(50),
+		difficulty: difficultySchema,
+		scope: scopeSchema,
+		questionDurationMs: z.number().int().min(5_000).max(120_000),
+	}),
+})
 
 export const submitAnswerRequestSchema = z.object({
 	countryId: z.string().regex(/^\d{3}$/),

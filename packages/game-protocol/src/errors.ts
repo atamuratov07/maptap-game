@@ -1,4 +1,7 @@
-import type { CommandError, SessionPreparationError } from '@maptap/game-domain'
+import type {
+	CommandError,
+	SessionPreparationError,
+} from '@maptap/game-domain/multiplayer-next'
 
 export type TransportError =
 	| { code: 'invalid_payload' }

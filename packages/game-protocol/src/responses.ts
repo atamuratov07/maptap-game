@@ -1,23 +1,22 @@
-import { z } from 'zod'
-
 import {
 	ROOM_PHASES,
-	type PlayerId,
-	type PlayerRole,
+	type MemberId,
 	type RoomCode,
 	type RoomHostView,
 	type RoomId,
+	type RoomMemberRole,
 	type RoomPlayerView,
-} from '@maptap/game-domain/multiplayer'
+} from '@maptap/game-domain/multiplayer-next/room'
 
+import { z } from 'zod'
 export const roomPhaseSchema = z.enum(ROOM_PHASES)
 
 export interface SessionIdentity {
 	roomId: RoomId
 	roomCode: RoomCode
-	playerId: PlayerId
-	role: PlayerRole
-	playerSessionToken: string
+	memberId: MemberId
+	role: RoomMemberRole
+	memberSessionToken: string
 }
 
 export interface CreateRoomResponse extends SessionIdentity {
@@ -34,7 +33,7 @@ export const lookupRoomFoundResponseSchema = z.object({
 	roomCode: z.string().trim().length(6),
 	phase: roomPhaseSchema,
 	joinable: z.boolean(),
-	playerCount: z.number().int().nonnegative(),
+	memberCount: z.number().int().nonnegative(),
 	hostName: z.string().trim().min(1),
 })
 
@@ -59,13 +58,13 @@ export interface JoinRoomResponse extends SessionIdentity {
 
 export type ResumeHostRoomResponse = {
 	roomId: RoomId
-	playerId: PlayerId
+	memberId: MemberId
 	snapshot: RoomHostView
 }
 
 export interface ResumePlayerRoomResponse {
 	roomId: RoomId
-	playerId: PlayerId
+	memberId: MemberId
 	snapshot: RoomPlayerView
 }
 
