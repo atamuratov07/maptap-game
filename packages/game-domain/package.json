@@ -9,7 +9,9 @@
 		".": "./src/index.ts",
 		"./singleplayer": "./src/singleplayer/index.ts",
 		"./multiplayer": "./src/multiplayer/index.ts",
-		"./multiplayer-next": "./src/multiplayer+/index.ts"
+		"./multiplayer-next": "./src/multiplayer-next/index.ts",
+		"./multiplayer-next/game": "./src/multiplayer-next/game/index.ts",
+		"./multiplayer-next/room": "./src/multiplayer-next/room/index.ts"
 	},
 	"sideEffects": false
 }

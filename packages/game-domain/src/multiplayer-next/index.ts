@@ -4,11 +4,30 @@ export {
 	type DomainError,
 	type SessionPreparationError,
 } from './errors'
-export * as game from './game/index'
+
 export {
 	advanceActiveRoomGame,
 	startRoomGame,
 	submitRoomGameAnswer,
 	type StartRoomGameInput,
 } from './orchestration'
-export * as room from './room/index'
+
+export {
+	createRoom,
+	toHostRoomView,
+	toPlayerRoomView,
+	toRoomView,
+	type MemberId,
+	type RoomHostView,
+	type RoomPlayerView,
+	type RoomState,
+	type RoomView,
+} from './room/index'
+
+export {
+	DEFAULT_GAME_CONFIG,
+	prepareGameSession,
+	type GameCommand,
+	type GameConfig,
+	type GameSession,
+} from './game/index'
