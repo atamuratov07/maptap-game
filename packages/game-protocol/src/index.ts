@@ -19,6 +19,7 @@ export {
 	lookupRoomRequestSchema,
 	resumeHostRoomRequestSchema,
 	resumePlayerRoomRequestSchema,
+	returnToLobbyRequestSchema,
 	roomCodeSchema,
 	scopeSchema,
 	startGameRequestSchema,
@@ -28,6 +29,7 @@ export {
 	type LookupRoomRequest,
 	type ResumeHostRoomRequest,
 	type ResumePlayerRoomRequest,
+	type ReturnToLobbyRequest,
 	type StartGameRequest,
 	type SubmitAnswerRequest,
 } from './requests'

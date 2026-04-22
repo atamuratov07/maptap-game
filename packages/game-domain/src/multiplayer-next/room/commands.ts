@@ -33,7 +33,7 @@ export type RoomCommand =
 			activeGame: GameOpenState
 	  }
 	| {
-			type: 'RETURN_LOBBY'
+			type: 'RETURN_TO_LOBBY'
 			actorId: MemberId
 			now: number
 	  }
@@ -172,7 +172,7 @@ export function applyRoomCommand(
 			return ok(toRoomActiveState(state, command.activeGame))
 		}
 
-		case 'RETURN_LOBBY': {
+		case 'RETURN_TO_LOBBY': {
 			if (state.phase !== 'finished') {
 				return err({
 					code: 'room_not_finished',

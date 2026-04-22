@@ -5,6 +5,7 @@ import type {
 	LookupRoomRequest,
 	ResumeHostRoomRequest,
 	ResumePlayerRoomRequest,
+	ReturnToLobbyRequest,
 	StartGameRequest,
 	SubmitAnswerRequest,
 } from './requests'
@@ -42,6 +43,10 @@ export interface ClientToServerEvents {
 	'room:player-resume': (
 		payload: ResumePlayerRoomRequest,
 		ack: AckCallback<ResumePlayerRoomResponse>,
+	) => void
+	'room:return-to-lobby': (
+		payload: ReturnToLobbyRequest,
+		ack: AckCallback<EmptyAckData>,
 	) => void
 	'game:start': (
 		payload: StartGameRequest,

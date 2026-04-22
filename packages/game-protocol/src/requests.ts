@@ -31,6 +31,8 @@ export const resumePlayerRoomRequestSchema = z.object({
 	memberSessionToken: z.string().min(1),
 })
 
+export const returnToLobbyRequestSchema = z.object({})
+
 export const startGameRequestSchema = z.object({
 	gameConfig: z.object({
 		questionCount: z.number().int().min(1).max(50),
@@ -51,5 +53,6 @@ export type ResumeHostRoomRequest = z.infer<typeof resumeHostRoomRequestSchema>
 export type ResumePlayerRoomRequest = z.infer<
 	typeof resumePlayerRoomRequestSchema
 >
+export type ReturnToLobbyRequest = z.infer<typeof returnToLobbyRequestSchema>
 export type StartGameRequest = z.infer<typeof startGameRequestSchema>
 export type SubmitAnswerRequest = z.infer<typeof submitAnswerRequestSchema>

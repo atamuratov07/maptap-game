@@ -5,6 +5,7 @@ import {
 	lookupRoomRequestSchema,
 	resumeHostRoomRequestSchema,
 	resumePlayerRoomRequestSchema,
+	returnToLobbyRequestSchema,
 	startGameRequestSchema,
 	submitAnswerRequestSchema,
 } from '@maptap/game-protocol'
@@ -239,6 +240,30 @@ export function registerRoomHandlers({
 			)
 
 			return respondWithSuccess(ack, resumedRoom.value.response)
+		})
+
+		socket.on('room:return-to-lobby', (payload, ack) => {
+			const auth = requireAuthenticated(socket)
+			if (!auth.ok) {
+				return respondWithError(ack, { code: 'unauthorized' })
+			}
+
+			const parsed = parsePayload(returnToLobbyRequestSchema, payload)
+			if (!parsed.ok) {
+				return respondWithError(ack, {
+					code: 'invalid_payload',
+				})
+			}
+
+			const returnedRoomResult = roomsService.returnToLobby({
+				memberSessionToken: auth.value,
+			})
+
+			if (!returnedRoomResult.ok) {
+				return respondWithError(ack, returnedRoomResult.error)
+			}
+
+			return respondWithSuccess(ack, returnedRoomResult.value)
 		})
 
 		socket.on('game:start', (payload, ack) => {

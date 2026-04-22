@@ -93,6 +93,10 @@ export interface SubmitAnswerInput {
 	countryId: string
 }
 
+export interface ReturnToLobbyInput {
+	memberSessionToken: MemberSessionToken
+}
+
 export class RoomsService {
 	private readonly countryPool: CountryPool
 	private readonly repository: RoomsRepository
@@ -367,6 +371,33 @@ export class RoomsService {
 			},
 			replacedSocketId,
 		})
+	}
+
+	returnToLobby(input: ReturnToLobbyInput): ServiceResult<EmptyAckData> {
+		const sessionContext = this.getMemberSessionContext(
+			input.memberSessionToken,
+		)
+
+		if (!sessionContext.ok) {
+			return sessionContext
+		}
+
+		const nextStateResult = applyRoomCommand(sessionContext.value.state, {
+			type: 'RETURN_TO_LOBBY',
+			actorId: sessionContext.value.memberSession.memberId,
+			now: this.now(),
+		})
+
+		if (!nextStateResult.ok) {
+			return nextStateResult
+		}
+
+		this.commitRoomState(
+			sessionContext.value.state.roomId,
+			nextStateResult.value,
+		)
+
+		return ok({})
 	}
 
 	startGame(input: StartGameInput): ServiceResult<EmptyAckData> {
