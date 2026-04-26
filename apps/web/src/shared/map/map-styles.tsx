@@ -23,7 +23,7 @@ export const LABELS_BOTTOM_LAYER_ID = 'geolines'
 
 export const WRONG_FILL = '#f87171'
 export const REVEALED_FILL = '#22c55e'
-export const SELECTED_FILL = '#f59e0b'
+export const SELECTED_FILL = '#6366f1'
 
 export type FillColorExpression = NonNullable<
 	FillLayerSpecification['paint']

@@ -173,7 +173,8 @@ export function SetupPage(): JSX.Element {
 						<Button
 							type='button'
 							variant='teal'
-							className='hover:-translate-y-0.5'
+							is3d
+							className='w-full sm:w-auto'
 							onClick={handleStart}
 						>
 							Начать игру

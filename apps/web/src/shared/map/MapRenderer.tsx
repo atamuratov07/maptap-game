@@ -494,6 +494,7 @@ function MapRendererInner({
 					aria-label='Плоская карта'
 					title='Плоская карта'
 					active={isMercatorProjection}
+					disabled={isMercatorProjection}
 					onClick={() => switchProjection(MERCATOR_PROJECTION)}
 				>
 					<MapIcon aria-hidden='true' size={24} strokeWidth={2} />
@@ -504,11 +505,11 @@ function MapRendererInner({
 					title='Глобус'
 					active={isGlobeProjection}
 					onClick={() => {
-						if (!isContinentChosen) {
+						if (!isGlobeProjection && !isContinentChosen) {
 							switchProjection(GLOBE_PROJECTION)
 						}
 					}}
-					disabled={isContinentChosen}
+					disabled={isGlobeProjection || isContinentChosen}
 				>
 					<Globe aria-hidden='true' size={24} strokeWidth={2} />
 				</IconButton>

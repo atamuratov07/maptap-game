@@ -16,10 +16,11 @@ import {
 import { useEffect, useMemo, useRef } from 'react'
 import { MapRenderer } from '../../shared/map/MapRenderer'
 import type { MapHighlightTone, MapRendererProps } from '../../shared/map/types'
+import { ScoreBanner } from '../../shared/widgets/ScoreBanner'
 import { CountryInfoCard } from '../../shared/widgets/CountryInfoCard'
+import { Button } from '../../shared/ui'
 import { GameHeader } from '../components/GameHeader'
 import { Hearts } from '../components/Hearts'
-import { ScoreBanner } from '../components/ScoreBanner'
 
 interface GameScreenProps {
 	state: GameState
@@ -151,13 +152,16 @@ export function GameScreen({
 
 				{state.phase === 'revealed' ? (
 					<div className='absolute bottom-8 left-1/2 z-20 -translate-x-1/2'>
-						<button
+						<Button
 							type='button'
-							className='rounded-lg bg-sky-500 px-4 py-2.5 text-sm font-bold text-white shadow-[0_6px_20px_rgba(14,165,233,0.35)] transition hover:-translate-y-0.5 hover:bg-sky-400'
+							variant='teal'
+							size='sm'
+							is3d
+							className='px-4 py-2.5'
 							onClick={onNext}
 						>
 							Следующий вопрос
-						</button>
+						</Button>
 					</div>
 				) : null}
 			</main>

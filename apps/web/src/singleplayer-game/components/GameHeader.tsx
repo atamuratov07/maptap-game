@@ -1,5 +1,5 @@
 import { Flag, LogOut } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Button, ButtonLink } from '../../shared/ui'
 import { QuestionTimer } from './QuestionTimer'
 
 interface GameHeaderBarProps {
@@ -36,10 +36,12 @@ export function GameHeader({
 					</p>
 				</div>
 				<div className='mx-auto grid items-end gap-1 grid-cols-[auto_1fr_auto] sm:gap-4'>
-					<Link
+					<ButtonLink
 						to='/singleplayer'
 						aria-label='Выйти'
-						className='inline-flex items-center justify-center rounded-lg  bg-white/90 px-3 py-2 text-sm font-bold text-slate-700 transition  hover:text-slate-950 sm:px-3.5'
+						variant='inverse'
+						size='sm'
+						className='min-h-10 px-3 text-slate-700 hover:text-slate-950 sm:px-3.5'
 					>
 						<LogOut
 							className='shrink-0 rotate-180 sm:hidden'
@@ -48,7 +50,7 @@ export function GameHeader({
 							strokeWidth={2}
 						/>
 						<span className='hidden sm:inline'>Выйти</span>
-					</Link>
+					</ButtonLink>
 
 					<div className='flex min-w-0 justify-center'>
 						<div className='flex flex-col items-center justify-center gap-2 text-center'>
@@ -68,10 +70,12 @@ export function GameHeader({
 						</div>
 					</div>
 
-					<button
+					<Button
 						type='button'
 						aria-label='Сдаться'
-						className='inline-flex items-center justify-center rounded-lg bg-white/20 px-3 py-2 text-sm font-bold text-slate-50 transition hover:bg-white/30 disabled:cursor-not-allowed disabled:opacity-55 sm:px-3.5'
+						variant='soft'
+						size='sm'
+						className='min-h-10 bg-white/20 px-3 text-slate-50 hover:bg-white/30 disabled:opacity-55 sm:px-3.5'
 						onClick={onGiveUp}
 						disabled={!isPlaying}
 					>
@@ -82,7 +86,7 @@ export function GameHeader({
 							strokeWidth={2}
 						/>
 						<span className='hidden sm:inline'>Сдаться</span>
-					</button>
+					</Button>
 				</div>
 				<div className='absolute top-1 right-4 text-sm font-bold'>
 					<QuestionTimer

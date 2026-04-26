@@ -75,6 +75,8 @@ export function GameCard({
 				className={getButtonClassName({
 					variant: styles.buttonVariant,
 					size: 'md',
+					is3d: true,
+					className: 'w-full sm:w-fit',
 				})}
 			>
 				{ctaLabel}

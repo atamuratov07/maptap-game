@@ -75,6 +75,94 @@
 	}
 }
 
+.button-3d {
+	--button-3d-edge: rgba(15, 23, 42, 0.32);
+	--button-3d-glow: rgba(15, 23, 42, 0.18);
+	--button-3d-edge-height: 4px;
+	position: relative;
+	isolation: isolate;
+	overflow: hidden;
+	transform: translateY(calc(-1 * var(--button-3d-edge-height)));
+	box-shadow:
+		0 var(--button-3d-edge-height) 0 var(--button-3d-edge),
+		0 16px 28px var(--button-3d-glow);
+	transition:
+		transform 140ms cubic-bezier(0.2, 0.8, 0.2, 1),
+		box-shadow 140ms cubic-bezier(0.2, 0.8, 0.2, 1),
+		filter 140ms ease;
+	will-change: transform;
+}
+
+.button-3d::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	background: linear-gradient(
+		180deg,
+		rgba(255, 255, 255, 0.28),
+		rgba(255, 255, 255, 0) 48%
+	);
+	pointer-events: none;
+}
+
+.button-3d:hover:not(:disabled) {
+	transform: translateY(calc(-1 * var(--button-3d-edge-height) - 1px));
+	box-shadow:
+		0 calc(var(--button-3d-edge-height) + 1px) 0 var(--button-3d-edge),
+		0 18px 32px var(--button-3d-glow);
+	filter: saturate(1.04) brightness(1.02);
+}
+
+.button-3d:active:not(:disabled) {
+	transform: translateY(0);
+	box-shadow:
+		0 1px 0 var(--button-3d-edge),
+		0 8px 18px var(--button-3d-glow);
+	transition-duration: 70ms;
+}
+
+.button-3d-active {
+	transform: translateY(0);
+	box-shadow:
+		0 1px 0 var(--button-3d-edge),
+		0 8px 18px var(--button-3d-glow);
+}
+
+.button-3d:disabled:not(.button-3d-active) {
+	transform: translateY(-1px);
+	box-shadow:
+		0 1px 0 rgba(15, 23, 42, 0.18),
+		0 8px 16px rgba(15, 23, 42, 0.08);
+}
+
+.button-3d-amber {
+	--button-3d-edge: #b45309;
+	--button-3d-glow: rgba(245, 158, 11, 0.28);
+}
+
+.button-3d-teal {
+	--button-3d-edge: #0f4f49;
+	--button-3d-glow: rgba(13, 148, 136, 0.26);
+}
+
+.button-3d-danger {
+	--button-3d-edge: #991b1b;
+	--button-3d-glow: rgba(220, 38, 38, 0.24);
+}
+
+.button-3d-secondary,
+.button-3d-inverse,
+.button-3d-nav {
+	--button-3d-edge: #cbd5e1;
+	--button-3d-glow: rgba(15, 23, 42, 0.16);
+}
+
+.button-3d-soft {
+	--button-3d-edge: #7c8a9b;
+	--button-3d-glow: rgba(15, 23, 42, 0.14);
+}
+
 .maplibregl-ctrl-top-left {
 	top: 7.75rem;
 	left: 0.5rem;
@@ -145,4 +233,42 @@
 	to {
 		opacity: 1;
 	}
+}
+
+@keyframes countdown-time-bump {
+	0% {
+		transform: scale(1);
+	}
+
+	45% {
+		transform: scale(1.18);
+	}
+
+	100% {
+		transform: scale(1);
+	}
+}
+
+@keyframes countdown-badge-bump {
+	0% {
+		transform: scale(1);
+	}
+
+	45% {
+		transform: scale(1.06);
+	}
+
+	100% {
+		transform: scale(1);
+	}
+}
+
+.countdown-time-bump {
+	animation: countdown-time-bump 220ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+	transform-origin: center;
+}
+
+.countdown-badge-bump {
+	animation: countdown-badge-bump 220ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+	transform-origin: center;
 }
