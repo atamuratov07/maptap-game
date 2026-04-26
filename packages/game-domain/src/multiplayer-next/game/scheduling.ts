@@ -8,7 +8,6 @@ export interface GameAdvanceScheduleConfig {
 export function getNextGameAdvanceAt(
 	game: GameState,
 	config: GameAdvanceScheduleConfig,
-	now: number,
 ): number | null {
 	switch (game.phase) {
 		case 'open':
@@ -23,6 +22,6 @@ export function getNextGameAdvanceAt(
 			)
 
 		case 'completed':
-			return now
+			return null
 	}
 }

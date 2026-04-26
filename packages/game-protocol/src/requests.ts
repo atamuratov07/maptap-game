@@ -32,6 +32,7 @@ export const resumePlayerRoomRequestSchema = z.object({
 })
 
 export const returnToLobbyRequestSchema = z.object({})
+export const terminateRoomRequestSchema = z.object({})
 
 export const startGameRequestSchema = z.object({
 	gameConfig: z.object({
@@ -54,5 +55,6 @@ export type ResumePlayerRoomRequest = z.infer<
 	typeof resumePlayerRoomRequestSchema
 >
 export type ReturnToLobbyRequest = z.infer<typeof returnToLobbyRequestSchema>
+export type TerminateRoomRequest = z.infer<typeof terminateRoomRequestSchema>
 export type StartGameRequest = z.infer<typeof startGameRequestSchema>
 export type SubmitAnswerRequest = z.infer<typeof submitAnswerRequestSchema>

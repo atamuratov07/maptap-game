@@ -75,13 +75,12 @@ export function submitRoomGameAnswer(
 export function getNextActiveRoomGameAdvanceAt(
 	room: RoomState,
 	config: GameAdvanceScheduleConfig,
-	now: number,
 ): number | null {
 	if (room.phase !== 'active') {
 		return null
 	}
 
-	return getNextGameAdvanceAt(room.activeGame, config, now)
+	return getNextGameAdvanceAt(room.activeGame, config)
 }
 
 export function advanceActiveRoomGame(

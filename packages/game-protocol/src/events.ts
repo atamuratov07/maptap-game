@@ -8,6 +8,7 @@ import type {
 	ReturnToLobbyRequest,
 	StartGameRequest,
 	SubmitAnswerRequest,
+	TerminateRoomRequest,
 } from './requests'
 import type {
 	CreateRoomResponse,
@@ -46,6 +47,10 @@ export interface ClientToServerEvents {
 	) => void
 	'room:return-to-lobby': (
 		payload: ReturnToLobbyRequest,
+		ack: AckCallback<EmptyAckData>,
+	) => void
+	'room:terminate': (
+		payload: TerminateRoomRequest,
 		ack: AckCallback<EmptyAckData>,
 	) => void
 	'game:start': (

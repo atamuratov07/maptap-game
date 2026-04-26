@@ -97,6 +97,10 @@ export interface ReturnToLobbyInput {
 	memberSessionToken: MemberSessionToken
 }
 
+export interface TerminateRoomInput {
+	memberSessionToken: MemberSessionToken
+}
+
 export class RoomsService {
 	private readonly countryPool: CountryPool
 	private readonly repository: RoomsRepository
@@ -400,6 +404,28 @@ export class RoomsService {
 		return ok({})
 	}
 
+	terminateRoom(input: TerminateRoomInput): ServiceResult<EmptyAckData> {
+		const sessionContext = this.getMemberSessionContext(
+			input.memberSessionToken,
+		)
+
+		if (!sessionContext.ok) {
+			return sessionContext
+		}
+
+		const { memberSession, state } = sessionContext.value
+		if (
+			memberSession.role !== 'host' ||
+			memberSession.memberId !== state.hostId
+		) {
+			return err({ code: 'unauthorized' })
+		}
+
+		this.closeRoom(state.roomId, 'host_terminated')
+
+		return ok({})
+	}
+
 	startGame(input: StartGameInput): ServiceResult<EmptyAckData> {
 		const gameSession = prepareGameSession(this.countryPool, input.gameConfig)
 		if (!gameSession.ok) {
@@ -580,13 +606,12 @@ export class RoomsService {
 			return
 		}
 
-		let dueAt = getNextActiveRoomGameAdvanceAt(
+		const dueAt = getNextActiveRoomGameAdvanceAt(
 			context.state,
 			{
 				revealDurationMs: this.revealDurationMs,
 				leaderboardDurationMs: this.leaderboardDurationMs,
 			},
-			this.now(),
 		)
 
 		if (dueAt === null) {

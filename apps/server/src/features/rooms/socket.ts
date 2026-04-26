@@ -8,6 +8,7 @@ import {
 	returnToLobbyRequestSchema,
 	startGameRequestSchema,
 	submitAnswerRequestSchema,
+	terminateRoomRequestSchema,
 } from '@maptap/game-protocol'
 import type { ZodType } from 'zod'
 
@@ -264,6 +265,32 @@ export function registerRoomHandlers({
 			}
 
 			return respondWithSuccess(ack, returnedRoomResult.value)
+		})
+
+		socket.on('room:terminate', (payload, ack) => {
+			const auth = requireAuthenticated(socket)
+			if (!auth.ok) {
+				return respondWithError(ack, { code: 'unauthorized' })
+			}
+
+			const parsed = parsePayload(terminateRoomRequestSchema, payload)
+			if (!parsed.ok) {
+				return respondWithError(ack, {
+					code: 'invalid_payload',
+				})
+			}
+
+			const terminatedRoomResult = roomsService.terminateRoom({
+				memberSessionToken: auth.value,
+			})
+
+			if (!terminatedRoomResult.ok) {
+				return respondWithError(ack, terminatedRoomResult.error)
+			}
+
+			clearSocketIdentity(socket)
+
+			return respondWithSuccess(ack, terminatedRoomResult.value)
 		})
 
 		socket.on('game:start', (payload, ack) => {

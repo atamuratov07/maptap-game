@@ -35,10 +35,15 @@ export interface HostSubmissionView extends EvaluatedViewerSubmissionView {
 interface GameViewBase {
 	gameId: string
 	phase: GamePhase
+	viewerParticipantId: MemberId
 	questionCount: number
 	currentQuestionNumber: number
+	scope: GameState['session']['config']['scope']
 	eligibleCountryIds: readonly CountryId[]
 	participantCount: number
+	viewerScore: number
+	viewerCorrectCount: number
+	viewerRank: number | null
 	leaderboard: GameLeaderboardEntry[] | null
 }
 
@@ -100,9 +105,7 @@ export type HostGameView =
 	| CompletedGameView
 
 export type OpenGameView = OpenGamePlayerView | OpenGameHostView
-export type RevealedGameView =
-	| RevealedGamePlayerView
-	| RevealedGameHostView
+export type RevealedGameView = RevealedGamePlayerView | RevealedGameHostView
 export type LeaderboardGameView =
 	| LeaderboardGamePlayerView
 	| LeaderboardGameHostView
@@ -144,18 +147,33 @@ function toHostSubmissionView(
 	}
 }
 
-function getBaseView(state: GameState): GameViewBase {
+function getBaseView(state: GameState, viewerId: MemberId): GameViewBase {
+	const leaderboard = getGameLeaderboard(state)
+	const canShowLeaderboard =
+		state.phase === 'leaderboard' || state.phase === 'completed'
+	const viewerParticipant = state.participantsById[viewerId]
+	const viewerLeaderboardEntry =
+		leaderboard.find(entry => entry.participantId === viewerId) ?? null
+
 	return {
 		gameId: state.gameId,
 		phase: state.phase,
+		viewerParticipantId: viewerId,
 		questionCount: getGameQuestionCount(state),
 		currentQuestionNumber: getGameCurrentQuestionNumber(state),
+		scope: state.session.config.scope,
 		eligibleCountryIds: state.session.eligibleIds,
 		participantCount: getGameParticipantCount(state),
-		leaderboard:
-			state.phase === 'leaderboard' || state.phase === 'completed'
-				? getGameLeaderboard(state)
-				: null,
+		viewerScore:
+			viewerParticipant?.score ?? viewerLeaderboardEntry?.score ?? 0,
+		viewerCorrectCount:
+			viewerParticipant?.correctCount ??
+			viewerLeaderboardEntry?.correctCount ??
+			0,
+		viewerRank: canShowLeaderboard
+			? (viewerLeaderboardEntry?.rank ?? null)
+			: null,
+		leaderboard: canShowLeaderboard ? leaderboard : null,
 	}
 }
 
@@ -180,7 +198,7 @@ function toVisibleGameView(
 	viewerId: MemberId,
 	includeAllSubmissions: boolean,
 ): GameView {
-	const base = getBaseView(state)
+	const base = getBaseView(state, viewerId)
 
 	switch (state.phase) {
 		case 'open': {

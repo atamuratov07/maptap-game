@@ -1,4 +1,4 @@
-import type { GameResult } from '../game/types'
+import type { GameLeaderboardEntry, GameResult } from '../game/types'
 import {
 	toHostGameView,
 	toPlayerGameView,
@@ -54,6 +54,7 @@ export interface RoomHostFinishedView extends RoomHostViewBase {
 	activeGame: null
 	finishedAt: number
 	lastGameResult: GameResult
+	viewerLeaderboardEntry: GameLeaderboardEntry | null
 }
 
 export type RoomHostView =
@@ -78,6 +79,7 @@ export interface RoomPlayerFinishedView extends RoomPlayerViewBase {
 	activeGame: null
 	finishedAt: number
 	lastGameResult: GameResult
+	viewerLeaderboardEntry: GameLeaderboardEntry | null
 }
 
 export type RoomPlayerView =
@@ -149,6 +151,17 @@ function getPlayerRoomViewBase(
 		: undefined
 }
 
+function getViewerLeaderboardEntry(
+	result: GameResult,
+	viewerMemberId: MemberId,
+): GameLeaderboardEntry | null {
+	return (
+		result.leaderboard.find(
+			entry => entry.participantId === viewerMemberId,
+		) ?? null
+	)
+}
+
 export function toHostRoomView(
 	state: RoomState,
 	viewerMemberId: MemberId,
@@ -182,6 +195,10 @@ export function toHostRoomView(
 				activeGame: null,
 				finishedAt: state.finishedAt,
 				lastGameResult: state.lastGameResult,
+				viewerLeaderboardEntry: getViewerLeaderboardEntry(
+					state.lastGameResult,
+					viewerMemberId,
+				),
 			}
 	}
 }
@@ -219,6 +236,10 @@ export function toPlayerRoomView(
 				activeGame: null,
 				finishedAt: state.finishedAt,
 				lastGameResult: state.lastGameResult,
+				viewerLeaderboardEntry: getViewerLeaderboardEntry(
+					state.lastGameResult,
+					viewerMemberId,
+				),
 			}
 	}
 }

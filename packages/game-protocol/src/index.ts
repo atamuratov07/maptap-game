@@ -24,6 +24,7 @@ export {
 	scopeSchema,
 	startGameRequestSchema,
 	submitAnswerRequestSchema,
+	terminateRoomRequestSchema,
 	type CreateRoomRequest,
 	type JoinRoomRequest,
 	type LookupRoomRequest,
@@ -32,6 +33,7 @@ export {
 	type ReturnToLobbyRequest,
 	type StartGameRequest,
 	type SubmitAnswerRequest,
+	type TerminateRoomRequest,
 } from './requests'
 export {
 	lookupRoomFoundResponseSchema,
