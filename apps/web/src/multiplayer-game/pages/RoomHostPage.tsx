@@ -1,14 +1,16 @@
-import { useParams } from 'react-router-dom'
-import { GameScreen } from '../components/game/GameScene'
-import { RoomClosedScreen } from '../components/screens/RoomClosedScreen'
-import { RoomErrorScreen } from '../components/screens/RoomErrorScreen'
-import { RoomFinishedScreen } from '../components/screens/RoomFinishedScreen'
-import { RoomLoadingScreen } from '../components/screens/RoomLoadingScreen'
-import { RoomLobbyScreen } from '../components/screens/RoomLobbyScreen'
-import { useRoomHostSession } from '../core/useHostSession'
+import { useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { RoomFinishedScreen } from '../finished/RoomFinishedScreen'
+import { ActiveGameScreen } from '../game/ActiveGameScreen'
+import { RoomLobbyScreen } from '../lobby/RoomLobbyScreen'
+import { RoomClosedScreen } from '../screens/RoomClosedScreen'
+import { RoomErrorScreen } from '../screens/RoomErrorScreen'
+import { RoomLoadingScreen } from '../screens/RoomLoadingScreen'
+import { useRoomHostController } from '../session/useRoomHostController'
 
 export function RoomHostPage(): JSX.Element {
 	const params = useParams<{ roomCode: string }>()
+	const navigate = useNavigate()
 	const roomCode = (params.roomCode ?? '').trim().toUpperCase()
 	const {
 		state,
@@ -16,8 +18,17 @@ export function RoomHostPage(): JSX.Element {
 		actionErrorMessage,
 		startGame,
 		submitAnswer,
+		returnToLobby,
+		terminateRoom,
 		retry,
-	} = useRoomHostSession(roomCode)
+	} = useRoomHostController(roomCode)
+	const closedReason = state.status === 'closed' ? state.reason : null
+
+	useEffect(() => {
+		if (closedReason === 'host_terminated') {
+			navigate('/multiplayer', { replace: true })
+		}
+	}, [closedReason, navigate])
 
 	if (state.status === 'connecting') {
 		return (
@@ -30,6 +41,16 @@ export function RoomHostPage(): JSX.Element {
 	}
 
 	if (state.status === 'closed') {
+		if (state.reason === 'host_terminated') {
+			return (
+				<RoomLoadingScreen
+					label='Комната'
+					title='Комната закрыта'
+					message='Возвращаемся на страницу мультиплеера.'
+				/>
+			)
+		}
+
 		return <RoomClosedScreen reason={state.reason} />
 	}
 
@@ -62,25 +83,49 @@ export function RoomHostPage(): JSX.Element {
 			<RoomLobbyScreen
 				role='host'
 				roomCode={roomCode}
-				players={room.players}
+				members={room.members}
 				startPending={actionPending === 'start'}
+				terminatePending={actionPending === 'terminate-room'}
 				actionErrorMessage={actionErrorMessage}
 				isReconnecting={isReconnecting}
-				onStartGame={() => {
-					void startGame()
+				onStartGame={gameConfig => {
+					void startGame(gameConfig)
+				}}
+				onTerminateRoom={() => {
+					void terminateRoom()
 				}}
 			/>
 		)
 	}
 
 	if (room.phase === 'finished') {
-		return <RoomFinishedScreen room={room} isReconnecting={isReconnecting} />
+		return (
+			<RoomFinishedScreen
+				room={room}
+				capabilities={{
+					canPlayAgain: true,
+					canTerminateRoom: true,
+					canLeaveRoom: false,
+				}}
+				isReconnecting={isReconnecting}
+				playAgainPending={actionPending === 'return-lobby'}
+				terminatePending={actionPending === 'terminate-room'}
+				actionErrorMessage={actionErrorMessage}
+				onPlayAgain={() => {
+					void returnToLobby()
+				}}
+				onTerminateRoom={() => {
+					void terminateRoom()
+				}}
+			/>
+		)
 	}
 
 	return (
 		<div className='fixed inset-0 overflow-hidden bg-slate-950'>
-			<GameScreen
-				room={room}
+			<ActiveGameScreen
+				game={room.activeGame}
+				members={room.members}
 				submitPending={actionPending === 'submit'}
 				actionErrorMessage={actionErrorMessage}
 				isReconnecting={isReconnecting}

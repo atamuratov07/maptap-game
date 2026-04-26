@@ -1,11 +1,13 @@
+import { useCountdown } from '../hooks/useCountdown'
+
+const URGENT_COUNTDOWN_SECONDS = 5
+
 interface RoomGameHeaderProps {
 	progressLabel: string
 	questionLabel: string
 	targetName: string
 	targetFlagUrl?: string
-	viewerName: string
-	viewerRank?: number | null
-	secondsLeft: number | null
+	deadlineAt: number | null
 }
 
 function formatCountdown(totalSeconds: number): string {
@@ -18,17 +20,15 @@ function formatCountdown(totalSeconds: number): string {
 function QuestionBarChip({
 	label,
 	value,
-	emphasized = false,
 	className,
 }: {
 	label: string
 	value: string
-	emphasized?: boolean
 	className?: string
 }): JSX.Element {
 	return (
 		<div
-			className={`rounded-full px-3 py-2 text-left ${emphasized ? 'bg-amber-400 text-slate-950' : 'bg-white/12 text-slate-100'} ${className ?? ''}`}
+			className={`rounded-full bg-white/12 px-3 py-2 text-left text-slate-100 ${className ?? ''}`}
 		>
 			<p className='text-[10px] font-black uppercase tracking-[0.18em] opacity-70'>
 				{label}
@@ -38,12 +38,52 @@ function QuestionBarChip({
 	)
 }
 
+function CountdownTimer({
+	deadlineAt,
+}: {
+	deadlineAt: number | null
+}): JSX.Element | null {
+	const secondsLeft = useCountdown(deadlineAt)
+	const isUrgent = secondsLeft <= URGENT_COUNTDOWN_SECONDS
+
+	if (deadlineAt === null) {
+		return null
+	}
+
+	return (
+		<div
+			key={isUrgent ? secondsLeft : 'normal'}
+			className={`h-12 min-w-16 rounded-full flex items-center justify-center text-left ${
+				isUrgent
+					? 'countdown-badge-bump bg-red-600 text-white shadow-[0_0_14px_rgba(220,38,38,0.8)]'
+					: 'bg-amber-400 text-slate-950'
+			}`}
+		>
+			<div>
+				<p className='text-[10px] font-black leading-none uppercase tracking-[0.18em] opacity-70'>
+					Время
+				</p>
+				<p className='mt-1 h-4 text-sm font-black leading-4 text-inherit tabular-nums'>
+					<span
+						key={secondsLeft}
+						className={`inline-block ${
+							isUrgent ? 'countdown-time-bump' : ''
+						}`}
+					>
+						{formatCountdown(secondsLeft)}
+					</span>
+				</p>
+			</div>
+		</div>
+	)
+}
+
 export function GameQuestionBar({
 	progressLabel,
 	questionLabel,
 	targetName,
 	targetFlagUrl,
-	secondsLeft,
+	deadlineAt,
 }: RoomGameHeaderProps): JSX.Element {
 	return (
 		<section className='w-full border-t border-white/12 bg-slate-950/88 px-4 pt-3 pb-8 text-white backdrop-blur-md'>
@@ -62,7 +102,7 @@ export function GameQuestionBar({
 					</p>
 				</div>
 				<div className='row-start-2 col-start-1 col-span-1 flex flex-wrap items-center justify-center gap-2 self-start justify-self-center md:col-start-2'>
-					<h1 className='text-2xl font-black tracking-tight text-white sm:text-3xl'>
+					<h1 className='text-2xl font-black tracking-tight text-white sm:text-3xl text-center'>
 						{targetName}
 					</h1>
 					{targetFlagUrl ? (
@@ -74,13 +114,7 @@ export function GameQuestionBar({
 					) : null}
 				</div>
 				<div className='row-start-1 row-span-1 col-start-1 justify-self-end align-center md:row-span-2 md:col-start-3'>
-					{secondsLeft !== null ? (
-						<QuestionBarChip
-							label='Время'
-							value={formatCountdown(secondsLeft)}
-							emphasized
-						/>
-					) : null}
+					<CountdownTimer deadlineAt={deadlineAt} />
 				</div>
 			</div>
 		</section>

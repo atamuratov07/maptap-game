@@ -48,7 +48,7 @@ export function JoinRoomForm({
 								.toUpperCase()
 								.replace(/[^A-Z0-9]/g, '')
 								.slice(0, 6),
-							)
+						)
 					}}
 					tone='dark'
 					className='text-lg font-black tracking-[0.24em] focus:border-amber-400 focus:ring-amber-300/30'
@@ -59,7 +59,8 @@ export function JoinRoomForm({
 			<Button
 				type='submit'
 				variant='inverse'
-				className='mt-6 px-5 hover:-translate-y-0.5'
+				is3d
+				className='mt-6 px-5'
 				disabled={roomCode.length !== 6}
 			>
 				Открыть комнату

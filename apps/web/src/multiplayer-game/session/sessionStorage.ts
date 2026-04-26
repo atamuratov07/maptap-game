@@ -1,8 +1,17 @@
 import type { RoomSession } from './types'
 
 const STORAGE_KEY = 'maptap.multiplayer.sessions'
+const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000
 
 type RoomSessionsRecord = Record<string, RoomSession>
+
+function isFreshSession(session: RoomSession, now: number): boolean {
+	return (
+		typeof session.savedAt === 'number' &&
+		Number.isFinite(session.savedAt) &&
+		now - session.savedAt <= SESSION_TTL_MS
+	)
+}
 
 function readStore(): RoomSessionsRecord {
 	try {
@@ -12,7 +21,21 @@ function readStore(): RoomSessionsRecord {
 		}
 
 		const parsed = JSON.parse(rawValue) as RoomSessionsRecord
-		return parsed && typeof parsed === 'object' ? parsed : {}
+		if (!parsed || typeof parsed !== 'object') {
+			return {}
+		}
+
+		const now = Date.now()
+		const freshEntries = Object.entries(parsed).filter(([, session]) =>
+			isFreshSession(session, now),
+		)
+		const store = Object.fromEntries(freshEntries) as RoomSessionsRecord
+
+		if (freshEntries.length !== Object.keys(parsed).length) {
+			writeStore(store)
+		}
+
+		return store
 	} catch {
 		return {}
 	}

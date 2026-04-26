@@ -1,4 +1,4 @@
-import { Button, ButtonLink, ScreenShell, SurfacePanel } from '../../../shared/ui'
+import { Button, ButtonLink, ScreenShell, SurfacePanel } from '../../shared/ui'
 
 interface RoomErrorScreenProps {
 	message: string
@@ -20,17 +20,11 @@ export function RoomErrorScreen({
 				</h1>
 				<p className='mt-3 text-sm leading-7 text-slate-600'>{message}</p>
 				<div className='mt-6 flex flex-wrap gap-3'>
-					<Button
-						type='button'
-						onClick={onRetry}
-					>
+					<Button type='button' onClick={onRetry}>
 						Повторить
 					</Button>
-					<ButtonLink
-						to='/multiplayer'
-						variant='secondary'
-					>
-						К мультиплееру
+					<ButtonLink to='/multiplayer' variant='secondary'>
+						Мультиплеер
 					</ButtonLink>
 				</div>
 			</SurfacePanel>

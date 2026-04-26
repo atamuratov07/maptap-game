@@ -1,4 +1,4 @@
-import { ScreenShell, SurfacePanel } from '../../../shared/ui'
+import { ScreenShell, SurfacePanel } from '../../shared/ui'
 
 interface RoomLoadingScreenProps {
 	label: string

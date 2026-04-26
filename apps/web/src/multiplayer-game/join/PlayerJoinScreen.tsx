@@ -7,7 +7,7 @@ import {
 	ScreenShell,
 	SurfacePanel,
 	TextInput,
-} from '../../../shared/ui'
+} from '../../shared/ui'
 
 interface PlayerJoinScreenProps {
 	hostName: string

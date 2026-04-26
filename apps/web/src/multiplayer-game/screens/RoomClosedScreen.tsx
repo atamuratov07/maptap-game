@@ -1,5 +1,5 @@
-import { ButtonLink, ScreenShell, SurfacePanel } from '../../../shared/ui'
-import { formatClosedReason } from '../../core/roomView'
+import { ButtonLink, ScreenShell, SurfacePanel } from '../../shared/ui'
+import { formatClosedReason } from '../model/roomSelectors'
 
 interface RoomClosedScreenProps {
 	reason: 'host_terminated' | 'expired' | 'server_shutdown'
@@ -21,15 +21,8 @@ export function RoomClosedScreen({
 					{formatClosedReason(reason)}
 				</p>
 				<div className='mt-6 flex flex-wrap gap-3'>
-					<ButtonLink
-						to='/multiplayer'
-					>
-						К мультиплееру
-					</ButtonLink>
-					<ButtonLink
-						to='/'
-						variant='secondary'
-					>
+					<ButtonLink to='/multiplayer'>Мультиплеер</ButtonLink>
+					<ButtonLink to='/' variant='secondary'>
 						На главную
 					</ButtonLink>
 				</div>

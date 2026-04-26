@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ButtonLink, ScreenShell } from '../../shared/ui'
+import { formatGatewayErrorMessage } from '../api/errors'
+import { createSocketGateway } from '../api/socketGateway'
 import {
 	CreateRoomForm,
 	type CreateRoomFormValues,
-} from '../components/CreateRoomForm'
-import { JoinRoomForm } from '../components/JoinRoomForm'
-import { formatGatewayErrorMessage } from '../core/errors'
-import { saveRoomSession } from '../core/sessionStorage'
-import { createSocketGateway } from '../core/socketGateway'
-import type { RoomSession } from '../core/types'
+} from '../create/CreateRoomForm'
+import { JoinRoomForm } from '../join/JoinRoomForm'
+import { saveRoomSession } from '../session/sessionStorage'
+import type { RoomSession } from '../session/types'
 
 export function HomePage(): JSX.Element {
 	const navigate = useNavigate()
@@ -31,20 +31,14 @@ export function HomePage(): JSX.Element {
 			try {
 				const response = await gateway.createRoom({
 					hostName: values.hostName,
-					gameConfig: {
-						questionCount: values.questionCount,
-						difficulty: values.difficulty,
-						scope: values.scope,
-						questionDurationMs: values.questionDurationSeconds * 1000,
-					},
 				})
 
 				const storedSession: RoomSession = {
 					role: response.role,
 					roomId: response.roomId,
 					roomCode: response.roomCode,
-					playerId: response.playerId,
-					playerSessionToken: response.playerSessionToken,
+					memberId: response.memberId,
+					memberSessionToken: response.memberSessionToken,
 					savedAt: Date.now(),
 				}
 
@@ -63,11 +57,7 @@ export function HomePage(): JSX.Element {
 		<ScreenShell className='sm:px-8'>
 			<div className='mx-auto max-w-6xl'>
 				<div className='mb-6 flex flex-wrap items-center justify-between gap-3'>
-					<ButtonLink
-						to='/'
-						variant='nav'
-						size='pill'
-					>
+					<ButtonLink to='/' variant='nav' size='pill'>
 						<span aria-hidden='true'>&larr;</span>К режимам
 					</ButtonLink>
 				</div>

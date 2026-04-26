@@ -1,8 +1,11 @@
-import type { RoomView } from '@maptap/game-domain/multiplayer'
+import type { GameView } from '@maptap/game-domain/multiplayer-next/game'
 import { useCallback, useMemo } from 'react'
 import type { MapHighlight, MapRendererProps } from '../../../shared/map/types'
 import { CountryInfoCard } from '../../../shared/widgets/CountryInfoCard'
-import { getCountryInfo } from '../../core/roomView'
+import {
+	getCorrectCountryInfo,
+	getCountryInfo,
+} from '../../model/gameSelectors'
 import { SelectedAnswerMarker } from './SelectedAnswerMarker'
 
 const EMPTY_HIGHLIGHTS: readonly MapHighlight[] = []
@@ -10,43 +13,38 @@ const EMPTY_MARKERS: NonNullable<MapRendererProps['markers']> = []
 const noopPick = () => undefined
 
 interface UseRoomGameMapArgs {
-	room: RoomView
+	game: GameView
 	submitPending: boolean
 	onSubmitAnswer: (countryId: string) => void
 }
 
 interface UseRoomGameMapResult {
 	mapProps: MapRendererProps
-	promptCountryInfo: ReturnType<typeof getCountryInfo>
-	correctCountryInfo: ReturnType<typeof getCountryInfo>
-	selectedCountryInfo: ReturnType<typeof getCountryInfo>
 }
 
 export function useGameMap({
-	room,
+	game,
 	submitPending,
 	onSubmitAnswer,
 }: UseRoomGameMapArgs): UseRoomGameMapResult {
-	const eligibleCountryIdsKey = room.eligibleCountryIds.join('|')
+	const eligibleCountryIdsKey = game.eligibleCountryIds.join('|')
 	const interactiveIds = useMemo<ReadonlySet<string>>(
-		() => new Set(room.eligibleCountryIds),
-		// Room snapshots recreate arrays; the country pool itself is stable for
-		// the room, so key by contents instead of array identity.
-		// eslint-disable-next-line react-hooks/exhaustive-deps
+		() => new Set(game.eligibleCountryIds),
 		[eligibleCountryIdsKey],
 	)
 
-	const round = room.currentRound
-	const hasRound = Boolean(round)
-	const isRoundOpen = round?.phase === 'open'
-	const openQuestionCountryId =
-		round?.phase === 'open' ? round.questionCountryId : null
+	const isCompleted = game.phase === 'completed'
+	const isOpen = game.phase === 'open'
 	const correctCountryId =
-		round && round.phase !== 'open' ? round.correctCountryId : null
-	const submissionCountryId = round?.submission?.countryId ?? null
+		game.phase === 'revealed' || game.phase === 'leaderboard'
+			? game.correctCountryId
+			: null
+	const submissionCountryId =
+		game.phase === 'completed'
+			? null
+			: (game.viewerSubmission?.countryId ?? null)
 
-	const promptCountryInfo = getCountryInfo(openQuestionCountryId)
-	const correctCountryInfo = getCountryInfo(correctCountryId)
+	const correctCountryInfo = getCorrectCountryInfo(game)
 	const selectedCountryInfo = getCountryInfo(submissionCountryId)
 
 	const handlePick = useCallback(
@@ -57,16 +55,16 @@ export function useGameMap({
 	)
 
 	const resetViewKey =
-		round?.phase === 'open'
-			? `${round.questionNumber}:${round.startedAt}`
+		game.phase !== 'completed'
+			? `${game.currentQuestionNumber}:${game.startedAt}`
 			: null
 
 	const mapProps = useMemo<MapRendererProps>(() => {
-		if (!hasRound) {
+		if (isCompleted) {
 			return {
 				onPick: noopPick,
 				interactiveIds,
-				scope: room.scope,
+				scope: game.scope,
 				highlights: EMPTY_HIGHLIGHTS,
 				markers: EMPTY_MARKERS,
 				popup: null,
@@ -75,11 +73,11 @@ export function useGameMap({
 			}
 		}
 
-		if (isRoundOpen) {
+		if (isOpen) {
 			return {
 				onPick: handlePick,
 				interactiveIds,
-				scope: room.scope,
+				scope: game.scope,
 				highlights: submissionCountryId
 					? [
 							{
@@ -123,8 +121,8 @@ export function useGameMap({
 		return {
 			onPick: noopPick,
 			interactiveIds,
-			scope: room.scope,
-			highlights: highlights,
+			scope: game.scope,
+			highlights,
 			markers: EMPTY_MARKERS,
 			popup: correctCountryInfo
 				? {
@@ -139,12 +137,12 @@ export function useGameMap({
 		}
 	}, [
 		correctCountryId,
-		hasRound,
-		interactiveIds,
-		handlePick,
 		correctCountryInfo,
-		isRoundOpen,
-		room.scope,
+		game.scope,
+		handlePick,
+		isCompleted,
+		interactiveIds,
+		isOpen,
 		resetViewKey,
 		selectedCountryInfo,
 		submissionCountryId,
@@ -153,8 +151,5 @@ export function useGameMap({
 
 	return {
 		mapProps,
-		promptCountryInfo,
-		correctCountryInfo,
-		selectedCountryInfo,
 	}
 }

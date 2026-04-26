@@ -1,17 +1,24 @@
-import type { VisiblePlayerInfo } from '@maptap/game-domain/multiplayer'
-import { UserRound } from 'lucide-react'
+import type { GameConfig } from '@maptap/game-domain/multiplayer-next'
+import type {
+	RoomMemberRole,
+	VisibleMemberInfo,
+} from '@maptap/game-domain/multiplayer-next/room'
+import { DoorClosed, Play, UserRound } from 'lucide-react'
 import { useMemo } from 'react'
-import { AlertMessage, Button, CopyButton } from '../../../shared/ui'
-import { cn } from '../../../shared/utils'
+import { AlertMessage, Button, CopyButton } from '../../shared/ui'
+import { cn } from '../../shared/utils'
+import { GameConfigPanel } from './GameConfigPanel'
 
 interface RoomLobbyScreenProps {
-	role: 'host' | 'player'
+	role: RoomMemberRole
 	roomCode: string
-	players: VisiblePlayerInfo[]
+	members: VisibleMemberInfo[]
 	startPending?: boolean
+	terminatePending?: boolean
 	actionErrorMessage?: string | null
 	isReconnecting?: boolean
-	onStartGame?: () => void
+	onStartGame?: (config: GameConfig) => void
+	onTerminateRoom?: () => void
 }
 
 function InvitePanel({ roomCode }: { roomCode: string }): JSX.Element {
@@ -28,7 +35,7 @@ function InvitePanel({ roomCode }: { roomCode: string }): JSX.Element {
 
 	return (
 		<section
-			aria-label='Приглашение в игру'
+			aria-label='Приглашение в комнату'
 			className='mx-auto mt-6 flex w-full max-w-2xl flex-col items-center gap-4 rounded-[28px] border border-white/70 bg-white/90 px-5 py-4 shadow-[0_18px_54px_rgba(15,23,42,0.12)] backdrop-blur sm:flex-row sm:justify-between'
 		>
 			<div className='text-center sm:text-left'>
@@ -44,14 +51,16 @@ function InvitePanel({ roomCode }: { roomCode: string }): JSX.Element {
 				<CopyButton
 					textToCopy={roomCode}
 					title='Скопировать код комнаты'
-					className='min-h-11 border-slate-200 py-2.5 shadow-sm hover:-translate-y-0.5 hover:border-amber-300'
+					is3d
+					className='min-h-11 border-slate-200 py-2.5'
 				>
 					Код
 				</CopyButton>
 				<CopyButton
 					textToCopy={inviteUrl}
 					title='Скопировать ссылку на комнату'
-					className='min-h-11 border-slate-200 py-2.5 shadow-sm hover:-translate-y-0.5 hover:border-amber-300'
+					is3d
+					className='min-h-11 border-slate-200 py-2.5'
 				>
 					Ссылка
 				</CopyButton>
@@ -60,13 +69,13 @@ function InvitePanel({ roomCode }: { roomCode: string }): JSX.Element {
 	)
 }
 
-function PlayerTile({ player }: { player: VisiblePlayerInfo }): JSX.Element {
+function MemberTile({ member }: { member: VisibleMemberInfo }): JSX.Element {
 	return (
 		<li className='flex min-w-0 flex-col items-center gap-3 text-center'>
 			<div
 				className={cn(
 					'grid h-20 w-20 place-items-center rounded-full border-2 bg-white shadow-[0_16px_42px_rgba(15,23,42,0.12)] sm:h-24 sm:w-24',
-					player.connected
+					member.connected
 						? 'border-amber-300'
 						: 'border-slate-200 opacity-55',
 				)}
@@ -79,7 +88,7 @@ function PlayerTile({ player }: { player: VisiblePlayerInfo }): JSX.Element {
 				/>
 			</div>
 			<span className='block w-full truncate px-1 text-sm font-black text-slate-950 sm:text-base'>
-				{player.name}
+				{member.name}
 			</span>
 		</li>
 	)
@@ -88,28 +97,32 @@ function PlayerTile({ player }: { player: VisiblePlayerInfo }): JSX.Element {
 export function RoomLobbyScreen({
 	role,
 	roomCode,
-	players,
+	members,
 	startPending = false,
+	terminatePending = false,
 	actionErrorMessage = null,
 	isReconnecting = false,
 	onStartGame,
+	onTerminateRoom,
 }: RoomLobbyScreenProps): JSX.Element {
 	const isHost = role === 'host'
+	const canStartGame = isHost && Boolean(onStartGame)
+	const gameConfigFormId = `room-game-config-${roomCode}`
 
 	return (
-		<main className='fixed inset-0 flex flex-col overflow-hidden px-5 py-6 text-slate-950 sm:px-8'>
-			<header className='relative z-10 mx-auto w-full max-w-6xl text-center'>
+		<main
+			className={cn(
+				'fixed inset-0 overflow-y-auto px-5 py-6 text-slate-950 sm:px-8',
+				canStartGame ? 'pb-24' : '',
+			)}
+		>
+			<header className='mx-auto w-full max-w-6xl text-center'>
 				<p className='text-[11px] font-black uppercase tracking-[0.24em] text-amber-600'>
 					Лобби
 				</p>
-				<h1 className='mt-3 text-4xl font-black tracking-tight sm:text-5xl'>
-					{isHost ? 'Подготовка к игре' : 'Ждём старт'}
+				<h1 className='mt-2 text-3xl font-black tracking-tight sm:text-4xl'>
+					{isHost ? 'Подготовьте игру' : 'Ждём начала'}
 				</h1>
-				<p className='mx-auto mt-4 max-w-2xl text-sm leading-7 text-slate-600'>
-					{isHost
-						? 'Когда все готовы, запускайте игру. После старта комната перейдёт в полноэкранный игровой режим.'
-						: 'Хост скоро начнёт игру. Карта откроется сразу в полноэкранном режиме.'}
-				</p>
 
 				{isReconnecting ? (
 					<AlertMessage className='mx-auto mt-5 max-w-xl'>
@@ -124,36 +137,69 @@ export function RoomLobbyScreen({
 				) : null}
 
 				<InvitePanel roomCode={roomCode} />
+
+				{isHost && onStartGame ? (
+					<GameConfigPanel
+						roomCode={roomCode}
+						formId={gameConfigFormId}
+						onStartGame={onStartGame}
+					/>
+				) : null}
 			</header>
 
 			<section
-				aria-label='Игроки в комнате'
-				className='relative z-0 flex min-h-0 flex-1 items-start justify-center overflow-y-auto py-10 pb-36'
+				aria-label='Участники комнаты'
+				className='mx-auto flex w-full max-w-6xl items-start justify-center py-8'
 			>
 				<ul className='grid w-full max-w-6xl grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'>
-					{players.map(player => (
-						<PlayerTile key={player.playerId} player={player} />
+					{members.map(member => (
+						<MemberTile key={member.memberId} member={member} />
 					))}
 				</ul>
 			</section>
 
-			<footer className='fixed inset-x-0 bottom-10 z-20 flex justify-center px-5 sm:bottom-12'>
-				{isHost ? (
+			{isHost && onTerminateRoom ? (
+				<footer className='mx-auto mt-4 flex w-full max-w-6xl justify-center pb-8'>
 					<Button
 						type='button'
-						size='lg'
-						className='shadow-[0_14px_36px_rgba(245,158,11,0.28)]'
-						onClick={onStartGame}
-						disabled={startPending}
+						variant='danger'
+						size='pill'
+						is3d
+						disabled={terminatePending}
+						onClick={onTerminateRoom}
 					>
-						{startPending ? 'Запуск...' : 'Начать игру'}
+						<DoorClosed aria-hidden='true' size={16} strokeWidth={2.4} />
+						{terminatePending ? 'Закрываем...' : 'Закрыть комнату'}
 					</Button>
-				) : (
+				</footer>
+			) : !isHost ? (
+				<footer className='mx-auto flex w-full max-w-6xl justify-center pb-8'>
 					<p className='rounded-full border border-slate-200 bg-white/90 px-5 py-3 text-sm font-black text-slate-700 shadow-[0_14px_36px_rgba(15,23,42,0.14)]'>
-						Ждём, когда хост начнёт игру
+						Ждём, пока хост начнёт игру
 					</p>
-				)}
-			</footer>
+				</footer>
+			) : null}
+
+			{canStartGame ? (
+				<div className='pointer-events-none fixed inset-x-0 bottom-8 z-50 flex justify-center px-5'>
+					<Button
+						type='submit'
+						form={gameConfigFormId}
+						size='lg'
+						is3d
+						disabled={startPending}
+						className='pointer-events-auto min-w-48 px-8'
+					>
+						<Play
+							aria-hidden='true'
+							size={17}
+							strokeWidth={2.8}
+							fill='currentColor'
+						/>
+						{startPending ? 'Запускаем...' : 'Начать игру'}
+					</Button>
+				</div>
+			) : null}
 		</main>
 	)
 }

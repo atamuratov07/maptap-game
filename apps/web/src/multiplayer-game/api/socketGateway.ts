@@ -16,11 +16,13 @@ import {
 	type ResumeHostRoomResponse,
 	type ResumePlayerRoomRequest,
 	type ResumePlayerRoomResponse,
+	type ReturnToLobbyRequest,
 	type RoomClosedEvent,
 	type ServerToClientEvents,
 	type StartGameRequest,
 	type SubmitAnswerRequest,
 	type SubmitAnswerResponse,
+	type TerminateRoomRequest,
 } from '@maptap/game-protocol'
 import { io, type Socket } from 'socket.io-client'
 import { toGatewayError } from './errors'
@@ -68,6 +70,8 @@ export interface SocketGateway {
 	resumePlayerRoom: (
 		payload: ResumePlayerRoomRequest,
 	) => Promise<ResumePlayerRoomResponse>
+	returnToLobby: (payload: ReturnToLobbyRequest) => Promise<EmptyAckData>
+	terminateRoom: (payload: TerminateRoomRequest) => Promise<EmptyAckData>
 	startGame: (payload: StartGameRequest) => Promise<EmptyAckData>
 	submitAnswer: (payload: SubmitAnswerRequest) => Promise<SubmitAnswerResponse>
 	subscribeHostRoom: (handlers: HostRoomSubscriptionHandlers) => () => void
@@ -123,7 +127,7 @@ export function createSocketGateway(): SocketGateway {
 				cleanup()
 				reject(
 					toGatewayError(
-						new Error('Unable to connect to the game server.'),
+						new Error('Не удалось подключиться к игровому серверу.'),
 					),
 				)
 			}, CONNECT_TIMEOUT_MS)
@@ -186,6 +190,14 @@ export function createSocketGateway(): SocketGateway {
 
 		resumeHostRoom(payload) {
 			return request('room:host-resume', payload)
+		},
+
+		returnToLobby(payload) {
+			return request('room:return-to-lobby', payload)
+		},
+
+		terminateRoom(payload) {
+			return request('room:terminate', payload)
 		},
 
 		startGame(payload) {

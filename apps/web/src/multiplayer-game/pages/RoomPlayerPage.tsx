@@ -1,12 +1,12 @@
 import { useParams } from 'react-router-dom'
-import { GameScreen } from '../components/game/GameScene'
-import { PlayerJoinScreen } from '../components/screens/PlayerJoinScreen'
-import { RoomClosedScreen } from '../components/screens/RoomClosedScreen'
-import { RoomErrorScreen } from '../components/screens/RoomErrorScreen'
-import { RoomFinishedScreen } from '../components/screens/RoomFinishedScreen'
-import { RoomLoadingScreen } from '../components/screens/RoomLoadingScreen'
-import { RoomLobbyScreen } from '../components/screens/RoomLobbyScreen'
-import { useRoomPlayerSession } from '../core/usePlayerSession'
+import { RoomFinishedScreen } from '../finished/RoomFinishedScreen'
+import { ActiveGameScreen } from '../game/ActiveGameScreen'
+import { PlayerJoinScreen } from '../join/PlayerJoinScreen'
+import { RoomLobbyScreen } from '../lobby/RoomLobbyScreen'
+import { RoomClosedScreen } from '../screens/RoomClosedScreen'
+import { RoomErrorScreen } from '../screens/RoomErrorScreen'
+import { RoomLoadingScreen } from '../screens/RoomLoadingScreen'
+import { useRoomPlayerController } from '../session/useRoomPlayerController'
 
 export function RoomPlayerPage(): JSX.Element {
 	const params = useParams<{ roomCode: string }>()
@@ -18,7 +18,7 @@ export function RoomPlayerPage(): JSX.Element {
 		joinRoom,
 		submitAnswer,
 		retry,
-	} = useRoomPlayerSession(roomCode)
+	} = useRoomPlayerController(roomCode)
 
 	if (state.status === 'connecting') {
 		return (
@@ -76,7 +76,7 @@ export function RoomPlayerPage(): JSX.Element {
 			<RoomLobbyScreen
 				role='player'
 				roomCode={roomCode}
-				players={room.players}
+				members={room.members}
 				actionErrorMessage={actionErrorMessage}
 				isReconnecting={isReconnecting}
 			/>
@@ -84,13 +84,24 @@ export function RoomPlayerPage(): JSX.Element {
 	}
 
 	if (room.phase === 'finished') {
-		return <RoomFinishedScreen room={room} isReconnecting={isReconnecting} />
+		return (
+			<RoomFinishedScreen
+				room={room}
+				capabilities={{
+					canPlayAgain: false,
+					canTerminateRoom: false,
+					canLeaveRoom: true,
+				}}
+				isReconnecting={isReconnecting}
+			/>
+		)
 	}
 
 	return (
 		<div className='fixed inset-0 overflow-hidden bg-slate-950'>
-			<GameScreen
-				room={room}
+			<ActiveGameScreen
+				game={room.activeGame}
+				members={room.members}
 				submitPending={actionPending === 'submit'}
 				actionErrorMessage={actionErrorMessage}
 				isReconnecting={isReconnecting}
