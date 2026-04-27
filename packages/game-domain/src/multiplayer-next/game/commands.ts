@@ -1,17 +1,18 @@
 import type { CommandError } from '../errors'
 import { err, ok, type Result } from '../../shared/result'
-import type { CountryId } from '../../shared/types'
 import type { MemberId } from '../room/types'
 import type {
 	GameParticipantState,
 	GameState,
+	GameQuestion,
 	LockedSubmission,
+	PlayerAnswer,
 } from './types'
 
 export type GameCommand = {
 	type: 'SUBMIT_ANSWER'
 	participantId: MemberId
-	countryId: CountryId
+	answer: PlayerAnswer
 	now: number
 }
 
@@ -24,6 +25,33 @@ function requireParticipant(
 	return participant
 		? ok(participant)
 		: err({ code: 'game_participant_not_found' })
+}
+
+function getCurrentQuestion(state: GameState): GameQuestion | null {
+	if (state.phase === 'completed') {
+		return null
+	}
+
+	return state.session.questions[state.currentRound.questionIndex] ?? null
+}
+
+function isAnswerAllowedForQuestion(
+	question: GameQuestion,
+	answer: PlayerAnswer,
+): boolean {
+	switch (question.kind) {
+		case 'map_pick_country':
+			return (
+				answer.kind === 'country_id' &&
+				question.eligibleAnswerIds.includes(answer.countryId)
+			)
+
+		case 'quiz_choice':
+			return (
+				answer.kind === 'choice_id' &&
+				question.choices.some(choice => choice.id === answer.choiceId)
+			)
+	}
 }
 
 export function applyGameCommand(
@@ -52,15 +80,20 @@ export function applyGameCommand(
 				})
 			}
 
-			if (!state.session.eligibleIds.includes(command.countryId)) {
+			const question = getCurrentQuestion(state)
+			if (!question || !isAnswerAllowedForQuestion(question, command.answer)) {
 				return err({
-					code: 'country_not_eligible',
+					code: 'answer_not_allowed',
 				})
 			}
 
 			const submission: LockedSubmission = {
 				participantId: command.participantId,
-				countryId: command.countryId,
+				answer: command.answer,
+				countryId:
+					command.answer.kind === 'country_id'
+						? command.answer.countryId
+						: null,
 				submittedAt: command.now,
 			}
 

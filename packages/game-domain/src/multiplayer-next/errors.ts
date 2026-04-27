@@ -7,6 +7,11 @@ export type SessionPreparationError =
 			questionCount: number
 			countryCount: number
 	  }
+	| {
+			code: 'insufficient_questions'
+			questionCount: number
+			availableQuestionCount: number
+	  }
 
 export type CommandError =
 	| {
@@ -56,6 +61,9 @@ export type CommandError =
 	  }
 	| {
 			code: 'country_not_eligible'
+	  }
+	| {
+			code: 'answer_not_allowed'
 	  }
 	| {
 			code: 'member_not_found'

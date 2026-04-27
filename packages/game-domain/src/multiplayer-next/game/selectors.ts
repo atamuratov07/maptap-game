@@ -1,4 +1,3 @@
-import type { CountryId } from '../../shared/types'
 import type { MemberId } from '../room/types'
 import { createLeaderboard } from './leaderboard'
 import type {
@@ -38,7 +37,7 @@ export function getCurrentGameRound(state: GameState) {
 	return isActiveGameState(state) ? state.currentRound : null
 }
 
-export function getGameCurrentQuestionId(state: GameState): CountryId | null {
+export function getGameCurrentQuestionId(state: GameState): string | null {
 	return getCurrentGameRound(state)?.questionId ?? null
 }
 
@@ -65,7 +64,7 @@ export function hasParticipantSubmitted(
 	participantId: MemberId,
 ): boolean {
 	const submission = getGameSubmission(state, participantId)
-	return submission?.countryId !== undefined && submission.countryId !== null
+	return submission?.answer !== undefined && submission.answer !== null
 }
 
 export function getAnsweredParticipantCount(state: GameState): number {
@@ -79,7 +78,7 @@ export function getAnsweredParticipantCount(state: GameState): number {
 	}
 
 	return Object.values(round.submissions).filter(submission => {
-		return submission.countryId !== null
+		return submission.answer !== null
 	}).length
 }
 

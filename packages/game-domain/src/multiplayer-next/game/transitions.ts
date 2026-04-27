@@ -1,5 +1,4 @@
 import { err, ok, type Result } from '../../shared/result'
-import type { CountryId } from '../../shared/types'
 import type { CommandError } from '../errors'
 import type { MemberId } from '../room/types'
 import { createLeaderboard } from './leaderboard'
@@ -13,13 +12,14 @@ import type {
 	GameParticipantState,
 	GameRevealedState,
 	GameState,
+	GameQuestion,
 	LeaderboardRoundState,
 	OpenRoundState,
 	RevealedRoundState,
 } from './types'
 
 export function createRound(
-	questionIds: readonly CountryId[],
+	questionIds: readonly string[],
 	config: Readonly<GameConfig>,
 	questionIndex: number,
 	now: number,
@@ -65,6 +65,7 @@ export function archiveRound(
 function evaluateSubmissions(
 	participantsById: Record<MemberId, GameParticipantState>,
 	round: OpenRoundState,
+	question: GameQuestion,
 ): {
 	participantsById: Record<MemberId, GameParticipantState>
 	submissions: Record<string, EvaluatedSubmission>
@@ -77,6 +78,7 @@ function evaluateSubmissions(
 		if (!submission) {
 			const noAnswerSubmission: EvaluatedSubmission = {
 				participantId: participant.id,
+				answer: null,
 				countryId: null,
 				submittedAt: round.deadlineAt,
 				isCorrect: false,
@@ -87,7 +89,7 @@ function evaluateSubmissions(
 			continue
 		}
 
-		const isCorrect = submission.countryId === round.questionId
+		const isCorrect = isSubmissionCorrect(submission, question)
 		const score = calculateAnswerScore(
 			round.startedAt,
 			submission.submittedAt,
@@ -95,6 +97,7 @@ function evaluateSubmissions(
 		)
 		const answeredSubmission: EvaluatedSubmission = {
 			participantId: submission.participantId,
+			answer: submission.answer,
 			countryId: submission.countryId,
 			submittedAt: submission.submittedAt,
 			isCorrect,
@@ -112,6 +115,29 @@ function evaluateSubmissions(
 	return {
 		participantsById: nextParticipantsById,
 		submissions,
+	}
+}
+
+function isSubmissionCorrect(
+	submission: { answer: EvaluatedSubmission['answer'] },
+	question: GameQuestion,
+): boolean {
+	if (!submission.answer) {
+		return false
+	}
+
+	switch (question.kind) {
+		case 'map_pick_country':
+			return (
+				submission.answer.kind === 'country_id' &&
+				submission.answer.countryId === question.correctCountryId
+			)
+
+		case 'quiz_choice':
+			return (
+				submission.answer.kind === 'choice_id' &&
+				submission.answer.choiceId === question.correctChoiceId
+			)
 	}
 }
 
@@ -137,9 +163,18 @@ export function applyGameTransition(
 				})
 			}
 
+			const question =
+				state.session.questions[state.currentRound.questionIndex]
+			if (!question) {
+				return err({
+					code: 'game_not_ready_to_complete',
+				})
+			}
+
 			const evaluation = evaluateSubmissions(
 				state.participantsById,
 				state.currentRound,
+				question,
 			)
 
 			const nextState: GameRevealedState = {
@@ -235,6 +270,7 @@ export function applyGameTransition(
 				completedAt: transition.now,
 				result: {
 					gameId: state.gameId,
+					gameKind: state.session.gameKind,
 					leaderboard: createLeaderboard(state.participantsById),
 					rounds: completedRounds,
 					finishedAt: transition.now,

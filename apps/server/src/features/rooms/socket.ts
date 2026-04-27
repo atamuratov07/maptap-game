@@ -337,7 +337,7 @@ export function registerRoomHandlers({
 
 			const submittedAnswer = roomsService.submitAnswer({
 				memberSessionToken: auth.value,
-				countryId: parsed.value.countryId,
+				answer: parsed.value.answer,
 			})
 
 			if (!submittedAnswer.ok) {

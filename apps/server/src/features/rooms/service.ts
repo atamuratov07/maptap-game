@@ -21,6 +21,7 @@ import {
 	getAnsweredParticipantCount,
 	prepareGameSession,
 	type GameConfig,
+	type PlayerAnswer,
 } from '@maptap/game-domain/multiplayer-next/game'
 import {
 	applyRoomCommand,
@@ -90,7 +91,7 @@ export interface StartGameInput {
 
 export interface SubmitAnswerInput {
 	memberSessionToken: MemberSessionToken
-	countryId: string
+	answer: PlayerAnswer
 }
 
 export interface ReturnToLobbyInput {
@@ -467,7 +468,7 @@ export class RoomsService {
 		const submittedState = submitRoomGameAnswer(room, {
 			type: 'SUBMIT_ANSWER',
 			participantId: memberSession.memberId,
-			countryId: input.countryId,
+			answer: input.answer,
 			now: acceptedAt,
 		})
 

@@ -15,18 +15,26 @@ export function createGame(
 ): Result<GameOpenState, CommandError | SessionPreparationError> {
 	if (
 		input.session.questionIds.length === 0 ||
-		input.session.eligibleIds.length === 0
+		input.session.questions.length === 0
 	) {
 		return err({
 			code: 'no_eligible_countries',
 		})
 	}
 
-	for (const id of input.session.questionIds) {
-		if (!input.session.eligibleIds.includes(id)) {
+	if (input.session.gameKind === 'country-map') {
+		if (input.session.eligibleIds.length === 0) {
 			return err({
-				code: 'country_not_eligible',
+				code: 'no_eligible_countries',
 			})
+		}
+
+		for (const id of input.session.questionIds) {
+			if (!input.session.eligibleIds.includes(id)) {
+				return err({
+					code: 'country_not_eligible',
+				})
+			}
 		}
 	}
 

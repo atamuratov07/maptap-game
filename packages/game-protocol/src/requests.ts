@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import { GAME_DIFFICULTIES, GAME_SCOPES } from '@maptap/game-domain'
+import { QUIZ_QUESTION_PACK_IDS } from '@maptap/game-domain/multiplayer-next'
 
 export const difficultySchema = z.enum(GAME_DIFFICULTIES)
 export const scopeSchema = z.enum(GAME_SCOPES)
@@ -34,17 +35,41 @@ export const resumePlayerRoomRequestSchema = z.object({
 export const returnToLobbyRequestSchema = z.object({})
 export const terminateRoomRequestSchema = z.object({})
 
-export const startGameRequestSchema = z.object({
-	gameConfig: z.object({
-		questionCount: z.number().int().min(1).max(50),
-		difficulty: difficultySchema,
-		scope: scopeSchema,
-		questionDurationMs: z.number().int().min(5_000).max(120_000),
-	}),
+const questionCountSchema = z.number().int().min(1).max(50)
+const questionDurationMsSchema = z.number().int().min(5_000).max(120_000)
+
+export const countryMapGameConfigSchema = z.object({
+	gameKind: z.literal('country-map').optional(),
+	questionCount: questionCountSchema,
+	difficulty: difficultySchema,
+	scope: scopeSchema,
+	questionDurationMs: questionDurationMsSchema,
 })
 
+export const quizGameConfigSchema = z.object({
+	gameKind: z.literal('quiz'),
+	packId: z.enum(QUIZ_QUESTION_PACK_IDS),
+	questionCount: questionCountSchema,
+	questionDurationMs: questionDurationMsSchema,
+})
+
+export const startGameRequestSchema = z.object({
+	gameConfig: z.union([quizGameConfigSchema, countryMapGameConfigSchema]),
+})
+
+export const playerAnswerSchema = z.discriminatedUnion('kind', [
+	z.object({
+		kind: z.literal('country_id'),
+		countryId: z.string().regex(/^\d{3}$/),
+	}),
+	z.object({
+		kind: z.literal('choice_id'),
+		choiceId: z.string().trim().min(1).max(80),
+	}),
+])
+
 export const submitAnswerRequestSchema = z.object({
-	countryId: z.string().regex(/^\d{3}$/),
+	answer: playerAnswerSchema,
 })
 
 export type CreateRoomRequest = z.infer<typeof createRoomRequestSchema>
