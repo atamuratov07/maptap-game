@@ -1,4 +1,7 @@
-import type { GameView } from '@maptap/game-domain/multiplayer-next/game'
+import type {
+	GameView,
+	PlayerAnswer,
+} from '@maptap/game-domain/multiplayer-next/game'
 import type { VisibleMemberInfo } from '@maptap/game-domain/multiplayer-next/room'
 import { useMemo } from 'react'
 import { MapRenderer } from '../../../shared/map/MapRenderer'
@@ -18,7 +21,7 @@ interface CountryMapGameScreenProps {
 	submitPending: boolean
 	actionErrorMessage: string | null
 	isReconnecting: boolean
-	onSubmitAnswer: (countryId: string) => Promise<void>
+	onSubmitAnswer: (answer: PlayerAnswer) => Promise<void>
 }
 
 function FloatingNotice({
@@ -59,7 +62,7 @@ export function CountryMapGameScreen({
 	})
 	const leaderboardEntries = useMemo(
 		() => getLeaderboardEntries(game, members, 5),
-		[game.leaderboard, members],
+		[game, members],
 	)
 	const evaluatedSubmission =
 		game.phase === 'open' || game.phase === 'completed'

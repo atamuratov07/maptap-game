@@ -78,6 +78,8 @@ export function formatGatewayErrorMessage(error: unknown): string {
 			return 'Этот участник игры не находится в комнате.'
 		case 'country_not_eligible':
 			return 'Эта страна недоступна в текущей игре.'
+		case 'answer_not_allowed':
+			return 'Этот тип ответа не подходит для текущего вопроса.'
 		case 'member_not_found':
 			return 'Этого участника нет в комнате.'
 		case 'member_name_required':
@@ -94,6 +96,8 @@ export function formatGatewayErrorMessage(error: unknown): string {
 			return 'Для этих настроек нет доступных стран.'
 		case 'insufficient_eligible_countries':
 			return 'В этих настройках вопросов больше, чем доступных стран.'
+		case 'insufficient_questions':
+			return 'В этом наборе меньше вопросов, чем выбрано для игры.'
 		case 'transport_error':
 			return 'Не удалось подключиться к игровому серверу.'
 	}

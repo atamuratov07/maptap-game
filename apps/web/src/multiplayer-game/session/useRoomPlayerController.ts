@@ -1,4 +1,7 @@
-import type { RoomPlayerView } from '@maptap/game-domain/multiplayer-next'
+import type {
+	PlayerAnswer,
+	RoomPlayerView,
+} from '@maptap/game-domain/multiplayer-next'
 import type { LookupRoomFoundResponse } from '@maptap/game-protocol'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { formatGatewayErrorMessage } from '../api/errors'
@@ -44,7 +47,7 @@ interface UseRoomPlayerControllerResult {
 	actionPending: RoomPlayerAction | null
 	actionErrorMessage: string | null
 	joinRoom: (playerName: string) => Promise<void>
-	submitAnswer: (countryId: string) => Promise<void>
+	submitAnswer: (answer: PlayerAnswer) => Promise<void>
 	retry: () => Promise<void>
 }
 
@@ -123,13 +126,13 @@ export function useRoomPlayerController(
 	)
 
 	const submitAnswer = useCallback(
-		async (countryId: string) => {
+		async (answer: PlayerAnswer) => {
 			if (runtime.state.status !== 'ready') {
 				return
 			}
 
 			await runAction('submit', async () => {
-				await gateway.submitAnswer({ countryId })
+				await gateway.submitAnswer({ answer })
 			})
 		},
 		[gateway, runAction, runtime.state.status],

@@ -1,5 +1,6 @@
 import type {
 	GameConfig,
+	PlayerAnswer,
 	RoomHostView,
 } from '@maptap/game-domain/multiplayer-next'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -26,7 +27,7 @@ interface UseRoomHostControllerResult {
 	actionPending: RoomHostAction | null
 	actionErrorMessage: string | null
 	startGame: (config: GameConfig) => Promise<void>
-	submitAnswer: (countryId: string) => Promise<void>
+	submitAnswer: (answer: PlayerAnswer) => Promise<void>
 	returnToLobby: () => Promise<void>
 	terminateRoom: () => Promise<void>
 	retry: () => Promise<void>
@@ -116,13 +117,13 @@ export function useRoomHostController(
 	)
 
 	const submitAnswer = useCallback(
-		async (countryId: string) => {
+		async (answer: PlayerAnswer) => {
 			if (runtime.state.status !== 'ready') {
 				return
 			}
 
 			await runAction('submit', async () => {
-				await gateway.submitAnswer({ countryId })
+				await gateway.submitAnswer({ answer })
 			})
 		},
 		[gateway, runAction, runtime.state.status],

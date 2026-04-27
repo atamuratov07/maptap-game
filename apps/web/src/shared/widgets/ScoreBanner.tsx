@@ -26,6 +26,7 @@ interface ScoreBannerProps {
 	awardedScore: number
 	durationMs?: number
 	className?: string
+	shadowClassName?: string
 }
 
 function formatAwardedScore(scoreDelta: number): string {
@@ -72,6 +73,7 @@ export function ScoreBanner({
 	awardedScore,
 	durationMs = SCORE_VISIBLE_DURATION_MS,
 	className,
+	shadowClassName = 'bg-slate-950/85',
 }: ScoreBannerProps): JSX.Element | null {
 	const [snapshot, setSnapshot] = useState<ScoreBannerSnapshot | null>(null)
 	const [isVisible, setIsVisible] = useState(false)
@@ -173,7 +175,7 @@ export function ScoreBanner({
 					>
 						<motion.div
 							aria-hidden='true'
-							className='absolute top-1/2 left-1/2 -z-10 h-40 w-28 -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-slate-950/85 blur-2xl'
+							className={`absolute top-1/2 left-1/2 -z-10 h-40 w-28 -translate-x-1/2 -translate-y-1/2 rounded-2xl blur-2xl ${shadowClassName}`}
 							initial={{ opacity: 0, scale: 0.1 }}
 							animate={{ opacity: 1, scale: 1 }}
 							exit={{ opacity: 0, scale: 0.1 }}
@@ -209,7 +211,7 @@ export function ScoreBanner({
 							}}
 						>
 							<p className='-mb-2 text-[11px] font-black uppercase tracking-[0.22em] text-slate-400'>
-								Your score
+								Ваш счёт
 							</p>
 							<p className='text-[clamp(1.5rem,8vw,2.5rem)] font-black'>
 								{score}

@@ -1,4 +1,10 @@
-import type { GameConfig } from '@maptap/game-domain/multiplayer-next'
+import {
+	DEFAULT_COUNTRY_MAP_GAME_CONFIG,
+	DEFAULT_QUIZ_GAME_CONFIG,
+	type CountryMapGameConfig,
+	type GameConfig,
+	type QuizGameConfig,
+} from '@maptap/game-domain/multiplayer-next'
 import { Gauge, Globe2, ListChecks, Timer } from 'lucide-react'
 import { useEffect, useState, type FormEvent } from 'react'
 import { SelectControl } from '../../shared/ui'
@@ -7,6 +13,7 @@ import {
 	loadRoomGameConfig,
 	QUESTION_COUNT_OPTIONS,
 	QUESTION_DURATION_MS_OPTIONS,
+	QUIZ_PACK_OPTIONS,
 	saveRoomGameConfig,
 	SCOPE_OPTIONS,
 } from '../model/gameConfig'
@@ -63,6 +70,30 @@ export function GameConfigPanel({
 		onStartGame(config)
 	}
 
+	function setGameKind(gameKind: GameConfig['gameKind']) {
+		setConfig(current => {
+			const shared = {
+				questionCount: current.questionCount,
+				questionDurationMs: current.questionDurationMs,
+			}
+			const quizPackId =
+				current.gameKind === 'quiz'
+					? current.packId
+					: DEFAULT_QUIZ_GAME_CONFIG.packId
+
+			return gameKind === 'quiz'
+				? {
+						...DEFAULT_QUIZ_GAME_CONFIG,
+						...shared,
+						packId: quizPackId,
+					}
+				: {
+						...DEFAULT_COUNTRY_MAP_GAME_CONFIG,
+						...shared,
+					}
+		})
+	}
+
 	return (
 		<form
 			id={formId}
@@ -73,20 +104,26 @@ export function GameConfigPanel({
 				<p className='text-[11px] font-black uppercase tracking-[0.22em] text-amber-700'>
 					Настройки игры
 				</p>
-				<h2 className='mt-1 text-2xl font-black tracking-tight text-slate-950'>
-					Раунд на карте
-				</h2>
+				<SelectControl
+					aria-label='Тип игры'
+					value={config.gameKind ?? 'country-map'}
+					className='mt-1 h-13 max-w-lg rounded-2xl border-amber-200 bg-white/88 text-lg font-black text-slate-950 shadow-sm sm:text-2xl'
+					onChange={event => {
+						setGameKind(event.target.value as GameConfig['gameKind'])
+					}}
+				>
+					<option value='country-map'>Раунд на карте</option>
+					<option value='quiz'>Викторина по Узбекистану</option>
+				</SelectControl>
 			</div>
 
-			<div className='grid gap-3 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-4'>
+			<div
+				className={`grid gap-3 p-4 sm:grid-cols-2 sm:p-5 ${
+					config.gameKind === 'quiz' ? 'lg:grid-cols-3' : 'lg:grid-cols-4'
+				}`}
+			>
 				<ConfigField
-					icon={
-						<ListChecks
-							aria-hidden='true'
-							size={17}
-							strokeWidth={2.4}
-						/>
-					}
+					icon={<ListChecks aria-hidden='true' size={17} strokeWidth={2.4} />}
 					label='Вопросы'
 				>
 					<SelectControl
@@ -108,13 +145,7 @@ export function GameConfigPanel({
 				</ConfigField>
 
 				<ConfigField
-					icon={
-						<Timer
-							aria-hidden='true'
-							size={17}
-							strokeWidth={2.4}
-						/>
-					}
+					icon={<Timer aria-hidden='true' size={17} strokeWidth={2.4} />}
 					label='Таймер'
 				>
 					<SelectControl
@@ -135,62 +166,94 @@ export function GameConfigPanel({
 					</SelectControl>
 				</ConfigField>
 
-				<ConfigField
-					icon={
-						<Globe2
-							aria-hidden='true'
-							size={17}
-							strokeWidth={2.4}
-						/>
-					}
-					label='Регион'
-				>
-					<SelectControl
-						value={config.scope}
-						className='h-12 rounded-2xl border-slate-200 bg-slate-50 font-black'
-						onChange={event => {
-							setConfig(current => ({
-								...current,
-								scope: event.target.value as GameConfig['scope'],
-							}))
-						}}
+				{config.gameKind === 'quiz' ? (
+					<ConfigField
+						icon={<Globe2 aria-hidden='true' size={17} strokeWidth={2.4} />}
+						label='Набор'
 					>
-						{SCOPE_OPTIONS.map(option => (
-							<option key={option.value} value={option.value}>
-								{option.label}
-							</option>
-						))}
-					</SelectControl>
-				</ConfigField>
+						<SelectControl
+							value={config.packId}
+							className='h-12 rounded-2xl border-slate-200 bg-slate-50 font-black'
+							onChange={event => {
+								setConfig(current =>
+									current.gameKind === 'quiz'
+										? {
+												...current,
+												packId: event.target
+													.value as QuizGameConfig['packId'],
+											}
+										: current,
+								)
+							}}
+						>
+							{QUIZ_PACK_OPTIONS.map(option => (
+								<option key={option.value} value={option.value}>
+									{option.label}
+								</option>
+							))}
+						</SelectControl>
+					</ConfigField>
+				) : (
+					<>
+						<ConfigField
+							icon={
+								<Globe2
+									aria-hidden='true'
+									size={17}
+									strokeWidth={2.4}
+								/>
+							}
+							label='Регион'
+						>
+							<SelectControl
+								value={config.scope}
+								className='h-12 rounded-2xl border-slate-200 bg-slate-50 font-black'
+								onChange={event => {
+									setConfig(current => ({
+										...current,
+										scope: event.target
+											.value as CountryMapGameConfig['scope'],
+									}))
+								}}
+							>
+								{SCOPE_OPTIONS.map(option => (
+									<option key={option.value} value={option.value}>
+										{option.label}
+									</option>
+								))}
+							</SelectControl>
+						</ConfigField>
 
-				<ConfigField
-					icon={
-						<Gauge
-							aria-hidden='true'
-							size={17}
-							strokeWidth={2.4}
-						/>
-					}
-					label='Сложность'
-				>
-					<SelectControl
-						value={config.difficulty}
-						className='h-12 rounded-2xl border-slate-200 bg-slate-50 font-black'
-						onChange={event => {
-							setConfig(current => ({
-								...current,
-								difficulty: event.target
-									.value as GameConfig['difficulty'],
-							}))
-						}}
-					>
-						{DIFFICULTY_OPTIONS.map(option => (
-							<option key={option.value} value={option.value}>
-								{option.label}
-							</option>
-						))}
-					</SelectControl>
-				</ConfigField>
+						<ConfigField
+							icon={
+								<Gauge
+									aria-hidden='true'
+									size={17}
+									strokeWidth={2.4}
+								/>
+							}
+							label='Сложность'
+						>
+							<SelectControl
+								value={config.difficulty}
+								className='h-12 rounded-2xl border-slate-200 bg-slate-50 font-black'
+								onChange={event => {
+									setConfig(current => ({
+										...current,
+										difficulty: event.target
+											.value as CountryMapGameConfig['difficulty'],
+									}))
+								}}
+							>
+								{DIFFICULTY_OPTIONS.map(option => (
+									<option key={option.value} value={option.value}>
+										{option.label}
+									</option>
+								))}
+							</SelectControl>
+						</ConfigField>
+					</>
+				)}
 			</div>
 		</form>
 	)

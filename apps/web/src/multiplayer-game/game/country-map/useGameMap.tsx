@@ -1,4 +1,7 @@
-import type { GameView } from '@maptap/game-domain/multiplayer-next/game'
+import type {
+	GameView,
+	PlayerAnswer,
+} from '@maptap/game-domain/multiplayer-next/game'
 import { useCallback, useMemo } from 'react'
 import type { MapHighlight, MapRendererProps } from '../../../shared/map/types'
 import { CountryInfoCard } from '../../../shared/widgets/CountryInfoCard'
@@ -15,7 +18,7 @@ const noopPick = () => undefined
 interface UseRoomGameMapArgs {
 	game: GameView
 	submitPending: boolean
-	onSubmitAnswer: (countryId: string) => void
+	onSubmitAnswer: (answer: PlayerAnswer) => void
 }
 
 interface UseRoomGameMapResult {
@@ -27,10 +30,9 @@ export function useGameMap({
 	submitPending,
 	onSubmitAnswer,
 }: UseRoomGameMapArgs): UseRoomGameMapResult {
-	const eligibleCountryIdsKey = game.eligibleCountryIds.join('|')
 	const interactiveIds = useMemo<ReadonlySet<string>>(
 		() => new Set(game.eligibleCountryIds),
-		[eligibleCountryIdsKey],
+		[game.eligibleCountryIds],
 	)
 
 	const isCompleted = game.phase === 'completed'
@@ -49,7 +51,10 @@ export function useGameMap({
 
 	const handlePick = useCallback(
 		(countryId: string) => {
-			void onSubmitAnswer(countryId)
+			void onSubmitAnswer({
+				kind: 'country_id',
+				countryId,
+			})
 		},
 		[onSubmitAnswer],
 	)
