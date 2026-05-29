@@ -360,7 +360,12 @@
 						[6, 16]
 					]
 				},
-				"text-field": "{name_ru}",
+					"text-field": [
+						"coalesce",
+						["get", "name_ru"],
+						["get", "name"],
+						["get", "name_uz_latn"]
+					],
 				"visibility": "visible",
 				"symbol-placement": "line"
 			},

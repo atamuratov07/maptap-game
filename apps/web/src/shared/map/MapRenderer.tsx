@@ -4,6 +4,7 @@ import { Globe, Map as MapIcon } from 'lucide-react'
 import type { FilterSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import Map, {
 	Layer,
 	Marker,
@@ -14,15 +15,18 @@ import Map, {
 	type MapRef,
 	type ProjectionSpecification,
 } from 'react-map-gl/maplibre'
+import { useAppLanguage } from '../i18n'
 import { IconButton } from '../ui'
 import { CONTINENT_VIEW_PRESETS } from './continent-view'
 import {
 	BASE_STYLE_LAYER_ID,
+	buildCapitalLabelLayer,
 	buildDimLayer,
+	buildCountryLabelLayer,
 	buildHighlightLayer,
 	capitalDotLayer,
-	capitalLabelLayer,
-	countryLabelLayer,
+	GEOLINES_LABEL_LAYER_ID,
+	getGeolinesTextField,
 	hoverLayer,
 	LABELS_BOTTOM_LAYER_ID,
 	SOURCE_ID,
@@ -85,6 +89,8 @@ function MapRendererInner({
 	className,
 	resetViewKey = null,
 }: MapRendererProps): JSX.Element {
+	const { t } = useTranslation()
+	const language = useAppLanguage()
 	const mapRef = useRef<MapRef | null>(null)
 
 	const [isLoaded, setIsLoaded] = useState(false)
@@ -248,6 +254,27 @@ function MapRendererInner({
 	const dimLayer = useMemo(() => {
 		return buildDimLayer(interactiveIds, true)
 	}, [interactiveIds])
+	const countryLabelLayer = useMemo(
+		() => buildCountryLabelLayer(language),
+		[language],
+	)
+	const capitalLabelLayer = useMemo(
+		() => buildCapitalLabelLayer(language),
+		[language],
+	)
+
+	useEffect(() => {
+		const map = mapRef.current?.getMap()
+		if (!map || !isLoaded || !map.getLayer(GEOLINES_LABEL_LAYER_ID)) {
+			return
+		}
+
+		map.setLayoutProperty(
+			GEOLINES_LABEL_LAYER_ID,
+			'text-field',
+			getGeolinesTextField(language),
+		)
+	}, [isLoaded, language])
 
 	const labelIds = useMemo(() => {
 		const ids = new Set<string>(
@@ -491,8 +518,8 @@ function MapRendererInner({
 			<div className='absolute top-3.5 left-3.5 z-10 flex flex-col gap-2'>
 				<IconButton
 					type='button'
-					aria-label='Плоская карта'
-					title='Плоская карта'
+					aria-label={t('map.projection.flat')}
+					title={t('map.projection.flat')}
 					active={isMercatorProjection}
 					disabled={isMercatorProjection}
 					onClick={() => switchProjection(MERCATOR_PROJECTION)}
@@ -501,8 +528,8 @@ function MapRendererInner({
 				</IconButton>
 				<IconButton
 					type='button'
-					aria-label='Глобус'
-					title='Глобус'
+					aria-label={t('map.projection.globe')}
+					title={t('map.projection.globe')}
 					active={isGlobeProjection}
 					onClick={() => {
 						if (!isGlobeProjection && !isContinentChosen) {
@@ -517,7 +544,7 @@ function MapRendererInner({
 
 			{hasFailure ? (
 				<div className='absolute top-3 left-1/2 z-11 -translate-x-1/2 rounded-lg bg-slate-900/90 px-2.5 py-2 text-xs text-white'>
-					Ошибка отображения карты.
+					{t('map.error')}
 				</div>
 			) : null}
 		</div>
