@@ -1,6 +1,7 @@
 import { animate } from 'motion'
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 const SCORE_VISIBLE_DURATION_MS = 3000
 const ENTER_DURATION_S = 0.4
@@ -75,6 +76,7 @@ export function ScoreBanner({
 	className,
 	shadowClassName = 'bg-slate-950/85',
 }: ScoreBannerProps): JSX.Element | null {
+	const { t } = useTranslation()
 	const [snapshot, setSnapshot] = useState<ScoreBannerSnapshot | null>(null)
 	const [isVisible, setIsVisible] = useState(false)
 	const lastTriggerKeyRef = useRef<ScoreBannerTriggerKey | null>(null)
@@ -211,7 +213,7 @@ export function ScoreBanner({
 							}}
 						>
 							<p className='-mb-2 text-[11px] font-black uppercase tracking-[0.22em] text-slate-400'>
-								Ваш счёт
+								{t('score.yourScore')}
 							</p>
 							<p className='text-[clamp(1.5rem,8vw,2.5rem)] font-black'>
 								{score}

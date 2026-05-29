@@ -1,8 +1,12 @@
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { LanguageSwitcher } from '../shared/i18n'
 import { ScreenShell, SurfacePanel } from '../shared/ui'
 import { GameCard } from '../shared/widgets/GameCard'
 
 export function HomePage(): JSX.Element {
+	const { t } = useTranslation()
+
 	return (
 		<ScreenShell className='sm:px-8 lg:px-10'>
 			<SurfacePanel
@@ -12,43 +16,44 @@ export function HomePage(): JSX.Element {
 				<header className='mb-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between'>
 					<div className='max-w-3xl'>
 						<p className='mb-4 text-xs font-black uppercase tracking-[0.3em] text-teal-700'>
-							MapTap
+							{t('app.name')}
 						</p>
 						<h1 className='max-w-2xl text-5xl font-black leading-[0.94] tracking-tight text-slate-950 sm:text-6xl'>
-							Изучай карту, играя.
+							{t('home.title')}
 						</h1>
 						<p className='mt-5 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg'>
-							Выбери режим и играй на карте сам или вместе с друзьями.
+							{t('home.description')}
 						</p>
 					</div>
+					<LanguageSwitcher />
 				</header>
 
 				<section className='grid flex-1 gap-5 lg:grid-cols-2'>
 					<GameCard
-						eyebrow='Соло'
-						title='Одиночная игра'
-						description='Выбери настройки и начни игру.'
+						eyebrow={t('home.singleplayer.eyebrow')}
+						title={t('home.singleplayer.title')}
+						description={t('home.singleplayer.description')}
 						to='/singleplayer'
-						ctaLabel='Играть'
+						ctaLabel={t('home.singleplayer.cta')}
 						tone='teal'
 					/>
 					<GameCard
-						eyebrow='Онлайн'
-						title='Мультиплеер'
-						description='Создай комнату или войди по коду.'
+						eyebrow={t('home.multiplayer.eyebrow')}
+						title={t('home.multiplayer.title')}
+						description={t('home.multiplayer.description')}
 						to='/multiplayer'
-						ctaLabel='Открыть'
+						ctaLabel={t('home.multiplayer.cta')}
 						tone='amber'
 					/>
 				</section>
 
 				<footer className='mt-10 flex flex-col gap-3 border-t border-slate-200 pt-5 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between'>
-					<p>Выбери режим и начни игру.</p>
+					<p>{t('home.footer')}</p>
 					<Link
 						to='/singleplayer'
 						className='inline-flex items-center gap-2 font-semibold text-slate-800 transition hover:text-teal-700'
 					>
-						Начать с одиночной игры
+						{t('home.startSingleplayer')}
 						<span aria-hidden='true'>-&gt;</span>
 					</Link>
 				</footer>

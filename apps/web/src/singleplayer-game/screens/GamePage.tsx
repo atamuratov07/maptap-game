@@ -5,6 +5,7 @@ import {
 	type GameConfig,
 } from '@maptap/game-domain/singleplayer'
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Button, ButtonLink, ScreenShell, SurfacePanel } from '../../shared/ui'
 import { GameResultModal } from '../components/GameResultModal'
@@ -13,20 +14,20 @@ import { useGameSession, type GameLoadErrorCode } from '../core/useGameSession'
 import { GameScreen } from './GameScreen'
 import { InvalidConfigScreen } from './InvalidConfigScreen'
 
-function getLoadErrorMessage(errorCode: GameLoadErrorCode | null): string {
+function getLoadErrorKey(errorCode: GameLoadErrorCode | null): string {
 	if (errorCode === 'no_playable_countries') {
-		return 'В каталоге не найдено игровых стран.'
+		return 'singleplayer.loadErrors.noPlayableCountries'
 	}
 
 	if (errorCode === 'no_eligible_countries') {
-		return 'Нет стран, подходящих под выбранные область и сложность.'
+		return 'singleplayer.loadErrors.noEligibleCountries'
 	}
 
 	if (errorCode === 'insufficient_eligible_countries') {
-		return 'Выбрано слишком много вопросов.'
+		return 'singleplayer.loadErrors.insufficientEligibleCountries'
 	}
 
-	return 'Не удалось начать игру.'
+	return 'singleplayer.loadErrors.default'
 }
 
 export function GamePage(): JSX.Element {
@@ -43,6 +44,7 @@ export function GamePage(): JSX.Element {
 }
 
 function GameContent({ config }: { config: GameConfig }): JSX.Element {
+	const { t } = useTranslation()
 	const navigate = useNavigate()
 	const {
 		gameData,
@@ -60,13 +62,13 @@ function GameContent({ config }: { config: GameConfig }): JSX.Element {
 			<ScreenShell center>
 				<SurfacePanel>
 					<p className='text-[11px] font-black uppercase tracking-[0.22em] text-rose-700'>
-						Одиночная игра
+						{t('singleplayer.title')}
 					</p>
 					<h1 className='mt-3 text-3xl font-black tracking-tight text-slate-950'>
-						Игра недоступна
+						{t('singleplayer.unavailableTitle')}
 					</h1>
 					<p className='mt-3 text-sm leading-7 text-slate-600'>
-						{getLoadErrorMessage(loadErrorCode)}
+						{t(getLoadErrorKey(loadErrorCode))}
 					</p>
 					<div className='mt-6 flex flex-wrap gap-3'>
 						<Button
@@ -74,13 +76,13 @@ function GameContent({ config }: { config: GameConfig }): JSX.Element {
 							variant='teal'
 							onClick={handleTryAgain}
 						>
-							Повторить
+							{t('common.retry')}
 						</Button>
 						<ButtonLink
 							to='/singleplayer'
 							variant='secondary'
 						>
-							Изменить настройки
+							{t('singleplayer.changeSettings')}
 						</ButtonLink>
 					</div>
 				</SurfacePanel>

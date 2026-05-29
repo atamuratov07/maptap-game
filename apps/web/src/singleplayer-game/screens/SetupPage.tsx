@@ -3,7 +3,13 @@ import {
 	type GameConfig,
 } from '@maptap/game-domain/singleplayer'
 import { useCallback, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+import {
+	getDifficultyLabel,
+	getScopeLabel,
+	LanguageSwitcher,
+} from '../../shared/i18n'
 import {
 	Button,
 	ButtonLink,
@@ -21,6 +27,7 @@ import {
 } from '../core/config'
 
 export function SetupPage(): JSX.Element {
+	const { t } = useTranslation()
 	const navigate = useNavigate()
 	const [config, setConfig] = useState<GameConfig>(DEFAULT_GAME_CONFIG)
 
@@ -35,12 +42,9 @@ export function SetupPage(): JSX.Element {
 		navigate(buildGamePath(config))
 	}, [config, navigate])
 
-	const scopeLabel =
-		SCOPE_OPTIONS.find(option => option.value === config.scope)?.label ??
-		config.scope
+	const scopeLabel = getScopeLabel(t, config.scope)
 	const difficultyLabel =
-		DIFFICULTY_OPTIONS.find(option => option.value === config.difficulty)
-			?.label ?? config.difficulty
+		getDifficultyLabel(t, config.difficulty) ?? config.difficulty
 
 	return (
 		<ScreenShell className='sm:px-8'>
@@ -52,8 +56,9 @@ export function SetupPage(): JSX.Element {
 						size='pill'
 					>
 						<span aria-hidden='true'>&larr;</span>
-						К режимам
+						{t('singleplayer.toModes')}
 					</ButtonLink>
+					<LanguageSwitcher />
 				</div>
 
 				<SurfacePanel
@@ -61,14 +66,14 @@ export function SetupPage(): JSX.Element {
 					className='border-white/60 bg-white/90 shadow-[0_28px_80px_rgba(15,23,42,0.12)] backdrop-blur sm:p-8'
 				>
 					<h1 className='mb-2 text-5xl font-black leading-none tracking-tight text-slate-950'>
-						Одиночная игра
+						{t('singleplayer.title')}
 					</h1>
 					<p className='mb-6 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base'>
-						Выберите настройки и начните игру.
+						{t('singleplayer.setupDescription')}
 					</p>
 
 					<div className='grid gap-4 sm:grid-cols-2'>
-						<Field label='Количество вопросов'>
+						<Field label={t('singleplayer.fields.questionCount')}>
 							<SelectControl
 								accent='teal'
 								className='rounded-lg border-slate-400 py-2 shadow-sm'
@@ -87,7 +92,7 @@ export function SetupPage(): JSX.Element {
 							</SelectControl>
 						</Field>
 
-						<Field label='Попыток на вопрос'>
+						<Field label={t('singleplayer.fields.attemptsPerQuestion')}>
 							<SelectControl
 								accent='teal'
 								className='rounded-lg border-slate-400 py-2 shadow-sm'
@@ -106,7 +111,7 @@ export function SetupPage(): JSX.Element {
 							</SelectControl>
 						</Field>
 
-						<Field label='Область карты'>
+						<Field label={t('singleplayer.fields.scope')}>
 							<SelectControl
 								accent='teal'
 								className='rounded-lg border-slate-400 py-2 shadow-sm'
@@ -119,13 +124,13 @@ export function SetupPage(): JSX.Element {
 							>
 								{SCOPE_OPTIONS.map(option => (
 									<option key={option.value} value={option.value}>
-										{option.label}
+										{getScopeLabel(t, option.value)}
 									</option>
 								))}
 							</SelectControl>
 						</Field>
 
-						<Field label='Предел сложности'>
+						<Field label={t('singleplayer.fields.difficulty')}>
 							<SelectControl
 								accent='teal'
 								className='rounded-lg border-slate-400 py-2 shadow-sm'
@@ -139,7 +144,7 @@ export function SetupPage(): JSX.Element {
 							>
 								{DIFFICULTY_OPTIONS.map(option => (
 									<option key={option.value} value={option.value}>
-										{option.label}
+										{getDifficultyLabel(t, option.value)}
 									</option>
 								))}
 							</SelectControl>
@@ -152,13 +157,17 @@ export function SetupPage(): JSX.Element {
 								<strong className='text-slate-900'>
 									{config.questionCount}
 								</strong>{' '}
-								вопросов
+								{t('singleplayer.summary.questions', {
+									count: config.questionCount,
+								}).replace(`${config.questionCount} `, '')}
 							</span>
 							<span>
 								<strong className='text-slate-900'>
 									{config.attemptsPerQuestion}
 								</strong>{' '}
-								попыток
+								{t('singleplayer.summary.attempts', {
+									count: config.attemptsPerQuestion,
+								}).replace(`${config.attemptsPerQuestion} `, '')}
 							</span>
 							<span className='capitalize'>
 								<strong className='text-slate-900'>{scopeLabel}</strong>
@@ -177,7 +186,7 @@ export function SetupPage(): JSX.Element {
 							className='w-full sm:w-auto'
 							onClick={handleStart}
 						>
-							Начать игру
+							{t('singleplayer.start')}
 						</Button>
 					</div>
 				</SurfacePanel>

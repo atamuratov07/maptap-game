@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { getButtonClassName, type ButtonVariant } from '../ui'
 import { cn } from '../utils'
 
@@ -41,6 +42,7 @@ export function GameCard({
 	ctaLabel,
 	tone,
 }: GameCardProps): JSX.Element {
+	const { t } = useTranslation()
 	const styles = CARD_TONE_STYLES[tone]
 
 	return (
@@ -58,7 +60,7 @@ export function GameCard({
 					{eyebrow}
 				</span>
 				<span className='text-xs font-semibold text-slate-500 transition group-hover:text-slate-700'>
-					Открыть режим
+					{t('common.openMode')}
 				</span>
 			</div>
 

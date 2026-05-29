@@ -14,6 +14,8 @@ import {
 	type GameState,
 } from '@maptap/game-domain/singleplayer'
 import { useEffect, useMemo, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
+import { getCountryName, useAppLanguage } from '../../shared/i18n'
 import { MapRenderer } from '../../shared/map/MapRenderer'
 import type { MapHighlightTone, MapRendererProps } from '../../shared/map/types'
 import { ScoreBanner } from '../../shared/widgets/ScoreBanner'
@@ -39,6 +41,8 @@ export function GameScreen({
 	onGiveUp,
 	onNext,
 }: GameScreenProps): JSX.Element {
+	const { t } = useTranslation()
+	const language = useAppLanguage()
 	const targetId = getTargetId(state)
 	const targetInfo = targetId ? countriesInfo.get(targetId) : undefined
 	const revealedId = getRevealedId(state)
@@ -122,7 +126,9 @@ export function GameScreen({
 				questionIndex={questionIndex}
 				questionCount={questionCount}
 				targetName={
-					targetInfo?.nameRu || targetInfo?.name || 'Игра завершена'
+					targetInfo
+						? getCountryName(targetInfo, language)
+						: t('singleplayer.gameFinished')
 				}
 				targetFlagUrl={targetInfo?.flagUrl}
 				isPlaying={state.phase === 'playing'}
@@ -160,7 +166,7 @@ export function GameScreen({
 							className='px-4 py-2.5'
 							onClick={onNext}
 						>
-							Следующий вопрос
+							{t('singleplayer.nextQuestion')}
 						</Button>
 					</div>
 				) : null}
