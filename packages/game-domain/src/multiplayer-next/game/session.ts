@@ -1,7 +1,11 @@
 import { selectEligibleCountryIds } from '../../catalog/selectors'
 import type { CountryPool } from '../../catalog/types'
 import type { SessionPreparationError } from '../errors'
-import { pickRandomIds, type RandomNumberGenerator } from '../../shared/random'
+import {
+	pickRandomIds,
+	shuffleValues,
+	type RandomNumberGenerator,
+} from '../../shared/random'
 import { err, ok, type Result } from '../../shared/result'
 import { TASHKENT_CITY_QUESTIONS } from './quiz/content/tashkent-city'
 import { UZBEKISTAN_GEOGRAPHY_QUESTIONS } from './quiz/content/uzbekistan-geography'
@@ -69,6 +73,16 @@ function getQuizQuestions(
 	}
 }
 
+function shuffleQuizQuestionChoices(
+	question: QuizChoiceQuestion,
+	rng: RandomNumberGenerator,
+): QuizChoiceQuestion {
+	return {
+		...question,
+		choices: shuffleValues(question.choices, rng),
+	}
+}
+
 function prepareQuizGameSession(
 	config: QuizGameConfig,
 	rng: RandomNumberGenerator,
@@ -83,7 +97,9 @@ function prepareQuizGameSession(
 		})
 	}
 
-	const questions = pickRandomIds(questionBank, config.questionCount, rng)
+	const questions = pickRandomIds(questionBank, config.questionCount, rng).map(
+		question => shuffleQuizQuestionChoices(question, rng),
+	)
 
 	return ok({
 		gameKind: 'quiz',
