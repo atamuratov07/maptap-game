@@ -19,7 +19,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Afg'oniston",
+      "capital_uz_latn": "Qobul",
+      "currency_uz_latn": "Afg'oni"
     },
     {
       "id": "008",
@@ -37,7 +40,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Albaniya",
+      "capital_uz_latn": "Tirana",
+      "currency_uz_latn": "Lek"
     },
     {
       "id": "012",
@@ -55,7 +61,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Jazoir",
+      "capital_uz_latn": "Jazoir",
+      "currency_uz_latn": "Jazoir dinori"
     },
     {
       "id": "020",
@@ -73,7 +82,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Andorra",
+      "capital_uz_latn": "Andorra-la-Velya",
+      "currency_uz_latn": "yevro"
     },
     {
       "id": "024",
@@ -91,7 +103,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Angola",
+      "capital_uz_latn": "Luanda",
+      "currency_uz_latn": "kwanza"
     },
     {
       "id": "028",
@@ -109,7 +124,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Antigua va Barbuda",
+      "capital_uz_latn": "Sent Jons",
+      "currency_uz_latn": "Sharqiy Karib dollari"
     },
     {
       "id": "031",
@@ -127,7 +145,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Ozarbayjon",
+      "capital_uz_latn": "Boku",
+      "currency_uz_latn": "Ozarbayjon manati"
     },
     {
       "id": "032",
@@ -145,7 +166,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Argentina",
+      "capital_uz_latn": "Buenos Ayres",
+      "currency_uz_latn": "Argentina pesosi"
     },
     {
       "id": "036",
@@ -163,7 +187,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Avstraliya",
+      "capital_uz_latn": "Kanberra",
+      "currency_uz_latn": "Avstraliya dollari"
     },
     {
       "id": "040",
@@ -181,7 +208,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Avstriya",
+      "capital_uz_latn": "Vena",
+      "currency_uz_latn": "yevro"
     },
     {
       "id": "044",
@@ -199,7 +229,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Bagamalar",
+      "capital_uz_latn": "Nassau",
+      "currency_uz_latn": "Bahamian dollar"
     },
     {
       "id": "048",
@@ -217,7 +250,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Bahrayn",
+      "capital_uz_latn": "Manama",
+      "currency_uz_latn": "Bahrayn dinori"
     },
     {
       "id": "050",
@@ -235,7 +271,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Bangladesh",
+      "capital_uz_latn": "Dakka",
+      "currency_uz_latn": "Bangladesh takasi"
     },
     {
       "id": "051",
@@ -253,7 +292,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Armaniston",
+      "capital_uz_latn": "Yerevan",
+      "currency_uz_latn": "Dram"
     },
     {
       "id": "052",
@@ -271,7 +313,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Barbados",
+      "capital_uz_latn": "Bridjtaun",
+      "currency_uz_latn": "Barbadian dollar"
     },
     {
       "id": "056",
@@ -289,7 +334,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Belgiya",
+      "capital_uz_latn": "Bryussel",
+      "currency_uz_latn": "yevro"
     },
     {
       "id": "064",
@@ -307,7 +355,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Butan",
+      "capital_uz_latn": "Thimphu",
+      "currency_uz_latn": "ngultrum"
     },
     {
       "id": "068",
@@ -325,7 +376,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Boliviya",
+      "capital_uz_latn": "La Pas",
+      "currency_uz_latn": "boliviano"
     },
     {
       "id": "070",
@@ -343,7 +397,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Bosniya va Gersegovina",
+      "capital_uz_latn": "Sarayevo",
+      "currency_uz_latn": "convertible mark"
     },
     {
       "id": "072",
@@ -361,7 +418,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Botsvana",
+      "capital_uz_latn": "Gaborone",
+      "currency_uz_latn": "Botswana pula"
     },
     {
       "id": "076",
@@ -379,7 +439,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Braziliya",
+      "capital_uz_latn": "Brazilia",
+      "currency_uz_latn": "Braziliya reali"
     },
     {
       "id": "084",
@@ -397,7 +460,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Beliz",
+      "capital_uz_latn": "Belmopan",
+      "currency_uz_latn": "Belize dollar"
     },
     {
       "id": "090",
@@ -415,7 +481,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Solomon Orollari",
+      "capital_uz_latn": "Xoniara",
+      "currency_uz_latn": "Solomon Islands dollar"
     },
     {
       "id": "096",
@@ -433,7 +502,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Bruney",
+      "capital_uz_latn": "Bandar-Seri-Begavan",
+      "currency_uz_latn": "Brunei dollar"
     },
     {
       "id": "100",
@@ -451,7 +523,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Bolgariya",
+      "capital_uz_latn": "Sofiya",
+      "currency_uz_latn": "yevro"
     },
     {
       "id": "104",
@@ -469,7 +544,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Myanma",
+      "capital_uz_latn": "Neypido",
+      "currency_uz_latn": "kyat"
     },
     {
       "id": "108",
@@ -487,7 +565,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Burundi",
+      "capital_uz_latn": "Gitega",
+      "currency_uz_latn": "Brundi franki"
     },
     {
       "id": "112",
@@ -505,7 +586,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Belarus",
+      "capital_uz_latn": "Minsk",
+      "currency_uz_latn": "Belarus rubli"
     },
     {
       "id": "116",
@@ -523,7 +607,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Kambodja",
+      "capital_uz_latn": "Pnompen",
+      "currency_uz_latn": "riel"
     },
     {
       "id": "120",
@@ -541,7 +628,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Kamerun",
+      "capital_uz_latn": "Yaunde",
+      "currency_uz_latn": "Central African CFA franc"
     },
     {
       "id": "124",
@@ -559,7 +649,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Kanada",
+      "capital_uz_latn": "Ottava",
+      "currency_uz_latn": "Kanada dollari"
     },
     {
       "id": "132",
@@ -577,7 +670,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Kabo Verde",
+      "capital_uz_latn": "Praya",
+      "currency_uz_latn": "Cape Verdean escudo"
     },
     {
       "id": "140",
@@ -595,7 +691,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Markaziy Afrika Respublikasi",
+      "capital_uz_latn": "Bangi",
+      "currency_uz_latn": "Central African CFA franc"
     },
     {
       "id": "144",
@@ -613,7 +712,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Shri-Lanka",
+      "capital_uz_latn": "Kolombo",
+      "currency_uz_latn": "Sri Lankan rupee"
     },
     {
       "id": "148",
@@ -631,7 +733,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Chad",
+      "capital_uz_latn": "Njamena",
+      "currency_uz_latn": "Central African CFA franc"
     },
     {
       "id": "152",
@@ -649,7 +754,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Chili",
+      "capital_uz_latn": "Santiyago",
+      "currency_uz_latn": "Chilean peso"
     },
     {
       "id": "156",
@@ -667,7 +775,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Xitoy Xalq Respublikasi",
+      "capital_uz_latn": "Pekin",
+      "currency_uz_latn": "Xitoy yuani"
     },
     {
       "id": "170",
@@ -685,7 +796,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Kolumbiya",
+      "capital_uz_latn": "Bogota",
+      "currency_uz_latn": "Colombian peso"
     },
     {
       "id": "174",
@@ -703,7 +817,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Komoros",
+      "capital_uz_latn": "Moroni",
+      "currency_uz_latn": "Comorian franc"
     },
     {
       "id": "178",
@@ -721,7 +838,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Kongo Respublikasi",
+      "capital_uz_latn": "Brazzavil",
+      "currency_uz_latn": "Central African CFA franc"
     },
     {
       "id": "180",
@@ -739,7 +859,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Kongo Demokratik Respublikasi",
+      "capital_uz_latn": "Kinshasa",
+      "currency_uz_latn": "Congolese franc"
     },
     {
       "id": "188",
@@ -757,7 +880,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Kosta Rika",
+      "capital_uz_latn": "San Xose",
+      "currency_uz_latn": "Costa Rican colón"
     },
     {
       "id": "191",
@@ -775,7 +901,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Xorvatiya",
+      "capital_uz_latn": "Zagreb",
+      "currency_uz_latn": "yevro"
     },
     {
       "id": "192",
@@ -793,7 +922,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Kuba",
+      "capital_uz_latn": "Gavana",
+      "currency_uz_latn": "Cuban peso"
     },
     {
       "id": "196",
@@ -811,7 +943,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Kipr",
+      "capital_uz_latn": "Nikosiya",
+      "currency_uz_latn": "yevro"
     },
     {
       "id": "203",
@@ -829,7 +964,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Chexiya",
+      "capital_uz_latn": "Praga",
+      "currency_uz_latn": "Chexiya kronasi"
     },
     {
       "id": "204",
@@ -847,7 +985,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Benin",
+      "capital_uz_latn": "Porto-Novo",
+      "currency_uz_latn": "West African CFA franc"
     },
     {
       "id": "208",
@@ -865,7 +1006,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Daniya",
+      "capital_uz_latn": "Kopengagen",
+      "currency_uz_latn": "Daniya kronasi"
     },
     {
       "id": "212",
@@ -883,7 +1027,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Dominika",
+      "capital_uz_latn": "Rozo",
+      "currency_uz_latn": "Sharqiy Karib dollari"
     },
     {
       "id": "214",
@@ -901,7 +1048,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Dominikana Respublikasi",
+      "capital_uz_latn": "Santa Domingo",
+      "currency_uz_latn": "Dominican peso"
     },
     {
       "id": "218",
@@ -919,7 +1069,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Ekvador",
+      "capital_uz_latn": "Kito",
+      "currency_uz_latn": "AQSh dollari"
     },
     {
       "id": "222",
@@ -937,7 +1090,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "El Salvador",
+      "capital_uz_latn": "San-Salvador",
+      "currency_uz_latn": "AQSh dollari"
     },
     {
       "id": "226",
@@ -955,7 +1111,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Ekvatorli Gvineya",
+      "capital_uz_latn": "Ciudad de la Paz",
+      "currency_uz_latn": "Central African CFA franc"
     },
     {
       "id": "231",
@@ -973,7 +1132,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Efiopiya",
+      "capital_uz_latn": "Addis-Abeba",
+      "currency_uz_latn": "bir"
     },
     {
       "id": "232",
@@ -991,7 +1153,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Eritreya",
+      "capital_uz_latn": "Asmera",
+      "currency_uz_latn": "nakfa"
     },
     {
       "id": "233",
@@ -1009,7 +1174,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Estoniya",
+      "capital_uz_latn": "Tallinn",
+      "currency_uz_latn": "yevro"
     },
     {
       "id": "242",
@@ -1027,7 +1195,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Fiji",
+      "capital_uz_latn": "Suva",
+      "currency_uz_latn": "Fijian dollar"
     },
     {
       "id": "246",
@@ -1045,7 +1216,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Finlandiya",
+      "capital_uz_latn": "Helsinki",
+      "currency_uz_latn": "yevro"
     },
     {
       "id": "250",
@@ -1063,7 +1237,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Fransiya",
+      "capital_uz_latn": "Parij",
+      "currency_uz_latn": "yevro"
     },
     {
       "id": "262",
@@ -1081,7 +1258,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Jibuti",
+      "capital_uz_latn": "Jibuti",
+      "currency_uz_latn": "Djiboutian franc"
     },
     {
       "id": "266",
@@ -1099,7 +1279,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Gabon",
+      "capital_uz_latn": "Librevil",
+      "currency_uz_latn": "Central African CFA franc"
     },
     {
       "id": "268",
@@ -1117,7 +1300,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Gurjiston",
+      "capital_uz_latn": "Tbilisi",
+      "currency_uz_latn": "Lari"
     },
     {
       "id": "270",
@@ -1135,7 +1321,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Gambia",
+      "capital_uz_latn": "Banjul",
+      "currency_uz_latn": "dalasi"
     },
     {
       "id": "275",
@@ -1153,7 +1342,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": false,
-      "un_member": false
+      "un_member": false,
+      "name_uz_latn": "Falastin",
+      "capital_uz_latn": "Quddus",
+      "currency_uz_latn": "Shekel"
     },
     {
       "id": "276",
@@ -1171,7 +1363,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Germaniya",
+      "capital_uz_latn": "Berlin",
+      "currency_uz_latn": "yevro"
     },
     {
       "id": "288",
@@ -1189,7 +1384,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Gana",
+      "capital_uz_latn": "Akkra",
+      "currency_uz_latn": "Ghana cedi"
     },
     {
       "id": "296",
@@ -1207,7 +1405,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Kiribati",
+      "capital_uz_latn": "South Tarawa",
+      "currency_uz_latn": "Avstraliya dollari"
     },
     {
       "id": "300",
@@ -1225,7 +1426,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Yunoniston",
+      "capital_uz_latn": "Afina",
+      "currency_uz_latn": "yevro"
     },
     {
       "id": "308",
@@ -1243,7 +1447,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Grenada",
+      "capital_uz_latn": "Sent-jorjes",
+      "currency_uz_latn": "Sharqiy Karib dollari"
     },
     {
       "id": "320",
@@ -1261,7 +1468,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Gvatemala",
+      "capital_uz_latn": "Gvatemala shahri",
+      "currency_uz_latn": "quetzal"
     },
     {
       "id": "324",
@@ -1279,7 +1489,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Gvineya",
+      "capital_uz_latn": "Konakri",
+      "currency_uz_latn": "Guinean franc"
     },
     {
       "id": "328",
@@ -1297,7 +1510,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Gayana",
+      "capital_uz_latn": "Jorjtaun",
+      "currency_uz_latn": "Guyanese dollar"
     },
     {
       "id": "332",
@@ -1315,7 +1531,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Gaiti",
+      "capital_uz_latn": "Port-o-Prens",
+      "currency_uz_latn": "Gurd"
     },
     {
       "id": "336",
@@ -1333,7 +1552,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": false
+      "un_member": false,
+      "name_uz_latn": "Vatikan shahri",
+      "capital_uz_latn": "Vatikan shahri",
+      "currency_uz_latn": "yevro"
     },
     {
       "id": "340",
@@ -1351,7 +1573,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Gonduras",
+      "capital_uz_latn": "Tegusigalpa",
+      "currency_uz_latn": "Honduran lempira"
     },
     {
       "id": "348",
@@ -1369,7 +1594,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Mojariston",
+      "capital_uz_latn": "Budapesht",
+      "currency_uz_latn": "Forint"
     },
     {
       "id": "352",
@@ -1387,7 +1615,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Islandiya",
+      "capital_uz_latn": "Reykyavik",
+      "currency_uz_latn": "Icelandic króna"
     },
     {
       "id": "356",
@@ -1405,7 +1636,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Hindiston",
+      "capital_uz_latn": "Nyu Deli",
+      "currency_uz_latn": "Hindiston rupiyasi"
     },
     {
       "id": "360",
@@ -1423,7 +1657,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Indoneziya",
+      "capital_uz_latn": "Jakarta",
+      "currency_uz_latn": "Indoneziya rupiyasi"
     },
     {
       "id": "364",
@@ -1441,7 +1678,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Eron",
+      "capital_uz_latn": "Tehron",
+      "currency_uz_latn": "Eron riali"
     },
     {
       "id": "368",
@@ -1459,7 +1699,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Iroq",
+      "capital_uz_latn": "Bag'dod",
+      "currency_uz_latn": "Iroq dinori"
     },
     {
       "id": "372",
@@ -1477,7 +1720,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Irlandiya",
+      "capital_uz_latn": "Dublin",
+      "currency_uz_latn": "yevro"
     },
     {
       "id": "376",
@@ -1495,7 +1741,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Isroil",
+      "capital_uz_latn": "Quddus",
+      "currency_uz_latn": "Shekel"
     },
     {
       "id": "380",
@@ -1513,7 +1762,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Italiya",
+      "capital_uz_latn": "Rim",
+      "currency_uz_latn": "yevro"
     },
     {
       "id": "384",
@@ -1531,7 +1783,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Fil Suyak Sohili",
+      "capital_uz_latn": "Yamusukro",
+      "currency_uz_latn": "West African CFA franc"
     },
     {
       "id": "388",
@@ -1549,7 +1804,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Yamayka",
+      "capital_uz_latn": "Kingston",
+      "currency_uz_latn": "Jamaican dollar"
     },
     {
       "id": "392",
@@ -1567,7 +1825,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Yaponiya",
+      "capital_uz_latn": "Tokio",
+      "currency_uz_latn": "iyena"
     },
     {
       "id": "398",
@@ -1585,7 +1846,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Qozog'iston",
+      "capital_uz_latn": "Ostona",
+      "currency_uz_latn": "Qozog'iston tengesi"
     },
     {
       "id": "400",
@@ -1603,7 +1867,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Iordaniya",
+      "capital_uz_latn": "Amman",
+      "currency_uz_latn": "Iordaniya dinori"
     },
     {
       "id": "404",
@@ -1621,7 +1888,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Keniya",
+      "capital_uz_latn": "Nayrobi",
+      "currency_uz_latn": "Kenyan shilling"
     },
     {
       "id": "408",
@@ -1639,7 +1909,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Koreya Xalq Demokratik Respublikasi",
+      "capital_uz_latn": "Pxenyan",
+      "currency_uz_latn": "North Korean won"
     },
     {
       "id": "410",
@@ -1657,7 +1930,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Koreya Respublikasi",
+      "capital_uz_latn": "Seul",
+      "currency_uz_latn": "Vona"
     },
     {
       "id": "414",
@@ -1675,7 +1951,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Quvayt",
+      "capital_uz_latn": "Al-Quvayt",
+      "currency_uz_latn": "Quvayt dinori"
     },
     {
       "id": "417",
@@ -1693,7 +1972,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Qirg'iziston",
+      "capital_uz_latn": "Bishkek",
+      "currency_uz_latn": "som"
     },
     {
       "id": "418",
@@ -1711,7 +1993,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Laos",
+      "capital_uz_latn": "Ventyan",
+      "currency_uz_latn": "Lao kip"
     },
     {
       "id": "422",
@@ -1729,7 +2014,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Livan",
+      "capital_uz_latn": "Bayrut",
+      "currency_uz_latn": "Lebanese pound"
     },
     {
       "id": "426",
@@ -1747,7 +2035,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Lesoto",
+      "capital_uz_latn": "Maseru",
+      "currency_uz_latn": "rand"
     },
     {
       "id": "428",
@@ -1765,7 +2056,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Latviya",
+      "capital_uz_latn": "Riga",
+      "currency_uz_latn": "yevro"
     },
     {
       "id": "430",
@@ -1783,7 +2077,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Liberiya",
+      "capital_uz_latn": "Monroviya",
+      "currency_uz_latn": "Liberian dollar"
     },
     {
       "id": "434",
@@ -1801,7 +2098,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Liviya",
+      "capital_uz_latn": "Tarobulus al-G'arb",
+      "currency_uz_latn": "Libyan dinar"
     },
     {
       "id": "438",
@@ -1819,7 +2119,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Lixtenshteyn",
+      "capital_uz_latn": "Vaduz",
+      "currency_uz_latn": "Shveysariya franki"
     },
     {
       "id": "440",
@@ -1837,7 +2140,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Litva",
+      "capital_uz_latn": "Vilnyus",
+      "currency_uz_latn": "yevro"
     },
     {
       "id": "442",
@@ -1855,7 +2161,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Lyuksemburg",
+      "capital_uz_latn": "Lyuksemburg (shahar)",
+      "currency_uz_latn": "yevro"
     },
     {
       "id": "450",
@@ -1873,7 +2182,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Madagaskar",
+      "capital_uz_latn": "Antananarivu",
+      "currency_uz_latn": "ariary"
     },
     {
       "id": "454",
@@ -1891,7 +2203,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Malavi",
+      "capital_uz_latn": "Lilongve",
+      "currency_uz_latn": "Malawian kwacha"
     },
     {
       "id": "458",
@@ -1909,7 +2224,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Malayziya",
+      "capital_uz_latn": "Kuala Lumpur",
+      "currency_uz_latn": "Malayziya pul birligi"
     },
     {
       "id": "462",
@@ -1927,7 +2245,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Maldivalar",
+      "capital_uz_latn": "Male",
+      "currency_uz_latn": "Maldivian rufiyaa"
     },
     {
       "id": "466",
@@ -1945,7 +2266,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Mali",
+      "capital_uz_latn": "Bamako",
+      "currency_uz_latn": "West African CFA franc"
     },
     {
       "id": "470",
@@ -1963,7 +2287,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Malta",
+      "capital_uz_latn": "Valletta",
+      "currency_uz_latn": "yevro"
     },
     {
       "id": "478",
@@ -1981,7 +2308,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Mavritaniya",
+      "capital_uz_latn": "Nuakshot",
+      "currency_uz_latn": "Mauritanian ouguiya"
     },
     {
       "id": "480",
@@ -1999,7 +2329,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Mavritsiya",
+      "capital_uz_latn": "Port-Lui",
+      "currency_uz_latn": "Mavrikiy rupiyasi"
     },
     {
       "id": "484",
@@ -2017,7 +2350,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Meksika",
+      "capital_uz_latn": "Mexiko shahri",
+      "currency_uz_latn": "peso"
     },
     {
       "id": "492",
@@ -2035,7 +2371,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Monako",
+      "capital_uz_latn": "Monako",
+      "currency_uz_latn": "yevro"
     },
     {
       "id": "496",
@@ -2053,7 +2392,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Mo'g'uliston",
+      "capital_uz_latn": "Ulan-Bator",
+      "currency_uz_latn": "Tugrik"
     },
     {
       "id": "498",
@@ -2071,7 +2413,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Moldova",
+      "capital_uz_latn": "Kishinyov",
+      "currency_uz_latn": "Moldovan leu"
     },
     {
       "id": "499",
@@ -2089,7 +2434,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Chernogoriya",
+      "capital_uz_latn": "Podgoritsa",
+      "currency_uz_latn": "yevro"
     },
     {
       "id": "504",
@@ -2107,7 +2455,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Marokash",
+      "capital_uz_latn": "Rabot",
+      "currency_uz_latn": "Marokash dirhami"
     },
     {
       "id": "508",
@@ -2125,7 +2476,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Mozambik",
+      "capital_uz_latn": "Maputu",
+      "currency_uz_latn": "Mozambican metical"
     },
     {
       "id": "512",
@@ -2143,7 +2497,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Oman",
+      "capital_uz_latn": "Maskat",
+      "currency_uz_latn": "Ummon riali"
     },
     {
       "id": "516",
@@ -2161,7 +2518,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Namibiya",
+      "capital_uz_latn": "Vindhuk",
+      "currency_uz_latn": "rand"
     },
     {
       "id": "520",
@@ -2179,7 +2539,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Nauru",
+      "capital_uz_latn": "Yaren",
+      "currency_uz_latn": "Avstraliya dollari"
     },
     {
       "id": "524",
@@ -2197,7 +2560,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Nepal",
+      "capital_uz_latn": "Katmandu",
+      "currency_uz_latn": "Nepalese rupee"
     },
     {
       "id": "528",
@@ -2215,7 +2581,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Niderlandlar",
+      "capital_uz_latn": "Amsterdam",
+      "currency_uz_latn": "yevro"
     },
     {
       "id": "548",
@@ -2233,7 +2602,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Vanuatu",
+      "capital_uz_latn": "Port-vila",
+      "currency_uz_latn": "Vatu"
     },
     {
       "id": "554",
@@ -2251,7 +2623,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Yangi Zelandiya",
+      "capital_uz_latn": "Vellington",
+      "currency_uz_latn": "Kivi (dollar)"
     },
     {
       "id": "558",
@@ -2269,7 +2644,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Nikaragua",
+      "capital_uz_latn": "Managua",
+      "currency_uz_latn": "Nicaraguan córdoba"
     },
     {
       "id": "562",
@@ -2287,7 +2665,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Niger",
+      "capital_uz_latn": "Niamey",
+      "currency_uz_latn": "West African CFA franc"
     },
     {
       "id": "566",
@@ -2305,7 +2686,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Nigeriya",
+      "capital_uz_latn": "Abuja",
+      "currency_uz_latn": "naira"
     },
     {
       "id": "578",
@@ -2323,7 +2707,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Norvegiya",
+      "capital_uz_latn": "Oslo",
+      "currency_uz_latn": "Norwegian krone"
     },
     {
       "id": "583",
@@ -2341,7 +2728,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Mikroneziya Federativ Shtatlari",
+      "capital_uz_latn": "Palikir",
+      "currency_uz_latn": "AQSh dollari"
     },
     {
       "id": "584",
@@ -2359,7 +2749,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Marshall Orollari",
+      "capital_uz_latn": "Majuro",
+      "currency_uz_latn": "AQSh dollari"
     },
     {
       "id": "585",
@@ -2377,7 +2770,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Palau",
+      "capital_uz_latn": "Ngerulmud",
+      "currency_uz_latn": "AQSh dollari"
     },
     {
       "id": "586",
@@ -2395,7 +2791,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Pokiston",
+      "capital_uz_latn": "Islomobod",
+      "currency_uz_latn": "Pokiston rupisi"
     },
     {
       "id": "591",
@@ -2413,7 +2812,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Panama",
+      "capital_uz_latn": "Panama shahri",
+      "currency_uz_latn": "AQSh dollari"
     },
     {
       "id": "598",
@@ -2431,7 +2833,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Papua Yangi Gvineya",
+      "capital_uz_latn": "Port Morsbi",
+      "currency_uz_latn": "kina"
     },
     {
       "id": "600",
@@ -2449,7 +2854,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Paragvay",
+      "capital_uz_latn": "Asunsyon",
+      "currency_uz_latn": "Guarani (pul birligi)"
     },
     {
       "id": "604",
@@ -2467,7 +2875,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Peru",
+      "capital_uz_latn": "Lima",
+      "currency_uz_latn": "Nuevo sol"
     },
     {
       "id": "608",
@@ -2485,7 +2896,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Filippin",
+      "capital_uz_latn": "Manila",
+      "currency_uz_latn": "Philippine peso"
     },
     {
       "id": "616",
@@ -2503,7 +2917,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Polsha",
+      "capital_uz_latn": "Varshava",
+      "currency_uz_latn": "Zlotiy"
     },
     {
       "id": "620",
@@ -2521,7 +2938,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Portugaliya",
+      "capital_uz_latn": "Lissabon",
+      "currency_uz_latn": "yevro"
     },
     {
       "id": "624",
@@ -2539,7 +2959,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": false
+      "un_member": false,
+      "name_uz_latn": "Gvineya-Bissau",
+      "capital_uz_latn": "Bisau",
+      "currency_uz_latn": "West African CFA franc"
     },
     {
       "id": "626",
@@ -2557,7 +2980,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Sharqiy Timor",
+      "capital_uz_latn": "Dili",
+      "currency_uz_latn": "AQSh dollari"
     },
     {
       "id": "634",
@@ -2575,7 +3001,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Qatar",
+      "capital_uz_latn": "Doha",
+      "currency_uz_latn": "Qatar riali"
     },
     {
       "id": "642",
@@ -2593,7 +3022,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Ruminiya",
+      "capital_uz_latn": "Buharest",
+      "currency_uz_latn": "Ley"
     },
     {
       "id": "643",
@@ -2611,7 +3043,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Rossiya",
+      "capital_uz_latn": "Moskva",
+      "currency_uz_latn": "Rossiya rubli"
     },
     {
       "id": "646",
@@ -2629,7 +3064,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Ruanda",
+      "capital_uz_latn": "Kigali",
+      "currency_uz_latn": "Rwandan franc"
     },
     {
       "id": "659",
@@ -2647,7 +3085,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Saint Kitts va Nevis",
+      "capital_uz_latn": "Baster",
+      "currency_uz_latn": "Sharqiy Karib dollari"
     },
     {
       "id": "662",
@@ -2665,7 +3106,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Saint Lucia",
+      "capital_uz_latn": "Kastri",
+      "currency_uz_latn": "Sharqiy Karib dollari"
     },
     {
       "id": "670",
@@ -2683,7 +3127,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Sent Vinsent va Grenadinlar",
+      "capital_uz_latn": "Kingstaun",
+      "currency_uz_latn": "Sharqiy Karib dollari"
     },
     {
       "id": "674",
@@ -2701,7 +3148,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "San Marino",
+      "capital_uz_latn": "San-Marino",
+      "currency_uz_latn": "yevro"
     },
     {
       "id": "678",
@@ -2719,7 +3169,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "San-Tome va Prinsipi",
+      "capital_uz_latn": "San-Tome",
+      "currency_uz_latn": "São Tomé and Príncipe dobra"
     },
     {
       "id": "682",
@@ -2737,7 +3190,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Saudiya Arabistoni",
+      "capital_uz_latn": "Ar-Riyod",
+      "currency_uz_latn": "Saudiya riali"
     },
     {
       "id": "686",
@@ -2755,7 +3211,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Senegal",
+      "capital_uz_latn": "Dakar",
+      "currency_uz_latn": "West African CFA franc"
     },
     {
       "id": "688",
@@ -2773,7 +3232,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Serbiya",
+      "capital_uz_latn": "Belgrad",
+      "currency_uz_latn": "Serb dinori"
     },
     {
       "id": "690",
@@ -2791,7 +3253,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Seyshell orollari",
+      "capital_uz_latn": "Viktoriya",
+      "currency_uz_latn": "Seychellois rupee"
     },
     {
       "id": "694",
@@ -2809,7 +3274,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Syerra Leone",
+      "capital_uz_latn": "Fritaun",
+      "currency_uz_latn": "leone"
     },
     {
       "id": "702",
@@ -2827,7 +3295,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Singapur",
+      "capital_uz_latn": "Singapur",
+      "currency_uz_latn": "Singapore dollar"
     },
     {
       "id": "703",
@@ -2845,7 +3316,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Slovakiya",
+      "capital_uz_latn": "Bratislava",
+      "currency_uz_latn": "yevro"
     },
     {
       "id": "704",
@@ -2863,7 +3337,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Vyetnam",
+      "capital_uz_latn": "Xanoy",
+      "currency_uz_latn": "Dong"
     },
     {
       "id": "705",
@@ -2881,7 +3358,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Sloveniya",
+      "capital_uz_latn": "Lyublyana",
+      "currency_uz_latn": "yevro"
     },
     {
       "id": "706",
@@ -2899,7 +3379,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Somali",
+      "capital_uz_latn": "Mogadisho",
+      "currency_uz_latn": "Somali shilling"
     },
     {
       "id": "710",
@@ -2917,7 +3400,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Janubiy Afrika Respublikasi",
+      "capital_uz_latn": "Pretoriya",
+      "currency_uz_latn": "rand"
     },
     {
       "id": "716",
@@ -2935,7 +3421,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Zimbabve",
+      "capital_uz_latn": "Xarare",
+      "currency_uz_latn": "yevro"
     },
     {
       "id": "724",
@@ -2953,7 +3442,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Ispaniya",
+      "capital_uz_latn": "Madrid",
+      "currency_uz_latn": "yevro"
     },
     {
       "id": "728",
@@ -2971,7 +3463,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Janubiy Sudan",
+      "capital_uz_latn": "Juba",
+      "currency_uz_latn": "Janubiy Sudan funti"
     },
     {
       "id": "729",
@@ -2989,7 +3484,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Sudan",
+      "capital_uz_latn": "Xartum",
+      "currency_uz_latn": "Sudan funti"
     },
     {
       "id": "740",
@@ -3007,7 +3505,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Surinam",
+      "capital_uz_latn": "Paramaribo",
+      "currency_uz_latn": "Surinamese dollar"
     },
     {
       "id": "748",
@@ -3025,7 +3526,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Eswatini",
+      "capital_uz_latn": "Mbabane",
+      "currency_uz_latn": "lilangeni"
     },
     {
       "id": "752",
@@ -3043,7 +3547,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Shvetsiya",
+      "capital_uz_latn": "Stokgolm",
+      "currency_uz_latn": "Shved kronasi"
     },
     {
       "id": "756",
@@ -3061,7 +3568,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Shveysariya",
+      "capital_uz_latn": "Bern",
+      "currency_uz_latn": "Shveysariya franki"
     },
     {
       "id": "760",
@@ -3079,7 +3589,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Suriya",
+      "capital_uz_latn": "Damashq",
+      "currency_uz_latn": "Suriya funti"
     },
     {
       "id": "762",
@@ -3097,7 +3610,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Tojikiston",
+      "capital_uz_latn": "Dushanbe",
+      "currency_uz_latn": "Somoniy"
     },
     {
       "id": "764",
@@ -3115,7 +3631,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Tailand",
+      "capital_uz_latn": "Bangkok",
+      "currency_uz_latn": "Bat"
     },
     {
       "id": "768",
@@ -3133,7 +3652,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Togo",
+      "capital_uz_latn": "Lome",
+      "currency_uz_latn": "West African CFA franc"
     },
     {
       "id": "776",
@@ -3151,7 +3673,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Tonga",
+      "capital_uz_latn": "Nukualofa",
+      "currency_uz_latn": "Tongan pa'anga"
     },
     {
       "id": "780",
@@ -3169,7 +3694,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Trinidad va Tobago",
+      "capital_uz_latn": "Port-of-speyn",
+      "currency_uz_latn": "Trinidad and Tobago dollar"
     },
     {
       "id": "784",
@@ -3187,7 +3715,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Birlashgan Arab Amirliklari",
+      "capital_uz_latn": "Abu Dabi",
+      "currency_uz_latn": "United Arab Emirates dirham"
     },
     {
       "id": "788",
@@ -3205,7 +3736,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Tunis",
+      "capital_uz_latn": "Tunis",
+      "currency_uz_latn": "Tunisian dinar"
     },
     {
       "id": "792",
@@ -3223,7 +3757,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Turkiya",
+      "capital_uz_latn": "Anqara",
+      "currency_uz_latn": "Turk lirası"
     },
     {
       "id": "795",
@@ -3241,7 +3778,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Turkmaniston",
+      "capital_uz_latn": "Ashxobod",
+      "currency_uz_latn": "Turkmaniston manati"
     },
     {
       "id": "798",
@@ -3259,7 +3799,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Tuvalu",
+      "capital_uz_latn": "Funafuti",
+      "currency_uz_latn": "Tuvaluan dollar"
     },
     {
       "id": "800",
@@ -3277,7 +3820,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Uganda",
+      "capital_uz_latn": "Kampala",
+      "currency_uz_latn": "Ugandan shilling"
     },
     {
       "id": "804",
@@ -3295,7 +3841,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Ukraina",
+      "capital_uz_latn": "Kiyev",
+      "currency_uz_latn": "grivna"
     },
     {
       "id": "807",
@@ -3313,7 +3862,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Shimoliy Makedoniya",
+      "capital_uz_latn": "Skopye",
+      "currency_uz_latn": "Makedoniya denari"
     },
     {
       "id": "818",
@@ -3331,7 +3883,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Misr",
+      "capital_uz_latn": "Qohira",
+      "currency_uz_latn": "Misr funti"
     },
     {
       "id": "826",
@@ -3349,7 +3904,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Birlashgan Qirollik",
+      "capital_uz_latn": "London",
+      "currency_uz_latn": "funt sterling"
     },
     {
       "id": "834",
@@ -3367,7 +3925,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Tanzaniya",
+      "capital_uz_latn": "Dodoma",
+      "currency_uz_latn": "Tanzanian shilling"
     },
     {
       "id": "840",
@@ -3385,7 +3946,10 @@
       "playable": true,
       "difficulty": "easy",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Amerika Qo'shma Shtatlari",
+      "capital_uz_latn": "Vashington",
+      "currency_uz_latn": "AQSh dollari"
     },
     {
       "id": "854",
@@ -3403,7 +3967,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Burkina Faso",
+      "capital_uz_latn": "Uagadugu",
+      "currency_uz_latn": "West African CFA franc"
     },
     {
       "id": "858",
@@ -3421,7 +3988,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Urugvay",
+      "capital_uz_latn": "Montevideo",
+      "currency_uz_latn": "Uruguayan peso"
     },
     {
       "id": "860",
@@ -3439,7 +4009,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "O'zbekiston",
+      "capital_uz_latn": "Toshkent",
+      "currency_uz_latn": "So'm"
     },
     {
       "id": "862",
@@ -3457,7 +4030,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Venesuela",
+      "capital_uz_latn": "Karakas",
+      "currency_uz_latn": "sovereign bolivar"
     },
     {
       "id": "882",
@@ -3475,7 +4051,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Samoa",
+      "capital_uz_latn": "Apia",
+      "currency_uz_latn": "Samoan tālā"
     },
     {
       "id": "887",
@@ -3493,7 +4072,10 @@
       "playable": true,
       "difficulty": "medium",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Yaman",
+      "capital_uz_latn": "San'o",
+      "currency_uz_latn": "Yaman riali"
     },
     {
       "id": "894",
@@ -3511,7 +4093,10 @@
       "playable": true,
       "difficulty": "hard",
       "independent": true,
-      "un_member": true
+      "un_member": true,
+      "name_uz_latn": "Zambiya",
+      "capital_uz_latn": "Lusaka",
+      "currency_uz_latn": "Zambiya kvachasi"
     }
   ]
 }

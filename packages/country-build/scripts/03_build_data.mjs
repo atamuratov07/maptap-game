@@ -20,6 +20,10 @@ import pointOnFeature from '@turf/point-on-feature'
 import fs from 'node:fs'
 import shp from 'shpjs'
 import { canonicalizeContinent } from './lib/continent.mjs'
+import {
+	firstUzLatnLabel,
+	transliterateCyrillicToUzLatn,
+} from './lib/uz-latn.mjs'
 import { fetchWdqsJson } from './lib/wdqs.mjs'
 
 const BASE_COUNTRIES = 'build/base_countries.geojson'
@@ -266,13 +270,19 @@ const wikidata = await fetchWdqsJson({
 	cacheKey: 'wdqs-country-capital-labels',
 	query: `
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX bd: <http://www.bigdata.com/rdf#>
 PREFIX wikibase: <http://wikiba.se/ontology#>
 
-SELECT ?iso3 ?countryLabel ?capitalLabel WHERE {
+SELECT ?iso3 ?countryRuLabel ?countryUzLabel ?countryEnLabel ?capitalRuLabel ?capitalUzLabel ?capitalEnLabel WHERE {
   ?country wdt:P298 ?iso3 .
   OPTIONAL { ?country wdt:P36 ?capital . }
-  SERVICE wikibase:label { bd:serviceParam wikibase:language "ru,en". }
+  OPTIONAL { ?country rdfs:label ?countryRuLabel FILTER(LANG(?countryRuLabel) = "ru") }
+  OPTIONAL { ?country rdfs:label ?countryUzLabel FILTER(LANG(?countryUzLabel) = "uz") }
+  OPTIONAL { ?country rdfs:label ?countryEnLabel FILTER(LANG(?countryEnLabel) = "en") }
+  OPTIONAL { ?capital rdfs:label ?capitalRuLabel FILTER(LANG(?capitalRuLabel) = "ru") }
+  OPTIONAL { ?capital rdfs:label ?capitalUzLabel FILTER(LANG(?capitalUzLabel) = "uz") }
+  OPTIONAL { ?capital rdfs:label ?capitalEnLabel FILTER(LANG(?capitalEnLabel) = "en") }
 }
 `,
 })
@@ -287,8 +297,16 @@ for (const row of wikidata.results.bindings ?? []) {
 	const a3 = row.iso3?.value?.trim()
 	if (!a3 || wdByA3.has(a3)) continue
 	wdByA3.set(a3, {
-		NAME_RU: row.countryLabel?.value?.trim() ?? '',
-		CAPITAL_RU: row.capitalLabel?.value?.trim() ?? '',
+		NAME_RU: row.countryRuLabel?.value?.trim() ?? '',
+		CAPITAL_RU: row.capitalRuLabel?.value?.trim() ?? '',
+		NAME_UZ_LATN: firstUzLatnLabel(
+			row.countryUzLabel?.value,
+			row.countryEnLabel?.value,
+		),
+		CAPITAL_UZ_LATN: firstUzLatnLabel(
+			row.capitalUzLabel?.value,
+			row.capitalEnLabel?.value,
+		),
 	})
 }
 
@@ -399,8 +417,10 @@ function toSeedRecord(props) {
 		ADM0_A3: String(props.ADM0_A3),
 		NAME: String(props.NAME),
 		NAME_RU: String(props.NAME_RU),
+		NAME_UZ_LATN: String(props.NAME_UZ_LATN),
 		CAPITAL: String(props.CAPITAL),
 		CAPITAL_RU: String(props.CAPITAL_RU),
+		CAPITAL_UZ_LATN: String(props.CAPITAL_UZ_LATN),
 		CONTINENT: String(props.CONTINENT),
 		ISO_A2: String(props.ISO_A2),
 		ISO_N3: String(props.ISO_N3),
@@ -435,6 +455,13 @@ function buildCountryRecord({ a3, baseFeat, neFeat }) {
 		rest?.translations?.rus?.common,
 	)
 
+	const NAME_UZ_LATN = firstUzLatnLabel(
+		ov.NAME_UZ_LATN,
+		wd.NAME_UZ_LATN,
+		rest?.translations?.uzb?.common,
+		NAME,
+	)
+
 	const CAPITAL = firstNonEmpty(
 		ov.CAPITAL,
 		firstArrayValue(rest?.capital),
@@ -443,6 +470,11 @@ function buildCountryRecord({ a3, baseFeat, neFeat }) {
 	)
 
 	const CAPITAL_RU = firstNonEmpty(ov.CAPITAL_RU, wd.CAPITAL_RU)
+	const CAPITAL_UZ_LATN = firstUzLatnLabel(
+		ov.CAPITAL_UZ_LATN,
+		wd.CAPITAL_UZ_LATN,
+		CAPITAL,
+	)
 
 	let CAPITAL_COORDS = null
 	if (Array.isArray(ov.CAPITAL_COORDS) && ov.CAPITAL_COORDS.length === 2) {
@@ -476,8 +508,10 @@ function buildCountryRecord({ a3, baseFeat, neFeat }) {
 	const props = {
 		NAME,
 		NAME_RU,
+		NAME_UZ_LATN,
 		CAPITAL,
 		CAPITAL_RU,
+		CAPITAL_UZ_LATN,
 		ABBREV,
 		ADM0_A3: a3,
 		ISO_A2,
@@ -491,8 +525,10 @@ function buildCountryRecord({ a3, baseFeat, neFeat }) {
 	for (const key of [
 		'NAME',
 		'NAME_RU',
+		'NAME_UZ_LATN',
 		'CAPITAL',
 		'CAPITAL_RU',
+		'CAPITAL_UZ_LATN',
 		'ADM0_A3',
 		'ISO_A2',
 		'ISO_N3',
@@ -530,8 +566,10 @@ for (const [a3, baseFeat] of [...baseByA3.entries()].sort()) {
 		a3,
 		record.props.NAME,
 		record.props.NAME_RU,
+		record.props.NAME_UZ_LATN,
 		record.props.CAPITAL,
 		record.props.CAPITAL_RU,
+		record.props.CAPITAL_UZ_LATN,
 		record.props.ISO_A2,
 		record.props.ISO_N3,
 		record.props.CONTINENT,
@@ -616,8 +654,10 @@ writeCsv(
 		'ADM0_A3',
 		'NAME',
 		'NAME_RU',
+		'NAME_UZ_LATN',
 		'CAPITAL',
 		'CAPITAL_RU',
+		'CAPITAL_UZ_LATN',
 		'ISO_A2',
 		'ISO_N3',
 		'CONTINENT',
@@ -629,10 +669,11 @@ writeCsv(
 
 writeCsv(
 	'build/geolines_join.csv',
-	['name', 'name_ru'],
+	['name', 'name_ru', 'name_uz_latn'],
 	Object.entries(overrides.geolines ?? {}).map(([name, nameRu]) => [
 		name,
 		nameRu,
+		transliterateCyrillicToUzLatn(nameRu),
 	]),
 )
 

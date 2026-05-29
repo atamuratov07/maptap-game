@@ -30,6 +30,7 @@ const tilejson = {
 			fields: {
 				name: 'String',
 				name_ru: 'String',
+				name_uz_latn: 'String',
 			},
 		},
 		{
@@ -41,8 +42,10 @@ const tilejson = {
 			fields: {
 				NAME: 'String',
 				NAME_RU: 'String',
+				NAME_UZ_LATN: 'String',
 				CAPITAL: 'String',
 				CAPITAL_RU: 'String',
+				CAPITAL_UZ_LATN: 'String',
 				ABBREV: 'String',
 				ADM0_A3: 'String',
 				ISO_A2: 'String',
@@ -60,8 +63,10 @@ const tilejson = {
 			fields: {
 				NAME: 'String',
 				NAME_RU: 'String',
+				NAME_UZ_LATN: 'String',
 				CAPITAL: 'String',
 				CAPITAL_RU: 'String',
+				CAPITAL_UZ_LATN: 'String',
 				ABBREV: 'String',
 				ADM0_A3: 'String',
 				ISO_A2: 'String',
@@ -79,8 +84,10 @@ const tilejson = {
 			fields: {
 				NAME: 'String',
 				NAME_RU: 'String',
+				NAME_UZ_LATN: 'String',
 				CAPITAL: 'String',
 				CAPITAL_RU: 'String',
+				CAPITAL_UZ_LATN: 'String',
 				ABBREV: 'String',
 				ADM0_A3: 'String',
 				ISO_A2: 'String',

@@ -14,6 +14,7 @@
 		"build:server": "npm run build -w @maptap/server",
 		"build:data": "npm run build:data -w @maptap/country-build",
 		"build:country-registry": "npm run build:registry -w @maptap/country-build -- --out-dir ../../packages/country-catalog/generated",
+		"backfill:country-uz-latn": "npm run backfill:uz-latn -w @maptap/country-build",
 		"build:map-assets": "npm run build:tiles -w @maptap/country-build -- --tiles-dir ../../packages/map-assets/dist/public/map/tiles --tiles-url-template /map/tiles/{z}/{x}/{y}.pbf",
 		"lint": "eslint ."
 	},

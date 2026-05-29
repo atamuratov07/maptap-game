@@ -45,7 +45,7 @@ rm -f \
 
 rm -rf "$TILES_DIR"
 
-# 1) Patch original geolines with name_ru
+# 1) Patch original geolines with localized labels
 ./tools/tile-join -f -o build/base_geolines_patched.mbtiles \
   -c build/geolines_join.csv \
   upstream/maplibre.mbtiles

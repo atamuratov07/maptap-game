@@ -5,7 +5,8 @@
 	"scripts": {
 		"build:data": "node scripts/03_build_data.mjs",
 		"build:registry": "bash scripts/06_build_registry.sh",
-		"build:tiles": "bash scripts/04_build_tiles.sh"
+		"build:tiles": "bash scripts/04_build_tiles.sh",
+		"backfill:uz-latn": "node scripts/07_backfill_uz_latn_catalog.mjs"
 	},
 	"dependencies": {
 		"@turf/point-on-feature": "^7.3.4",

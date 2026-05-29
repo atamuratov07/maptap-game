@@ -7,6 +7,10 @@ import {
 	parseRegistryOutputOptions,
 	resolvePackagePath,
 } from './lib/output-paths.mjs'
+import {
+	firstUzLatnLabel,
+	transliterateCyrillicToUzLatn,
+} from './lib/uz-latn.mjs'
 import { fetchWdqsJson } from './lib/wdqs.mjs'
 
 const SEED_JSON = resolvePackagePath('build', 'country_seed.json')
@@ -197,28 +201,34 @@ for (const row of restMeta) {
 }
 
 /**
- * Russian currency labels keyed by ISO 4217 code.
+ * Russian and Uzbek Latin currency labels keyed by ISO 4217 code.
  */
 const wdCurrencies = await fetchWdqsJson({
 	cacheKey: 'wdqs-currency-labels',
 	cacheDir: resolvePackagePath('build', 'cache'),
 	query: `
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>
-PREFIX bd: <http://www.bigdata.com/rdf#>
-PREFIX wikibase: <http://wikiba.se/ontology#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
-SELECT ?code ?currencyLabel WHERE {
+SELECT ?code ?currencyRuLabel ?currencyUzLabel ?currencyEnLabel WHERE {
   ?currency wdt:P498 ?code .
-  SERVICE wikibase:label { bd:serviceParam wikibase:language "ru,en". }
+  OPTIONAL { ?currency rdfs:label ?currencyRuLabel FILTER(LANG(?currencyRuLabel) = "ru") }
+  OPTIONAL { ?currency rdfs:label ?currencyUzLabel FILTER(LANG(?currencyUzLabel) = "uz") }
+  OPTIONAL { ?currency rdfs:label ?currencyEnLabel FILTER(LANG(?currencyEnLabel) = "en") }
 }
 `,
 })
 
 const currencyRuByCode = new Map()
+const currencyUzLatnByCode = new Map()
 for (const row of wdCurrencies.results.bindings ?? []) {
 	const code = row.code?.value?.trim()
 	if (!code || currencyRuByCode.has(code)) continue
-	currencyRuByCode.set(code, row.currencyLabel?.value?.trim() ?? '')
+	currencyRuByCode.set(code, row.currencyRuLabel?.value?.trim() ?? '')
+	currencyUzLatnByCode.set(
+		code,
+		firstUzLatnLabel(row.currencyUzLabel?.value, row.currencyEnLabel?.value),
+	)
 }
 
 const registry = []
@@ -280,8 +290,22 @@ for (const baseRow of seed) {
 		),
 		name: String(firstNonEmpty(baseRow.NAME)),
 		name_ru: String(firstNonEmpty(baseRow.NAME_RU)),
+		name_uz_latn: String(
+			firstUzLatnLabel(
+				baseRow.NAME_UZ_LATN,
+				transliterateCyrillicToUzLatn(baseRow.NAME_RU),
+				baseRow.NAME,
+			),
+		),
 		capital: String(firstNonEmpty(baseRow.CAPITAL)),
 		capital_ru: String(firstNonEmpty(baseRow.CAPITAL_RU)),
+		capital_uz_latn: String(
+			firstUzLatnLabel(
+				baseRow.CAPITAL_UZ_LATN,
+				transliterateCyrillicToUzLatn(baseRow.CAPITAL_RU),
+				baseRow.CAPITAL,
+			),
+		),
 		continent: canonicalizeContinent(baseRow.CONTINENT, a3),
 		population:
 			typeof ov.POPULATION === 'number'
@@ -296,6 +320,15 @@ for (const baseRow of seed) {
 				primaryCurrency?.code
 					? currencyRuByCode.get(primaryCurrency.code)
 					: '',
+			),
+		),
+		currency_uz_latn: String(
+			firstUzLatnLabel(
+				ov.CURRENCY_UZ_LATN,
+				primaryCurrency?.code
+					? currencyUzLatnByCode.get(primaryCurrency.code)
+					: '',
+				primaryCurrency?.name,
 			),
 		),
 		flag_url: String(
@@ -321,11 +354,14 @@ for (const baseRow of seed) {
 		'id',
 		'name',
 		'name_ru',
+		'name_uz_latn',
 		'capital',
 		'capital_ru',
+		'capital_uz_latn',
 		'continent',
 		'currency',
 		'currency_ru',
+		'currency_uz_latn',
 		'flag_url',
 		'difficulty',
 	]) {
