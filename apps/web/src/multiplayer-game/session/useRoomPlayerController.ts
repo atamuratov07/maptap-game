@@ -4,6 +4,7 @@ import type {
 } from '@maptap/game-domain/multiplayer-next'
 import type { LookupRoomFoundResponse } from '@maptap/game-protocol'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { i18n } from '../../shared/i18n/setup'
 import { formatGatewayErrorMessage } from '../api/errors'
 import { createSocketGateway } from '../api/socketGateway'
 import {
@@ -163,7 +164,7 @@ export function useRoomPlayerController(
 			setEntryState({
 				status: 'error',
 				roomCode,
-				message: 'Код комнаты должен состоять из 6 символов.',
+				message: i18n.t('multiplayer.error.roomCodeLength'),
 			})
 			return
 		}
@@ -185,7 +186,7 @@ export function useRoomPlayerController(
 				setEntryState({
 					status: 'error',
 					roomCode,
-					message: 'Комната не найдена.',
+					message: i18n.t('gatewayErrors.room_not_found'),
 				})
 				return
 			}
@@ -216,7 +217,7 @@ export function useRoomPlayerController(
 					clearRoomSession(roomCode, 'player')
 					showJoinScreen(
 						lookupResponse,
-						'Сохранённая сессия игрока истекла или недействительна.',
+						i18n.t('multiplayer.error.playerSessionExpired'),
 					)
 					return
 				case 'error':

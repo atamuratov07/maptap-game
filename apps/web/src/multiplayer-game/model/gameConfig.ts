@@ -15,32 +15,29 @@ export const QUESTION_DURATION_MS_OPTIONS = [
 
 export const DIFFICULTY_OPTIONS: Array<{
 	value: GameDifficulty
-	label: string
 }> = [
-	{ value: 'easy', label: 'Лёгкая' },
-	{ value: 'medium', label: 'Средняя' },
-	{ value: 'hard', label: 'Сложная' },
+	{ value: 'easy' },
+	{ value: 'medium' },
+	{ value: 'hard' },
 ]
 
 export const SCOPE_OPTIONS: Array<{
 	value: GameScope
-	label: string
 }> = [
-	{ value: 'all', label: 'Весь мир' },
-	{ value: 'africa', label: 'Африка' },
-	{ value: 'asia', label: 'Азия' },
-	{ value: 'europe', label: 'Европа' },
-	{ value: 'north-america', label: 'Северная Америка' },
-	{ value: 'south-america', label: 'Южная Америка' },
-	{ value: 'oceania', label: 'Океания' },
+	{ value: 'all' },
+	{ value: 'africa' },
+	{ value: 'asia' },
+	{ value: 'europe' },
+	{ value: 'north-america' },
+	{ value: 'south-america' },
+	{ value: 'oceania' },
 ]
 
 export const QUIZ_PACK_OPTIONS: Array<{
 	value: QuizQuestionPackId
-	label: string
 }> = [
-	{ value: 'uzbekistan-geography', label: 'География Узбекистана' },
-	{ value: 'tashkent-city', label: 'Ташкент: город и места' },
+	{ value: 'uzbekistan-geography' },
+	{ value: 'tashkent-city' },
 ]
 
 const CONFIG_STORAGE_PREFIX = 'maptap.multiplayer.gameConfig'

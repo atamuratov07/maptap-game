@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
 	AlertMessage,
 	Button,
@@ -26,6 +27,7 @@ export function PlayerJoinScreen({
 	resumeMessage,
 	onJoin,
 }: PlayerJoinScreenProps): JSX.Element {
+	const { t } = useTranslation()
 	const [playerName, setPlayerName] = useState('')
 
 	return (
@@ -37,13 +39,13 @@ export function PlayerJoinScreen({
 				<div className='flex flex-wrap items-center justify-between gap-3'>
 					<div>
 						<p className='text-[11px] font-black uppercase tracking-[0.24em] text-amber-600'>
-							Мультиплеер
+							{t('multiplayer.title')}
 						</p>
 						<h1 className='mt-3 text-4xl font-black tracking-tight text-slate-950'>
-							Присоединиться к игре
+							{t('multiplayer.join.pageTitle')}
 						</h1>
 						<p className='mt-3 text-sm leading-7 text-slate-600'>
-							Хост: {hostName}
+							{t('multiplayer.join.host', { name: hostName })}
 						</p>
 					</div>
 					<ButtonLink
@@ -51,7 +53,7 @@ export function PlayerJoinScreen({
 						variant='secondary'
 						size='pill'
 					>
-						Назад
+						{t('multiplayer.join.back')}
 					</ButtonLink>
 				</div>
 
@@ -68,7 +70,7 @@ export function PlayerJoinScreen({
 				) : null}
 
 				<div className='mt-8 rounded-[28px] border border-slate-200 bg-slate-50 p-5 sm:p-6'>
-					<Field label='Имя игрока'>
+					<Field label={t('multiplayer.join.playerName')}>
 						<TextInput
 							type='text'
 							value={playerName}
@@ -76,7 +78,7 @@ export function PlayerJoinScreen({
 								setPlayerName(event.target.value)
 							}}
 							maxLength={20}
-							placeholder='Введите имя'
+							placeholder={t('multiplayer.join.playerNamePlaceholder')}
 						/>
 					</Field>
 
@@ -88,12 +90,14 @@ export function PlayerJoinScreen({
 							!joinable || playerName.trim().length === 0 || pending
 						}
 					>
-						{pending ? 'Входим...' : 'Войти'}
+						{pending
+							? t('multiplayer.join.submitting')
+							: t('multiplayer.join.submit')}
 					</Button>
 
 					{!joinable ? (
 						<p className='mt-4 text-sm font-medium text-rose-700'>
-							Присоединиться к этой комнате уже нельзя.
+							{t('multiplayer.join.notJoinable')}
 						</p>
 					) : null}
 				</div>

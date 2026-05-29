@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import { AlertMessage, Button, Field, TextInput } from '../../shared/ui'
 import { cn } from '../../shared/utils'
 
@@ -19,6 +20,7 @@ export function CreateRoomForm({
 	submitError,
 	className,
 }: CreateRoomFormProps): JSX.Element {
+	const { t } = useTranslation()
 	const [hostName, setHostName] = useState('')
 	const trimmedHostName = hostName.trim()
 
@@ -43,13 +45,13 @@ export function CreateRoomForm({
 			onSubmit={handleSubmit}
 		>
 			<p className='text-[11px] font-black uppercase tracking-[0.24em] text-amber-600'>
-				Создание комнаты
+				{t('multiplayer.create.eyebrow')}
 			</p>
 			<h1 className='mt-3 text-4xl font-black tracking-tight text-slate-950'>
-				Новая мультиплеерная комната
+				{t('multiplayer.create.title')}
 			</h1>
 
-			<Field label='Имя хоста' className='mt-6'>
+			<Field label={t('multiplayer.create.hostName')} className='mt-6'>
 				<TextInput
 					type='text'
 					value={hostName}
@@ -58,7 +60,7 @@ export function CreateRoomForm({
 					}}
 					minLength={1}
 					maxLength={20}
-					placeholder='Введите имя хоста'
+					placeholder={t('multiplayer.create.hostNamePlaceholder')}
 				/>
 			</Field>
 
@@ -74,7 +76,9 @@ export function CreateRoomForm({
 				className='mt-6 px-5'
 				disabled={pending || trimmedHostName.length === 0}
 			>
-				{pending ? 'Создаём...' : 'Создать комнату'}
+				{pending
+					? t('multiplayer.create.submitting')
+					: t('multiplayer.create.submit')}
 			</Button>
 		</form>
 	)

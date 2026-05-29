@@ -25,6 +25,7 @@ import {
 	type TerminateRoomRequest,
 } from '@maptap/game-protocol'
 import { io, type Socket } from 'socket.io-client'
+import { i18n } from '../../shared/i18n/setup'
 import { toGatewayError } from './errors'
 
 type GameSocket = Socket<ServerToClientEvents, ClientToServerEvents>
@@ -127,7 +128,7 @@ export function createSocketGateway(): SocketGateway {
 				cleanup()
 				reject(
 					toGatewayError(
-						new Error('Не удалось подключиться к игровому серверу.'),
+						new Error(i18n.t('gatewayErrors.transport_error')),
 					),
 				)
 			}, CONNECT_TIMEOUT_MS)

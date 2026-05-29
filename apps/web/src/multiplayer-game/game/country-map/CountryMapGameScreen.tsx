@@ -4,6 +4,8 @@ import type {
 } from '@maptap/game-domain/multiplayer-next/game'
 import type { VisibleMemberInfo } from '@maptap/game-domain/multiplayer-next/room'
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
+import { getCountryName, useAppLanguage } from '../../../shared/i18n'
 import { MapRenderer } from '../../../shared/map/MapRenderer'
 import { ScoreBanner } from '../../../shared/widgets/ScoreBanner'
 import {
@@ -54,6 +56,8 @@ export function CountryMapGameScreen({
 	isReconnecting,
 	onSubmitAnswer,
 }: CountryMapGameScreenProps): JSX.Element {
+	const { t } = useTranslation()
+	const language = useAppLanguage()
 	const currentRound = getCurrentRound(game)
 	const { mapProps } = useGameMap({
 		game,
@@ -76,12 +80,15 @@ export function CountryMapGameScreen({
 			? evaluatedSubmission.isCorrect
 			: null
 	const targetInfo = getTargetCountryInfo(game)
+	const targetName = targetInfo
+		? getCountryName(targetInfo, language)
+		: t('multiplayer.game.countryFallback')
 
 	if (game.phase === 'completed' || !currentRound) {
 		return (
 			<main className='grid h-full place-items-center bg-slate-950 px-5 py-8 text-white'>
 				<p className='text-sm font-semibold text-slate-300'>
-					Завершаем игру...
+					{t('multiplayer.game.finishing')}
 				</p>
 			</main>
 		)
@@ -96,15 +103,17 @@ export function CountryMapGameScreen({
 			<GameQuestionBar
 				progressLabel={`${currentRound.currentQuestionNumber} / ${currentRound.questionCount}`}
 				questionLabel={
-					game.phase === 'open' ? 'Найдите страну' : 'Правильный ответ'
+					game.phase === 'open'
+						? t('multiplayer.game.findCountry')
+						: t('multiplayer.game.correctAnswer')
 				}
-				targetName={targetInfo?.nameRu || targetInfo?.name || 'Страна'}
+				targetName={targetName}
 				targetFlagUrl={targetInfo?.flagUrl}
 				deadlineAt={game.phase === 'open' ? currentRound.deadlineAt : null}
 			/>
 
 			{isReconnecting ? (
-				<FloatingNotice message='Переподключаемся к комнате...' />
+				<FloatingNotice message={t('multiplayer.lobby.reconnecting')} />
 			) : null}
 
 			{actionErrorMessage ? (

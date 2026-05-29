@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import { RoomFinishedScreen } from '../finished/RoomFinishedScreen'
 import { ActiveGameScreen } from '../game/ActiveGameScreen'
@@ -9,6 +10,7 @@ import { RoomLoadingScreen } from '../screens/RoomLoadingScreen'
 import { useRoomHostController } from '../session/useRoomHostController'
 
 export function RoomHostPage(): JSX.Element {
+	const { t } = useTranslation()
 	const params = useParams<{ roomCode: string }>()
 	const navigate = useNavigate()
 	const roomCode = (params.roomCode ?? '').trim().toUpperCase()
@@ -33,9 +35,9 @@ export function RoomHostPage(): JSX.Element {
 	if (state.status === 'connecting') {
 		return (
 			<RoomLoadingScreen
-				label='Комната'
-				title='Подключение'
-				message='Подключаемся к игре.'
+				label={t('multiplayer.room')}
+				title={t('multiplayer.loading.connecting')}
+				message={t('multiplayer.loading.connectingMessage')}
 			/>
 		)
 	}
@@ -44,9 +46,9 @@ export function RoomHostPage(): JSX.Element {
 		if (state.reason === 'host_terminated') {
 			return (
 				<RoomLoadingScreen
-					label='Комната'
-					title='Комната закрыта'
-					message='Возвращаемся на страницу мультиплеера.'
+					label={t('multiplayer.room')}
+					title={t('multiplayer.loading.closed')}
+					message={t('multiplayer.loading.closedRedirect')}
 				/>
 			)
 		}
@@ -71,9 +73,9 @@ export function RoomHostPage(): JSX.Element {
 	if (!room) {
 		return (
 			<RoomLoadingScreen
-				label='Комната'
-				title='Переподключение'
-				message='Возвращаем вас в игру.'
+				label={t('multiplayer.room')}
+				title={t('multiplayer.loading.reconnecting')}
+				message={t('multiplayer.loading.reconnectingMessage')}
 			/>
 		)
 	}

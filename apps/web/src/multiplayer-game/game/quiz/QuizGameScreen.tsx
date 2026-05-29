@@ -6,6 +6,14 @@ import type {
 import type { VisibleMemberInfo } from '@maptap/game-domain/multiplayer-next/room'
 import { CheckCircle2, Circle, XCircle } from 'lucide-react'
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
+import {
+	getQuizChoiceLabel,
+	getQuizImageAlt,
+	getQuizPrompt,
+	useAppLanguage,
+	type AppLanguage,
+} from '../../../shared/i18n'
 import { ScoreBanner } from '../../../shared/widgets/ScoreBanner'
 import { cn } from '../../../shared/utils'
 import { getLeaderboardEntries } from '../../model/gameSelectors'
@@ -96,8 +104,10 @@ function ChoiceIcon({
 
 function QuizQuestionImage({
 	question,
+	language,
 }: {
 	question: QuizChoiceQuestion
+	language: AppLanguage
 }): JSX.Element | null {
 	if (!question.imageUrl) {
 		return null
@@ -106,7 +116,7 @@ function QuizQuestionImage({
 	return (
 		<img
 			src={question.imageUrl}
-			alt={question.imageAlt ?? ''}
+			alt={getQuizImageAlt(question, language) ?? ''}
 			className='mt-6 max-h-64 w-full max-w-2xl object-contain sm:max-h-80'
 			decoding='async'
 		/>
@@ -121,6 +131,8 @@ export function QuizGameScreen({
 	isReconnecting,
 	onSubmitAnswer,
 }: QuizGameScreenProps): JSX.Element {
+	const { t } = useTranslation()
+	const language = useAppLanguage()
 	const leaderboardEntries = useMemo(
 		() => getLeaderboardEntries(game, members, 5),
 		[game, members],
@@ -130,7 +142,7 @@ export function QuizGameScreen({
 		return (
 			<main className='grid h-full place-items-center bg-slate-950 px-5 py-8 text-white'>
 				<p className='text-sm font-semibold text-slate-300'>
-					Завершаем игру...
+					{t('multiplayer.game.finishing')}
 				</p>
 			</main>
 		)
@@ -140,7 +152,7 @@ export function QuizGameScreen({
 		return (
 			<main className='grid h-full place-items-center bg-slate-950 px-5 py-8 text-white'>
 				<p className='text-sm font-semibold text-slate-300'>
-					Этот вопрос недоступен в режиме викторины.
+					{t('multiplayer.game.quizUnavailable')}
 				</p>
 			</main>
 		)
@@ -159,8 +171,9 @@ export function QuizGameScreen({
 	const scoreBannerTriggerKey =
 		game.phase === 'revealed' ? game.revealedAt : null
 	const packLabel =
-		QUIZ_PACK_OPTIONS.find(option => option.value === game.quizPackId)
-			?.label ?? 'Викторина'
+		QUIZ_PACK_OPTIONS.some(option => option.value === game.quizPackId)
+			? t(`multiplayer.config.packs.${game.quizPackId}`)
+			: t('multiplayer.game.quizFallback')
 
 	return (
 		<section className='relative flex h-full min-h-0 flex-col overflow-hidden bg-slate-950 text-white'>
@@ -169,7 +182,7 @@ export function QuizGameScreen({
 					<div className='flex flex-wrap items-center justify-between gap-3'>
 						<div className='rounded-full bg-white/10 px-4 py-3'>
 							<p className='text-[10px] font-black uppercase tracking-[0.2em] text-slate-400'>
-								Раунд
+								{t('multiplayer.game.round')}
 							</p>
 							<p className='text-sm font-black'>
 								{game.currentQuestionNumber} / {game.questionCount}
@@ -183,9 +196,9 @@ export function QuizGameScreen({
 							{packLabel}
 						</p>
 						<h1 className='mt-3 text-3xl font-black leading-tight tracking-tight sm:text-5xl'>
-							{question.prompt}
+							{getQuizPrompt(question, language)}
 						</h1>
-						<QuizQuestionImage question={question} />
+						<QuizQuestionImage question={question} language={language} />
 					</div>
 
 					<div className='mt-12 grid gap-3 sm:mt-14 sm:grid-cols-2'>
@@ -224,7 +237,7 @@ export function QuizGameScreen({
 										{CHOICE_LABELS[index] ?? index + 1}
 									</span>
 									<span className='min-w-0 flex-1 text-lg font-black leading-snug'>
-										{choice.label}
+										{getQuizChoiceLabel(question, choice, language)}
 									</span>
 									<span
 										className={cn(
@@ -250,7 +263,7 @@ export function QuizGameScreen({
 					<div className='mt-6 min-h-8'>
 						{isReconnecting ? (
 							<p className='rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-slate-200'>
-								Переподключаемся к комнате...
+								{t('multiplayer.lobby.reconnecting')}
 							</p>
 						) : actionErrorMessage ? (
 							<p className='rounded-full bg-rose-500 px-4 py-2 text-sm font-bold text-white'>
@@ -258,7 +271,7 @@ export function QuizGameScreen({
 							</p>
 						) : selectedChoiceId && isOpen ? (
 							<p className='rounded-full bg-white/10 px-4 py-2 text-sm font-bold text-slate-200'>
-								Ответ принят
+								{t('multiplayer.game.answerAccepted')}
 							</p>
 						) : null}
 					</div>

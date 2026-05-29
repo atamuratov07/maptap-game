@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { cn } from '../../shared/utils'
 import type { NamedLeaderboardEntry } from '../model/gameSelectors'
 
@@ -10,6 +11,8 @@ export function ResultsList({
 	entries,
 	viewerMemberId,
 }: ResultsListProps): JSX.Element | null {
+	const { t } = useTranslation()
+
 	if (!entries.length) {
 		return null
 	}
@@ -34,7 +37,9 @@ export function ResultsList({
 								#{entry.rank} {entry.name}
 							</p>
 							<p className='mt-1 text-sm text-slate-600'>
-								Правильных ответов: {entry.correctCount}
+								{t('multiplayer.game.correctAnswers', {
+									count: entry.correctCount,
+								})}
 							</p>
 						</div>
 						<p className='text-2xl font-black tracking-tight text-slate-950'>

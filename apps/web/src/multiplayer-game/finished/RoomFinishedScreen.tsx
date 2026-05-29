@@ -1,5 +1,6 @@
 import type { RoomFinishedView } from '@maptap/game-domain/multiplayer-next/room'
 import { DoorClosed, RotateCcw } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import {
 	AlertMessage,
 	Button,
@@ -37,6 +38,7 @@ export function RoomFinishedScreen({
 	onPlayAgain,
 	onTerminateRoom,
 }: RoomFinishedScreenProps): JSX.Element {
+	const { t } = useTranslation()
 	const viewerEntry = room.viewerLeaderboardEntry
 	const leaderboardEntries = getLeaderboardEntries(
 		room.lastGameResult,
@@ -51,21 +53,24 @@ export function RoomFinishedScreen({
 				className='rounded-4xl border-white/60 bg-white/92 shadow-[0_28px_80px_rgba(15,23,42,0.12)] backdrop-blur sm:p-8'
 			>
 				<p className='text-center text-[11px] font-black uppercase tracking-[0.24em] text-slate-500'>
-					Финал
+					{t('multiplayer.finished.final')}
 				</p>
 				<h1 className='mt-3 text-center text-4xl font-black tracking-tight text-slate-950'>
-					Игра завершена
+					{t('multiplayer.finished.title')}
 				</h1>
 
 				{viewerEntry ? (
 					<p className='mt-4 text-center text-sm font-semibold text-slate-600'>
-						Ваш результат: #{viewerEntry.rank} / {viewerEntry.score} очков
+						{t('multiplayer.finished.viewerResult', {
+							rank: viewerEntry.rank,
+							score: viewerEntry.score,
+						})}
 					</p>
 				) : null}
 
 				{isReconnecting ? (
 					<p className='mt-4 text-center text-sm font-medium text-slate-600'>
-						Переподключаемся к комнате...
+						{t('multiplayer.lobby.reconnecting')}
 					</p>
 				) : null}
 
@@ -93,7 +98,9 @@ export function RoomFinishedScreen({
 								size={16}
 								strokeWidth={2.4}
 							/>
-							{playAgainPending ? 'Возвращаемся...' : 'Сыграть ещё'}
+							{playAgainPending
+								? t('multiplayer.finished.returning')
+								: t('multiplayer.finished.playAgain')}
 						</Button>
 					) : null}
 					{capabilities.canTerminateRoom && onTerminateRoom ? (
@@ -109,16 +116,18 @@ export function RoomFinishedScreen({
 								size={16}
 								strokeWidth={2.4}
 							/>
-							{terminatePending ? 'Закрываем...' : 'Закрыть комнату'}
+							{terminatePending
+								? t('multiplayer.lobby.closingRoom')
+								: t('multiplayer.lobby.closeRoom')}
 						</Button>
 					) : null}
 					{capabilities.canLeaveRoom ? (
 						<>
 							<ButtonLink is3d to='/multiplayer'>
-								Мультиплеер
+								{t('multiplayer.title')}
 							</ButtonLink>
 							<ButtonLink is3d to='/' variant='secondary'>
-								На главную
+								{t('common.home')}
 							</ButtonLink>
 						</>
 					) : null}

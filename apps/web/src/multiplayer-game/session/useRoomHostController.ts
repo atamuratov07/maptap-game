@@ -4,6 +4,7 @@ import type {
 	RoomHostView,
 } from '@maptap/game-domain/multiplayer-next'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { i18n } from '../../shared/i18n/setup'
 import { createSocketGateway } from '../api/socketGateway'
 import { clearRoomGameConfig } from '../model/gameConfig'
 import {
@@ -76,13 +77,13 @@ export function useRoomHostController(
 		clearActionError()
 
 		if (roomCode.length !== 6) {
-			setEntryErrorMessage('Код комнаты должен состоять из 6 символов.')
+			setEntryErrorMessage(i18n.t('multiplayer.error.roomCodeLength'))
 			return
 		}
 
 		const storedSession = loadRoomSession(roomCode, 'host')
 		if (!storedSession) {
-			setEntryErrorMessage('Для этой комнаты нет сохранённой сессии хоста.')
+			setEntryErrorMessage(i18n.t('multiplayer.error.hostSessionMissing'))
 			return
 		}
 
@@ -94,7 +95,7 @@ export function useRoomHostController(
 			case 'rejected':
 				clearRoomSession(roomCode, 'host')
 				setEntryErrorMessage(
-					'Сохранённая сессия хоста истекла или недействительна.',
+					i18n.t('multiplayer.error.hostSessionExpired'),
 				)
 				return
 			case 'error':

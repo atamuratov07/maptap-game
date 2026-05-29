@@ -7,6 +7,8 @@ import {
 } from '@maptap/game-domain/multiplayer-next'
 import { Gauge, Globe2, ListChecks, Timer } from 'lucide-react'
 import { useEffect, useState, type FormEvent } from 'react'
+import { useTranslation } from 'react-i18next'
+import { getDifficultyLabel, getScopeLabel } from '../../shared/i18n'
 import { SelectControl } from '../../shared/ui'
 import {
 	DIFFICULTY_OPTIONS,
@@ -53,6 +55,7 @@ export function GameConfigPanel({
 	formId,
 	onStartGame,
 }: GameConfigPanelProps): JSX.Element {
+	const { t } = useTranslation()
 	const [config, setConfig] = useState<GameConfig>(() =>
 		loadRoomGameConfig(roomCode),
 	)
@@ -102,18 +105,20 @@ export function GameConfigPanel({
 		>
 			<div className='border-b border-slate-200/80 bg-linear-to-br from-white via-amber-50/80 to-teal-50/70 px-5 py-4 sm:px-6'>
 				<p className='text-[11px] font-black uppercase tracking-[0.22em] text-amber-700'>
-					Настройки игры
+					{t('multiplayer.config.title')}
 				</p>
 				<SelectControl
-					aria-label='Тип игры'
+					aria-label={t('multiplayer.config.gameType')}
 					value={config.gameKind ?? 'country-map'}
 					className='mt-1 h-13 max-w-lg rounded-2xl border-amber-200 bg-white/88 text-lg font-black text-slate-950 shadow-sm sm:text-2xl'
 					onChange={event => {
 						setGameKind(event.target.value as GameConfig['gameKind'])
 					}}
 				>
-					<option value='country-map'>Раунд на карте</option>
-					<option value='quiz'>Викторина по Узбекистану</option>
+					<option value='country-map'>
+						{t('multiplayer.config.countryMap')}
+					</option>
+					<option value='quiz'>{t('multiplayer.config.quiz')}</option>
 				</SelectControl>
 			</div>
 
@@ -124,7 +129,7 @@ export function GameConfigPanel({
 			>
 				<ConfigField
 					icon={<ListChecks aria-hidden='true' size={17} strokeWidth={2.4} />}
-					label='Вопросы'
+					label={t('multiplayer.config.questions')}
 				>
 					<SelectControl
 						value={config.questionCount}
@@ -146,7 +151,7 @@ export function GameConfigPanel({
 
 				<ConfigField
 					icon={<Timer aria-hidden='true' size={17} strokeWidth={2.4} />}
-					label='Таймер'
+					label={t('multiplayer.config.timer')}
 				>
 					<SelectControl
 						value={config.questionDurationMs}
@@ -160,7 +165,9 @@ export function GameConfigPanel({
 					>
 						{QUESTION_DURATION_MS_OPTIONS.map(option => (
 							<option key={option} value={option}>
-								{option / 1000} сек.
+								{t('multiplayer.config.seconds', {
+									count: option / 1000,
+								})}
 							</option>
 						))}
 					</SelectControl>
@@ -169,7 +176,7 @@ export function GameConfigPanel({
 				{config.gameKind === 'quiz' ? (
 					<ConfigField
 						icon={<Globe2 aria-hidden='true' size={17} strokeWidth={2.4} />}
-						label='Набор'
+						label={t('multiplayer.config.pack')}
 					>
 						<SelectControl
 							value={config.packId}
@@ -188,7 +195,7 @@ export function GameConfigPanel({
 						>
 							{QUIZ_PACK_OPTIONS.map(option => (
 								<option key={option.value} value={option.value}>
-									{option.label}
+									{t(`multiplayer.config.packs.${option.value}`)}
 								</option>
 							))}
 						</SelectControl>
@@ -203,7 +210,7 @@ export function GameConfigPanel({
 									strokeWidth={2.4}
 								/>
 							}
-							label='Регион'
+							label={t('multiplayer.config.region')}
 						>
 							<SelectControl
 								value={config.scope}
@@ -218,7 +225,7 @@ export function GameConfigPanel({
 							>
 								{SCOPE_OPTIONS.map(option => (
 									<option key={option.value} value={option.value}>
-										{option.label}
+										{getScopeLabel(t, option.value)}
 									</option>
 								))}
 							</SelectControl>
@@ -232,7 +239,7 @@ export function GameConfigPanel({
 									strokeWidth={2.4}
 								/>
 							}
-							label='Сложность'
+							label={t('multiplayer.config.difficulty')}
 						>
 							<SelectControl
 								value={config.difficulty}
@@ -247,7 +254,7 @@ export function GameConfigPanel({
 							>
 								{DIFFICULTY_OPTIONS.map(option => (
 									<option key={option.value} value={option.value}>
-										{option.label}
+										{getDifficultyLabel(t, option.value)}
 									</option>
 								))}
 							</SelectControl>

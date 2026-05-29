@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+import { LanguageSwitcher } from '../../shared/i18n'
 import { ButtonLink, ScreenShell } from '../../shared/ui'
 import { formatGatewayErrorMessage } from '../api/errors'
 import { createSocketGateway } from '../api/socketGateway'
@@ -12,6 +14,7 @@ import { saveRoomSession } from '../session/sessionStorage'
 import type { RoomSession } from '../session/types'
 
 export function HomePage(): JSX.Element {
+	const { t } = useTranslation()
 	const navigate = useNavigate()
 	const gateway = useMemo(() => createSocketGateway(), [])
 	const [createError, setCreateError] = useState<string | null>(null)
@@ -58,8 +61,10 @@ export function HomePage(): JSX.Element {
 			<div className='mx-auto max-w-6xl'>
 				<div className='mb-6 flex flex-wrap items-center justify-between gap-3'>
 					<ButtonLink to='/' variant='nav' size='pill'>
-						<span aria-hidden='true'>&larr;</span>К режимам
+						<span aria-hidden='true'>&larr;</span>
+						{t('multiplayer.toModes')}
 					</ButtonLink>
+					<LanguageSwitcher />
 				</div>
 
 				<div className='grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] [&>*:first-child]:order-1 [&>*:last-child]:order-2 lg:[&>*:first-child]:order-2 lg:[&>*:last-child]:order-1'>

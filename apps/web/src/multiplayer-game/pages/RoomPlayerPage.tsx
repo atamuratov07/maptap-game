@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import { RoomFinishedScreen } from '../finished/RoomFinishedScreen'
 import { ActiveGameScreen } from '../game/ActiveGameScreen'
@@ -9,6 +10,7 @@ import { RoomLoadingScreen } from '../screens/RoomLoadingScreen'
 import { useRoomPlayerController } from '../session/useRoomPlayerController'
 
 export function RoomPlayerPage(): JSX.Element {
+	const { t } = useTranslation()
 	const params = useParams<{ roomCode: string }>()
 	const roomCode = (params.roomCode ?? '').trim().toUpperCase()
 	const {
@@ -23,9 +25,9 @@ export function RoomPlayerPage(): JSX.Element {
 	if (state.status === 'connecting') {
 		return (
 			<RoomLoadingScreen
-				label='Комната'
-				title='Подключение'
-				message='Подключаемся к игре.'
+				label={t('multiplayer.room')}
+				title={t('multiplayer.loading.connecting')}
+				message={t('multiplayer.loading.connectingMessage')}
 			/>
 		)
 	}
@@ -64,9 +66,9 @@ export function RoomPlayerPage(): JSX.Element {
 	if (!room) {
 		return (
 			<RoomLoadingScreen
-				label='Комната'
-				title='Переподключение'
-				message='Возвращаем вас в игру.'
+				label={t('multiplayer.room')}
+				title={t('multiplayer.loading.reconnecting')}
+				message={t('multiplayer.loading.reconnectingMessage')}
 			/>
 		)
 	}
