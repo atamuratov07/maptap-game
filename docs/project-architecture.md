@@ -1,24 +1,34 @@
 # MapTap Project Architecture Guide
 
-This document is a first-pass project map for new contributors. It explains what each workspace does, how data moves through the system, which files matter most, and what order to read the code in.
+This guide is a current project map for contributors. It explains what MapTap is, how the workspaces fit together, how game state moves through the browser and server, and which files are worth reading first.
 
-## 1. Repo summary
+## 1. Project and game description
+
+MapTap is an interactive educational geography game. Its learning goal is to turn political-map knowledge into active practice: a player sees a country prompt, finds the location on a map, receives immediate feedback, and repeats short rounds until the country, flag, capital, currency, and region become easier to remember.
+
+The project was built for browser-based classroom and self-study use. It does not require installation for players, and it supports three learning formats:
+
+- **Singleplayer world-map training**: a local browser game where the player chooses question count, difficulty, and region, then clicks countries on an interactive map.
+- **Realtime multiplayer rooms**: a host creates a room, shares a short code or link, players join from their own devices, everyone answers the same timed question, and the room shows scoring plus leaderboards.
+- **Local Uzbekistan quiz content**: a quiz-style multiplayer mode about Uzbekistan and Tashkent, including cities, regions, landmarks, rivers, history, and culture.
+
+The educational idea is that mistakes become useful feedback rather than dead ends. When an answer is revealed, MapTap shows the correct place and related facts, making each round a small geography lesson rather than only a score check.
+
+## 2. Repository summary
 
 MapTap is an npm-workspaces monorepo with:
 
-- a React + Vite web app
-- an Express + Socket.IO realtime server
-- a shared pure TypeScript domain layer
-- a shared socket protocol package
-- a generated local country catalog
-- an offline build pipeline that produces the country catalog and map tiles
+- a React + Vite web app in `apps/web`
+- an Express + Socket.IO realtime server in `apps/server`
+- pure TypeScript game-domain packages in `packages/game-domain`
+- a shared Socket.IO protocol package in `packages/game-protocol`
+- a generated local country catalog in `packages/country-catalog`
+- an offline country-data and map-tile build pipeline in `packages/country-build`
+- a placeholder/generated map asset package in `packages/map-assets`
 
-The project has two gameplay modes:
+At runtime, the web app and server both consume the shared domain, protocol, and country catalog packages. The data build package is offline tooling only.
 
-- singleplayer: fully local in the browser, no server required
-- multiplayer: browser UI + Socket.IO server + in-memory room/session state
-
-## 2. Workspace dependency diagram
+## 3. Workspace dependency diagram
 
 ```mermaid
 graph LR
@@ -28,14 +38,14 @@ graph LR
     end
 
     subgraph SharedPackages
-        DOMAIN["@maptap/game-domain<br/>pure game rules and state machines"]
-        PROTOCOL["@maptap/game-protocol<br/>socket event names, ack types, zod schemas"]
-        CATALOG["@maptap/country-catalog<br/>generated playable country metadata"]
+        DOMAIN["@maptap/game-domain<br/>pure rules and state machines"]
+        PROTOCOL["@maptap/game-protocol<br/>events, acks, request schemas"]
+        CATALOG["@maptap/country-catalog<br/>generated country data"]
     end
 
     subgraph BuildPackages
         BUILD["@maptap/country-build<br/>offline data + tiles pipeline"]
-        ASSETS["map-assets<br/>placeholder package"]
+        ASSETS["map-assets<br/>generated/placeholder map assets package"]
     end
 
     WEB --> DOMAIN
@@ -50,192 +60,46 @@ graph LR
     CATALOG --> DOMAIN
 
     BUILD -->|writes generated JSON| CATALOG
-    BUILD -->|exports vector tiles + tiles.json| WEB
+    BUILD -->|exports vector tiles + TileJSON| WEB
+    BUILD -->|can export tiles| ASSETS
 ```
 
-## 3. Runtime architecture in one diagram
+## 4. Runtime architecture
 
 ```mermaid
 graph TD
     Browser["Browser"]
-    Router["apps/web/src/app/App.tsx<br/>route entry"]
+    Routes["apps/web/src/app/App.tsx<br/>React Router routes"]
     Single["singleplayer-game/*"]
     Multi["multiplayer-game/*"]
-    Map["shared/map/MapRenderer.tsx"]
+    Map["shared/map/MapRenderer.tsx<br/>MapLibre / react-map-gl"]
 
-    Gateway["socketGateway.ts<br/>Socket.IO client wrapper"]
+    Gateway["api/socketGateway.ts<br/>typed Socket.IO client boundary"]
     Protocol["@maptap/game-protocol"]
     SocketHandlers["apps/server/src/features/rooms/socket.ts"]
     Service["RoomsService"]
-    Repo["RoomsRepository<br/>in-memory state"]
-    Publisher["room publisher"]
-    Domain["@maptap/game-domain"]
+    Repo["RoomsRepository<br/>in-memory rooms, sessions, timers"]
+    Publisher["publisher.ts<br/>role-specific room snapshots"]
+    NextDomain["@maptap/game-domain/multiplayer-next"]
+    SingleDomain["@maptap/game-domain/singleplayer"]
     Catalog["@maptap/country-catalog"]
 
-    Browser --> Router
-    Router --> Single
-    Router --> Multi
-    Single --> Domain
+    Browser --> Routes
+    Routes --> Single
+    Routes --> Multi
+    Single --> SingleDomain
     Single --> Catalog
     Single --> Map
     Multi --> Gateway
     Multi --> Map
-    Multi --> Catalog
     Gateway --> Protocol
     Gateway --> SocketHandlers
     SocketHandlers --> Service
     Service --> Repo
-    Service --> Domain
+    Service --> NextDomain
     Service --> Catalog
     Service --> Publisher
     Publisher --> Gateway
-```
-
-## 4. Source tree map
-
-This is the important code tree, excluding large checked-in map assets under `apps/web/public/map/**`.
-
-```text
-maptap/
-|-- apps/
-|   |-- server/
-|   |   |-- package.json
-|   |   `-- src/
-|   |       |-- index.ts                # server composition root
-|   |       |-- app.ts                  # Express app and /health route
-|   |       |-- server.ts               # HTTP + Socket.IO server setup
-|   |       |-- config/
-|   |       |   `-- env.ts              # zod env parsing
-|   |       `-- features/
-|   |           `-- rooms/
-|   |               |-- ids.ts          # room/player/token/id generation
-|   |               |-- publisher.ts    # pushes host/player snapshots and room-closed events
-|   |               |-- repository.ts   # in-memory rooms + player sessions + socket mapping
-|   |               |-- service.ts      # multiplayer application service
-|   |               |-- socket.ts       # socket event handlers and payload validation
-|   |               `-- types.ts        # Socket.IO namespace/socket types
-|   `-- web/
-|       |-- package.json
-|       |-- vite.config.ts
-|       |-- public/
-|       |   |-- _headers
-|       |   |-- _redirects
-|       |   `-- map/                    # checked-in vector tiles, fonts, style.json, tiles.json
-|       `-- src/
-|           |-- app/
-|           |   |-- main.tsx            # React root + BrowserRouter
-|           |   |-- App.tsx             # top-level route map
-|           |   |-- HomePage.tsx        # mode chooser
-|           |   `-- globals.css
-|           |-- shared/
-|           |   |-- components/
-|           |   |   `-- GameCard.tsx
-|           |   |-- game/
-|           |   |   `-- CountryInfoCard.tsx
-|           |   `-- map/
-|           |       |-- MapRenderer.tsx # MapLibre wrapper used by game UIs
-|           |       |-- continent-view.ts
-|           |       |-- map-styles.tsx
-|           |       `-- types.ts
-|           |-- singleplayer-game/
-|           |   |-- index.ts
-|           |   |-- core/
-|           |   |   |-- config.ts         # URL <-> singleplayer config conversion
-|           |   |   `-- useGameSession.ts # local game orchestration hook
-|           |   |-- screens/
-|           |   |   |-- SetupPage.tsx
-|           |   |   |-- GamePage.tsx
-|           |   |   |-- GameScreen.tsx
-|           |   |   `-- InvalidConfigScreen.tsx
-|           |   `-- components/
-|           |       |-- CountryInfoCard.tsx
-|           |       |-- GameHeaderBar.tsx
-|           |       |-- GameResultModal.tsx
-|           |       |-- Hearts.tsx
-|           |       `-- QuestionTimer.tsx
-|           `-- multiplayer-game/
-|               |-- index.ts
-|               |-- core/
-|               |   |-- errors.ts
-|               |   |-- roomView.ts           # UI selectors/formatters over room views
-|               |   |-- sessionStorage.ts     # localStorage persistence for host/player sessions
-|               |   |-- socketGateway.ts      # typed Socket.IO client boundary
-|               |   |-- types.ts
-|               |   |-- useCountdown.ts
-|               |   |-- useTimestampGate.ts
-|               |   |-- useHostSession.ts     # host session bootstrap/reconnect flow
-|               |   `-- usePlayerSession.ts   # player lookup/join/resume/reconnect flow
-|               |-- pages/
-|               |   |-- HomePage.tsx
-|               |   |-- RoomHostPage.tsx
-|               |   |-- RoomPlayerPage.tsx
-|               |   |-- GameScreen.tsx        # empty placeholder
-|               |   `-- LeaderboardScreen.tsx # empty placeholder
-|               `-- components/
-|                   |-- CreateRoomForm.tsx
-|                   |-- JoinRoomForm.tsx
-|                   |-- screens/
-|                   |   |-- PlayerJoinScreen.tsx
-|                   |   |-- RoomClosedScreen.tsx
-|                   |   |-- RoomErrorScreen.tsx
-|                   |   |-- RoomFinishedScreen.tsx
-|                   |   |-- RoomLoadingScreen.tsx
-|                   |   `-- RoomLobbyScreen.tsx
-|                   `-- game/
-|                       |-- RoomGameHeader.tsx
-|                       |-- RoomGameScene.tsx
-|                       |-- RoomLeaderboardOverlay.tsx
-|                       |-- RoomScoreBanner.tsx
-|                       |-- SelectedAnswerMarker.tsx
-|                       `-- useRoomGameMap.tsx
-|-- packages/
-|   |-- game-domain/
-|   |   `-- src/
-|   |       |-- index.ts
-|   |       |-- shared/                  # base types, result, errors, random, time
-|   |       |-- catalog/                 # country eligibility selectors
-|   |       |-- singleplayer/            # local state machine
-|   |       `-- multiplayer/             # room state machine and visibility transforms
-|   |-- game-protocol/
-|   |   `-- src/
-|   |       |-- ack.ts
-|   |       |-- errors.ts
-|   |       |-- events.ts                # socket namespace + event contracts
-|   |       |-- requests.ts              # zod request schemas
-|   |       |-- responses.ts             # response/event types
-|   |       `-- index.ts
-|   |-- country-catalog/
-|   |   |-- generated/
-|   |   |   |-- countries.registry.json
-|   |   |   `-- countries.playable.json
-|   |   `-- src/
-|   |       |-- index.ts                 # builds in-memory catalog + country pool
-|   |       `-- types.ts
-|   |-- country-build/
-|   |   |-- data/
-|   |   |   |-- playable_states_195.json
-|   |   |   `-- manual_overrides.json
-|   |   |-- upstream/                    # source zip/mbtiles inputs
-|   |   |-- tools/                       # bundled tippecanoe/tile-join binaries
-|   |   `-- scripts/
-|   |       |-- 01_get_fallback_sources.sh
-|   |       |-- 02_prepare_base.sh
-|   |       |-- 02b_dump_base_country_tiles.sh
-|   |       |-- 02c_merge_base_countries.mjs
-|   |       |-- 03_build_data.mjs
-|   |       |-- 04_build_tiles.sh
-|   |       |-- 05_make_tilesjson.mjs
-|   |       |-- 06_build_registry.mjs
-|   |       |-- 06_build_registry.sh
-|   |       `-- lib/
-|   |           |-- continent.mjs
-|   |           |-- output-paths.mjs
-|   |           `-- wdqs.mjs
-|   `-- map-assets/                      # currently not part of the active runtime path
-|-- README.md
-|-- package.json
-|-- tsconfig.base.json
-`-- tsconfig.json
 ```
 
 ## 5. Web route map
@@ -251,9 +115,112 @@ graph TD
     MULTI_HOME --> PLAYER["/multiplayer/room/:roomCode"]
 ```
 
-## 6. Singleplayer architecture
+The top-level router lives in `apps/web/src/app/App.tsx`. Routes are intentionally shallow: the game mode owns its internal loading, lobby, active-game, error, and finished screens.
 
-Singleplayer never touches the server. Everything happens in the browser against pure shared logic.
+## 6. Current source tree map
+
+This map lists the important application and package paths. It excludes `node_modules` and the large checked-in vector tile/font tree under `apps/web/public/map/**`.
+
+```text
+maptap/
+|-- apps/
+|   |-- server/
+|   |   |-- package.json
+|   |   `-- src/
+|   |       |-- index.ts                # server composition root and shutdown
+|   |       |-- app.ts                  # Express app and /health route
+|   |       |-- server.ts               # HTTP + Socket.IO /game namespace
+|   |       |-- config/
+|   |       |   `-- env.ts              # zod env parsing
+|   |       `-- features/
+|   |           `-- rooms/
+|   |               |-- ids.ts          # room/member/session/game id generation
+|   |               |-- publisher.ts    # emits host/player snapshots and close events
+|   |               |-- repository.ts   # in-memory room/session/timer storage
+|   |               |-- service.ts      # multiplayer application service
+|   |               |-- socket.ts       # Socket.IO handlers and validation
+|   |               `-- types.ts        # typed Socket.IO namespace/socket data
+|   `-- web/
+|       |-- package.json
+|       |-- vite.config.ts
+|       |-- public/
+|       |   |-- _headers
+|       |   |-- _redirects
+|       |   `-- map/                    # style.json, vector tiles, glyph PBFs
+|       `-- src/
+|           |-- app/
+|           |   |-- main.tsx            # React root + BrowserRouter
+|           |   |-- App.tsx             # route map
+|           |   |-- HomePage.tsx        # mode chooser
+|           |   `-- globals.css
+|           |-- shared/
+|           |   |-- map/                # MapRenderer and MapLibre styles
+|           |   |-- ui/                 # buttons, panels, form controls
+|           |   |-- utils/              # small utilities such as cn()
+|           |   `-- widgets/            # reusable game display widgets
+|           |-- singleplayer-game/
+|           |   |-- core/               # URL config and local game hook
+|           |   |-- screens/            # setup, game, invalid config
+|           |   |-- components/         # header, hearts, timer, result modal
+|           |   `-- index.ts
+|           `-- multiplayer-game/
+|               |-- api/                # socketGateway and gateway error mapping
+|               |-- create/             # create-room form
+|               |-- join/               # join-room form and player entry
+|               |-- lobby/              # room lobby and game config panel
+|               |-- game/
+|               |   |-- ActiveGameScreen.tsx
+|               |   |-- country-map/    # map-click multiplayer game UI
+|               |   |-- quiz/           # multiple-choice quiz UI
+|               |   `-- hooks/          # countdown and timestamp helpers
+|               |-- finished/           # final leaderboard/results screen
+|               |-- model/              # selectors and persisted config helpers
+|               |-- pages/              # home, host room, player room
+|               |-- screens/            # loading, error, closed
+|               |-- session/            # room runtime, controllers, localStorage
+|               `-- index.ts
+|-- packages/
+|   |-- game-domain/
+|   |   `-- src/
+|   |       |-- shared/                 # base types, result, random, time, errors
+|   |       |-- catalog/                # country eligibility selectors
+|   |       |-- singleplayer/           # local singleplayer state machine
+|   |       |-- multiplayer/            # legacy multiplayer domain
+|   |       `-- multiplayer-next/       # active room/game domain used by server
+|   |           |-- orchestration.ts     # room + active-game command glue
+|   |           |-- room/                # room membership and visibility
+|   |           `-- game/                # game session, scoring, transitions, quiz content
+|   |-- game-protocol/
+|   |   `-- src/
+|   |       |-- ack.ts
+|   |       |-- errors.ts
+|   |       |-- events.ts               # Socket.IO event contract
+|   |       |-- requests.ts             # zod request schemas
+|   |       |-- responses.ts            # response and push-event types
+|   |       `-- index.ts
+|   |-- country-catalog/
+|   |   |-- generated/
+|   |   |   |-- countries.registry.json
+|   |   |   `-- countries.playable.json
+|   |   `-- src/
+|   |       |-- index.ts                # in-memory catalog + country pool
+|   |       `-- types.ts
+|   |-- country-build/
+|   |   |-- data/                      # curated playable states and overrides
+|   |   |-- upstream/                  # source zips and mbtiles
+|   |   |-- tools/                     # bundled tippecanoe/tile-join tools
+|   |   `-- scripts/                   # numbered offline build pipeline
+|   `-- map-assets/                    # placeholder/generated asset package
+|-- docs/
+|   `-- project-architecture.md
+|-- package.json
+|-- tsconfig.base.json
+`-- tsconfig.json
+```
+
+## 7. Singleplayer architecture
+
+Singleplayer is fully local in the browser. It does not connect to the server.
 
 ```mermaid
 graph TD
@@ -267,7 +234,7 @@ graph TD
     Screen --> Map["shared/map/MapRenderer.tsx"]
 ```
 
-### Singleplayer state machine
+The singleplayer state machine lives in `packages/game-domain/src/singleplayer`.
 
 ```mermaid
 stateDiagram-v2
@@ -280,76 +247,88 @@ stateDiagram-v2
     revealed --> finished: NEXT on final question
 ```
 
-### Singleplayer file responsibilities
+Key responsibilities:
 
-- `core/config.ts`: serializes game config into URL params and validates them back.
-- `core/useGameSession.ts`: loads local country data, prepares a session, and dispatches reducer actions.
-- `packages/game-domain/src/singleplayer/*`: the actual rules engine.
-- `shared/map/MapRenderer.tsx`: reusable interactive map surface.
+- `singleplayer-game/core/config.ts`: serializes and validates URL config.
+- `singleplayer-game/core/useGameSession.ts`: loads local catalog data, prepares the session, and dispatches domain actions.
+- `game-domain/src/singleplayer/session.ts`: chooses eligible country questions from the country pool.
+- `game-domain/src/singleplayer/engine.ts`: applies `START`, `PICK`, `GIVE_UP`, and `NEXT`.
+- `game-domain/src/singleplayer/score.ts`: scores a correct answer from response time and wrong attempts.
+- `shared/map/MapRenderer.tsx`: shared map surface used by local and multiplayer map gameplay.
 
-## 7. Multiplayer architecture
+## 8. Multiplayer architecture
+
+The active multiplayer implementation uses `packages/game-domain/src/multiplayer-next`. The older `packages/game-domain/src/multiplayer` tree still exists, but the server imports the `multiplayer-next` room/game model.
 
 Multiplayer is split into four layers:
 
-1. browser pages and session hooks
-2. `socketGateway.ts` transport boundary
-3. server room handlers/service/repository
-4. shared domain/protocol packages
-
-### End-to-end multiplayer sequence
+1. Browser pages, room controllers, and game screens.
+2. `socketGateway.ts`, the typed transport boundary.
+3. Server socket handlers, `RoomsService`, `RoomsRepository`, and publisher.
+4. Shared domain/protocol packages.
 
 ```mermaid
 sequenceDiagram
-    participant Browser as Browser UI
+    participant UI as Browser UI
+    participant Runtime as useRoomRuntime/controller
     participant Gateway as socketGateway.ts
     participant Socket as Socket.IO /game
     participant Handlers as socket.ts
     participant Service as RoomsService
+    participant Domain as multiplayer-next
     participant Repo as RoomsRepository
     participant Publisher as publisher.ts
 
-    Browser->>Gateway: create/join/resume/start/submit
-    Gateway->>Socket: emit event with ack
+    UI->>Runtime: create, join, resume, start, answer, return, terminate
+    Runtime->>Gateway: typed method call
+    Gateway->>Socket: event + timed ack
     Socket->>Handlers: room:* or game:* event
     Handlers->>Handlers: zod payload validation
     Handlers->>Service: application command
-    Service->>Repo: mutate room/session maps
-    Service->>Service: apply shared domain command/transition
-    Service->>Publisher: onRoomUpdated / onRoomClosed hook
-    Publisher->>Socket: room:host-snapshot / room:player-snapshot / room:closed
-    Socket->>Gateway: pushed snapshot events
-    Gateway->>Browser: update React state
+    Service->>Domain: room/game command or transition
+    Service->>Repo: persist new in-memory state
+    Service->>Publisher: onRoomUpdated / onRoomClosed
+    Publisher->>Socket: role-specific snapshot push
+    Socket->>Gateway: room:host-snapshot / room:player-snapshot / room:closed
+    Gateway->>Runtime: subscription callback
+    Runtime->>UI: React state update
 ```
 
 ### Client multiplayer split
 
 ```mermaid
 graph TD
-    Home["multiplayer/HomePage.tsx"] --> Create["create room"]
-    Home --> Join["go to player room by code"]
+    Home["pages/HomePage.tsx"] --> Create["create/CreateRoomForm.tsx"]
+    Home --> Join["join/JoinRoomForm.tsx"]
 
-    HostPage["RoomHostPage.tsx"] --> HostHook["useHostSession.ts"]
-    PlayerPage["RoomPlayerPage.tsx"] --> PlayerHook["usePlayerSession.ts"]
+    HostPage["pages/RoomHostPage.tsx"] --> HostController["session/useRoomHostController.ts"]
+    PlayerPage["pages/RoomPlayerPage.tsx"] --> PlayerController["session/useRoomPlayerController.ts"]
 
-    HostHook --> Store["sessionStorage.ts"]
-    PlayerHook --> Store
-    HostHook --> Gateway["socketGateway.ts"]
-    PlayerHook --> Gateway
+    HostController --> Runtime["session/useRoomRuntime.ts"]
+    PlayerController --> Runtime
+    Runtime --> Store["session/sessionStorage.ts"]
+    Runtime --> Gateway["api/socketGateway.ts"]
 
-    HostHook --> Scene["RoomGameScene / lobby / error / closed / finished"]
-    PlayerHook --> Scene
+    HostPage --> Lobby["lobby/RoomLobbyScreen.tsx"]
+    PlayerPage --> Lobby
+    HostPage --> Active["game/ActiveGameScreen.tsx"]
+    PlayerPage --> Active
+    Active --> MapGame["game/country-map/CountryMapGameScreen.tsx"]
+    Active --> Quiz["game/quiz/QuizGameScreen.tsx"]
+    HostPage --> Finished["finished/RoomFinishedScreen.tsx"]
+    PlayerPage --> Finished
 ```
 
-### Important multiplayer behavior
+Important client behavior:
 
-- host and player sessions are persisted in browser `localStorage`
-- reconnect/resume uses `playerSessionToken`, not `socket.id`
-- server state is in memory only; a server restart invalidates live room state
-- host and player receive different projections of the same room state via `visibility.ts`
+- Host and player room sessions are persisted in `localStorage`.
+- The saved session contains the room code, member ID, role, and `memberSessionToken`.
+- Reconnect/resume uses `memberSessionToken`, not `socket.id`.
+- `useRoomRuntime` centralizes connection status: connecting, ready, reconnecting, closed, and error.
+- The host can start a game, return a finished room to the lobby, or terminate the room.
+- Players can join from a code or link and can resume when a valid saved session exists.
 
-## 8. Server room subsystem
-
-The server is small, but the room feature is the core of the multiplayer backend.
+### Server room subsystem
 
 ```mermaid
 graph TD
@@ -361,125 +340,116 @@ graph TD
     Index --> Publisher["createRoomPublisher()"]
     Index --> Handlers["registerRoomHandlers()"]
 
+    Realtime --> Namespace["Socket.IO namespace /game"]
     Handlers --> Service
     Service --> Repo
-    Service --> Domain["game-domain/multiplayer"]
+    Service --> Domain["game-domain/multiplayer-next"]
     Service --> Publisher
-    Publisher --> Namespace["Socket.IO namespace /game"]
+    Publisher --> Namespace
 ```
 
-### Room handler responsibilities
+Server responsibilities:
 
-- `socket.ts`
-  - validates request payloads with zod
-  - checks auth/session presence for protected events
-  - delegates business logic to `RoomsService`
-  - maps service results to ack responses
+- `socket.ts`: validates payloads with zod, checks socket authentication, delegates to `RoomsService`, and returns typed ack responses.
+- `service.ts`: creates, joins, resumes, starts games, submits answers, returns finished rooms to lobby, closes rooms, handles disconnects, and schedules timed transitions.
+- `repository.ts`: stores rooms by ID/code, member sessions by token, socket-session bindings, and scheduled transition handles.
+- `publisher.ts`: converts internal room state into host/player views and emits only the appropriate snapshot type.
+- `server.ts`: creates the Socket.IO `/game` namespace with typed event maps and connection state recovery.
 
-- `service.ts`
-  - creates/joins/resumes rooms
-  - starts games and accepts answers
-  - resolves `playerSessionToken` to actual session/room context
-  - schedules reveal and leaderboard transitions with `setTimeout`
-  - emits hooks when room state changes
+## 9. Room and game state model
 
-- `repository.ts`
-  - stores rooms by ID and code
-  - stores player sessions by token
-  - stores socket-to-session mapping
-  - keeps scheduled transition handles
+`multiplayer-next` separates room state from active game state.
 
-- `publisher.ts`
-  - builds role-specific snapshots
-  - emits host snapshots to hosts only
-  - emits player snapshots to players only
-  - emits room-closed events
-
-## 9. Multiplayer room lifecycle
-
-The authoritative room state machine lives in `packages/game-domain/src/multiplayer`.
+Room phases:
 
 ```mermaid
 stateDiagram-v2
     [*] --> lobby
-    lobby --> question_open: START_GAME
-    lobby --> finished: TERMINATE_GAME
-
-    question_open --> question_revealed: REVEAL_QUESTION
-    question_open --> question_revealed: all connected players submitted
-    question_open --> finished: TERMINATE_GAME
-
-    question_revealed --> leaderboard: SHOW_LEADERBOARD
-    question_revealed --> finished: ADVANCE_TO_NEXT_QUESTION on final question
-
-    leaderboard --> question_open: ADVANCE_TO_NEXT_QUESTION
-    leaderboard --> finished: ADVANCE_TO_NEXT_QUESTION on final question
+    lobby --> active: START_GAME
+    active --> finished: FINISH_ACTIVE_GAME
+    finished --> lobby: RETURN_TO_LOBBY
 ```
 
-### Domain layers inside multiplayer
+Game phases inside an active room:
 
-- `session.ts`: picks eligible countries and random question IDs.
-- `factory.ts`: creates the initial lobby state.
-- `commands.ts`: join, reconnect, disconnect, start game, submit answer, terminate.
-- `transitions.ts`: reveal question, show leaderboard, advance question.
-- `round.ts`: creates and archives round state.
-- `visibility.ts`: converts internal `RoomState` into `RoomHostView` or `RoomPlayerView`.
-- `selectors.ts`: shared read-only helpers such as leaderboard/current question counts.
+```mermaid
+stateDiagram-v2
+    [*] --> open
+    open --> revealed: timer expires
+    open --> revealed: all connected participants answer
+    revealed --> leaderboard: more questions remain
+    revealed --> completed: final question
+    leaderboard --> open: advance to next question
+    leaderboard --> completed: final question
+```
+
+The room stores membership, host identity, connection state, and game history. The active game stores the chosen game kind, generated questions, participant scores, round deadlines, submissions, reveal state, and final leaderboard.
+
+The active game supports two question kinds:
+
+- `map_pick_country`: player answers with a country ID chosen from the interactive map.
+- `quiz_choice`: player answers with a choice ID from a multiple-choice quiz pack.
+
+Quiz packs currently include:
+
+- `uzbekistan-geography`
+- `tashkent-city`
 
 ## 10. Protocol boundary
 
-`@maptap/game-protocol` is the typed contract between browser and server.
+`@maptap/game-protocol` is the typed contract between browser and server. Runtime payload validation is done with zod request schemas in `requests.ts`, while event names and typed callbacks live in `events.ts`.
 
-### Client -> server events
+Client to server events:
 
 - `room:create`
 - `room:lookup`
 - `room:join`
 - `room:host-resume`
 - `room:player-resume`
+- `room:return-to-lobby`
+- `room:terminate`
 - `game:start`
 - `game:submit-answer`
 
-### Server -> client push events
+Server to client push events:
 
 - `room:host-snapshot`
 - `room:player-snapshot`
 - `room:closed`
 
-### Ack shape
-
-Every request-response socket event uses:
+Every request-response socket event uses this ack shape:
 
 ```ts
 type Ack<T> =
-  | { ok: true; data: T }
-  | { ok: false; error: GameProtocolError }
+	| { ok: true; data: T }
+	| { ok: false; error: GameProtocolError }
 ```
 
-That means the transport contract is:
+The transport contract is:
 
-- payload schema validation at the edge
-- typed success payloads
-- typed protocol/domain errors instead of exceptions crossing the wire
+- validate request payloads at the server edge
+- return typed success payloads
+- return typed protocol/domain errors instead of throwing exceptions across the wire
+- push room updates as role-specific snapshots rather than raw internal state
 
 ## 11. View projection model
 
-One internal room state becomes different outward views depending on the recipient.
+The server never sends raw `RoomState` to browsers. It projects one internal room into a view for a specific member.
 
 ```mermaid
 graph LR
     State["RoomState"] --> HostView["toHostRoomView()"]
     State --> PlayerView["toPlayerRoomView()"]
 
-    HostView --> HostClient["host sees scores + per-player submissions after reveal"]
-    PlayerView --> PlayerClient["player sees own submission and hidden competitive stats until leaderboard"]
+    HostView --> HostClient["host snapshot"]
+    PlayerView --> PlayerClient["player snapshot"]
 ```
 
-This separation is important: the server does not send raw internal room state to browsers.
+Host views can include all evaluated submissions after reveal or leaderboard. Player views focus on the viewer's own submission and only show leaderboard data once the game phase allows it.
 
 ## 12. Data and asset pipeline
 
-`@maptap/country-build` is an offline preparation step. It is not part of normal web/server runtime, but it explains where the local country catalog and map tiles come from.
+`@maptap/country-build` is an offline preparation package. It is not part of normal web/server runtime, but it explains where the local country catalog and map files come from.
 
 ```mermaid
 graph TD
@@ -489,72 +459,89 @@ graph TD
     TileJson["05_make_tilesjson.mjs"]
     BuildRegistry["06_build_registry.mjs"]
     CatalogJson["packages/country-catalog/generated/*.json"]
-    WebMap["apps/web/public/map/tiles + tiles.json"]
+    WebMap["apps/web/public/map/style.json + tiles + glyphs"]
 
     Upstream --> BuildData
     BuildData --> BuildTiles
     BuildData --> BuildRegistry
     BuildTiles --> TileJson
     BuildTiles --> WebMap
+    TileJson --> WebMap
     BuildRegistry --> CatalogJson
 ```
 
-### Build outputs
+Runtime build outputs:
 
-- `countries.registry.json`: full generated registry
-- `countries.playable.json`: filtered playable subset used at runtime
-- `apps/web/public/map/tiles/**`: static vector tile export for the web map
-- `apps/web/public/map/tiles/tiles.json`: TileJSON metadata
+- `countries.registry.json`: full generated country registry.
+- `countries.playable.json`: filtered playable subset used by the app.
+- `apps/web/public/map/style.json`: MapLibre style for the bundled map.
+- `apps/web/public/map/tiles/**`: static vector tile export.
+- `apps/web/public/map/tiles/tiles.json`: TileJSON metadata.
+- `apps/web/public/map/fonts/**`: glyph PBFs used by MapLibre labels.
 
 ## 13. Persistence model
 
-There are only two persistence layers in the active application:
+MapTap currently has no database.
 
-- browser `localStorage`
-  - stores `playerSessionToken` per room code and role
-  - enables room resume and reconnect UX
+Browser persistence:
 
-- server memory
-  - rooms, players, sessions, socket associations, and scheduled timers all live in `RoomsRepository`
-  - there is no database, queue, cache server, or durable event log
+- `session/sessionStorage.ts` saves host/player room sessions in `localStorage`.
+- `model/gameConfig.ts` saves the host's last multiplayer game config by room code.
+- Singleplayer config is represented in the `/singleplayer/play` URL query string.
 
-Implications:
+Server persistence:
 
-- server restarts clear all active rooms
-- reconnect works only while the in-memory room/session still exists
-- horizontal scaling would require a shared backing store and cross-instance event strategy
+- `RoomsRepository` stores rooms, member sessions, socket bindings, and scheduled timers in memory.
+- A server restart invalidates live rooms and member sessions.
+- On shutdown, the service emits `room:closed` with `server_shutdown` before closing Socket.IO.
 
-## 14. Suggested reading order for a new contributor
+## 14. Environment and local commands
 
-If you want the fastest path to understanding, read files in this order:
+Root scripts:
 
-1. `package.json`
-2. `apps/web/src/app/App.tsx`
-3. `apps/server/src/index.ts`
-4. `packages/game-domain/src/multiplayer/index.ts`
-5. `packages/game-domain/src/multiplayer/types.ts`
-6. `packages/game-domain/src/multiplayer/commands.ts`
-7. `packages/game-domain/src/multiplayer/transitions.ts`
-8. `packages/game-domain/src/multiplayer/visibility.ts`
-9. `packages/game-protocol/src/events.ts`
-10. `packages/game-protocol/src/requests.ts`
-11. `packages/game-protocol/src/responses.ts`
-12. `apps/server/src/features/rooms/socket.ts`
-13. `apps/server/src/features/rooms/service.ts`
-14. `apps/server/src/features/rooms/repository.ts`
-15. `apps/web/src/multiplayer-game/core/socketGateway.ts`
-16. `apps/web/src/multiplayer-game/core/useHostSession.ts`
-17. `apps/web/src/multiplayer-game/core/usePlayerSession.ts`
-18. `apps/web/src/singleplayer-game/core/useGameSession.ts`
-19. `packages/country-catalog/src/index.ts`
-20. `packages/country-build/scripts/03_build_data.mjs`
+```bash
+npm run dev:web
+npm run dev:server
+npm run build:web
+npm run build:server
+npm run build:data
+npm run build:country-registry
+npm run build:map-assets
+npm run lint
+```
 
-## 15. Quick mental model
+Server environment variables:
 
-If you only remember five things about this repo, remember these:
+- `PORT`, default `3001`
+- `HOST`, default `0.0.0.0`
+- `CORS_ORIGIN`, default `http://localhost:5173`, comma-separated
+- `REVEAL_DURATION_MS`, default `3000`
+- `LEADERBOARD_DURATION_MS`, default `3000`
 
-1. `game-domain` is the truth for game rules.
-2. `game-protocol` is the truth for browser/server communication.
-3. `country-catalog` is the truth for local country metadata used at runtime.
-4. singleplayer is local-only; multiplayer adds the server room subsystem.
-5. multiplayer persistence is in memory on the server and in `localStorage` on the client.
+Web environment:
+
+- `VITE_GAME_SERVER_ORIGIN` optionally points the client to a separate game server origin. If omitted, the Socket.IO client connects to the same origin at `/game`.
+
+## 15. Suggested reading order
+
+For a new contributor:
+
+1. `apps/web/src/app/App.tsx` for the route shape.
+2. `apps/web/src/app/HomePage.tsx` for the mode entry point.
+3. `apps/web/src/singleplayer-game/core/useGameSession.ts` and `packages/game-domain/src/singleplayer/engine.ts` for the local game loop.
+4. `apps/web/src/multiplayer-game/pages/RoomHostPage.tsx` and `apps/web/src/multiplayer-game/pages/RoomPlayerPage.tsx` for room screen orchestration.
+5. `apps/web/src/multiplayer-game/session/useRoomRuntime.ts` for reconnect/resume behavior.
+6. `apps/web/src/multiplayer-game/api/socketGateway.ts` plus `packages/game-protocol/src/events.ts` for the client/server boundary.
+7. `apps/server/src/features/rooms/service.ts` for backend room behavior.
+8. `packages/game-domain/src/multiplayer-next/orchestration.ts`, `room/*`, and `game/*` for the active multiplayer rules.
+9. `packages/country-catalog/src/index.ts` and `packages/country-build/scripts/*` when working on country data or map assets.
+
+## 16. Architectural constraints to keep in mind
+
+- Keep game rules in `packages/game-domain`, not React components or Socket.IO handlers.
+- Keep network payload shape in `packages/game-protocol`, not duplicated by hand in client/server files.
+- Send projected room/game views to clients; do not expose raw room state.
+- Treat `memberSessionToken` as the reconnect identity for multiplayer sessions.
+- Keep the server repository in-memory unless a deliberate persistence layer is added.
+- Keep the country catalog generated and deterministic; manual fixes belong in the build data/overrides path.
+- Prefer reusing `shared/map`, `shared/ui`, and `shared/widgets` before adding new UI primitives.
