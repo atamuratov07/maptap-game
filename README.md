@@ -23,6 +23,24 @@ For a current repo-wide architecture map, see [docs/project-architecture.md](doc
   - Pinned country info card (flag, name, capital, currency)
   - Next Question button after reveal
 - End modal with total score, correct count, Try again, and Home actions
+- Multiplayer quiz mode with:
+  - Multiple-choice packs for Uzbekistan geography and Tashkent city
+  - Russian, English, and Uzbek Latin question/answer text
+  - Officially validated facts for cities, regions, landmarks, rivers,
+    transport, institutions, and venues
+
+  Quiz mode sources:
+  - Uzbekistan territory, borders, and geography: [gov.uz](https://gov.uz/en/pages/territory)
+  - Capital and administrative information: [my.gov.uz](https://my.gov.uz/uz/for-foreigners)
+  - Uzbekistan landmarks and tourism facts: [uzbekistan.travel](https://uzbekistan.travel/)
+  - Tashkent landmarks: [visit.tashkent.uz](https://visit.tashkent.uz/)
+  - Tashkent official place-name catalogue:
+    [api.tashkent.uz PDF](https://api.tashkent.uz/upload/storage/2026/01/%D0%96%D0%BE%D0%B9_%D0%BD%D0%BE%D0%BC%D0%BB%D0%B0%D1%80%D0%B8_%D0%9B%D0%BE%D1%82%D0%B8%D0%BD.pdf)
+  - Administrative and institutional confirmations:
+    [president.uz](https://president.uz/), [gov.uz regional pages](https://gov.uz/),
+    and official operator/institution sites for WIUT, UWED, NUU, TUIT,
+    Tashkent International Airport, Humo Arena, Magic City, Uzbekistan Railways,
+    and NMMC
 
 ## Architecture
 

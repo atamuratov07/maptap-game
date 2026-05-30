@@ -278,7 +278,7 @@ const EN_QUIZ_TRANSLATIONS = {
 		'Afrosiyob high-speed train',
 	),
 	'uz-geo-032': q(
-		'Which city is often called an open-air museum because of its historic center?',
+		'The historic center of which city is a UNESCO World Heritage site?',
 		{
 			bukhara: 'Bukhara',
 			angren: 'Angren',
@@ -639,7 +639,7 @@ const EN_QUIZ_TRANSLATIONS = {
 		},
 	),
 	'tashkent-029': q(
-		'Which district is in the northeast of the city and gave its name to a large residential area?',
+		'Which district is in the north of the city and gave its name to a large residential area?',
 		{
 			yunusabad: 'Yunusabad',
 			chilanzar: 'Chilanzar',
@@ -691,7 +691,7 @@ const UZ_LATN_QUIZ_TRANSLATIONS = {
 		india: 'Hindiston',
 		china: 'Xitoy',
 	}),
-	'uz-geo-005': q('Ichan qal’a qal’asi bilan qaysi shahar mashhur?', {
+	'uz-geo-005': q('Ichan Qal’a qaysi shaharda joylashgan?', {
 		khiva: 'Xiva',
 		termez: 'Termiz',
 		karshi: 'Qarshi',
@@ -890,7 +890,7 @@ const UZ_LATN_QUIZ_TRANSLATIONS = {
 		'Afrosiyob tezyurar poyezdi',
 	),
 	'uz-geo-032': q(
-		"Tarixiy markazi sabab qaysi shahar ko'pincha ochiq osmon ostidagi muzey deb ataladi?",
+		'Qaysi shaharning tarixiy markazi YUNESKOning Jahon merosi ro‘yxatiga kiritilgan?',
 		{
 			bukhara: 'Buxoro',
 			angren: 'Angren',
@@ -955,11 +955,11 @@ const UZ_LATN_QUIZ_TRANSLATIONS = {
 		andijan: 'Andijon',
 	}, 'Buxorodagi Labi Hovuz ansambli'),
 	'uz-geo-040': q('Qaysi milliy bog‘ Jizzax viloyatida joylashgan?', {
-		zaamin: 'Zomin milliy bog‘i',
+		zaamin: 'Zomin milliy tabiat parki',
 		'ugam-chatkal': 'Ugom-Chotqol bog‘i',
 		'baday-tugay': "Baday-To'qay",
 		hissar: "Hisor qo'riqxonasi",
-	}, 'Zomin milliy bog‘i'),
+	}, 'Zomin milliy tabiat parki'),
 	'uz-geo-041': q(
 		"Toshkentdagi qaysi transport Markaziy Osiyodagi birinchi metropoliten bo'lgan?",
 		{
@@ -1007,12 +1007,15 @@ const UZ_LATN_QUIZ_TRANSLATIONS = {
 		'chorsu-square': 'Chorsu maydoni',
 		'friendship-square': "Xalqlar do'stligi maydoni",
 	}, 'Toshkentdagi Amir Temur maydoni'),
-	'tashkent-005': q("Mustaqillik maydoni odatda o'zbekcha qanday ataladi?", {
-		mustaqillik: 'Mustaqillik maydoni',
-		registan: 'Registon',
-		shahriston: 'Shahriston',
-		navruz: "Navro'z maydoni",
-	}),
+	'tashkent-005': q(
+		'Ruscha “Площадь Независимости” deb ataladigan maydonning rasmiy o‘zbekcha nomi qaysi?',
+		{
+			mustaqillik: 'Mustaqillik maydoni',
+			registan: 'Registon',
+			shahriston: 'Shahriston',
+			navruz: "Navro'z maydoni",
+		},
+	),
 	'tashkent-006': q(
 		"Eski shahardagi qaysi majmua xalifa Usmon Qur'oni bilan bog'liq?",
 		{
@@ -1053,7 +1056,7 @@ const UZ_LATN_QUIZ_TRANSLATIONS = {
 		'uzbekistan-line': "O'zbekiston yo'nalishi",
 		'chilanzar-line': "Chilonzor yo'nalishi",
 		'yunusabad-line': "Yunusobod yo'nalishi",
-		'circle-line': 'Halqa yo‘li',
+		'circle-line': 'Halqa yo‘nalishi',
 	}),
 	'tashkent-011': q('Variantlardan qaysi biri Toshkent shahri tumani?', {
 		yunusabad: 'Yunusobod',
@@ -1062,7 +1065,7 @@ const UZ_LATN_QUIZ_TRANSLATIONS = {
 		parkent: 'Parkent',
 	}),
 	'tashkent-012': q('Quyidagilardan qaysi Toshkent tumani eng yangi tashkil etilgan?', {
-		yangihayot: 'Yangi hayot',
+		yangihayot: 'Yangihayot',
 		chilanzar: 'Chilonzor',
 		mirobod: 'Mirobod',
 		uchtepa: 'Uchtepa',
@@ -1076,7 +1079,7 @@ const UZ_LATN_QUIZ_TRANSLATIONS = {
 	'tashkent-014': q(
 		"Qaysi tuman buyuk astronom va hukmdor nomi bilan atalgan?",
 		{
-			'mirzo-ulugbek': "Mirzo Ulug'bek tumani",
+			'mirzo-ulugbek': 'Mirzo Ulug‘bek tumani',
 			shaykhantahur: 'Shayxontohur tumani',
 			yakkasaray: 'Yakkasaroy tumani',
 			yashnobod: 'Yashnobod tumani',
@@ -1131,11 +1134,11 @@ const UZ_LATN_QUIZ_TRANSLATIONS = {
 	'tashkent-021': q('Toshkentdagi qaysi universitet WIUT inglizcha nomi bilan mashhur?', {
 		wiut: 'Vestminster xalqaro universiteti',
 		tsue: 'Toshkent davlat iqtisodiyot universiteti',
-		nuwu: "O'zbekiston Milliy universiteti",
+		nuwu: 'O‘zbekiston Milliy universiteti',
 		inha: 'Toshkentdagi Inha universiteti',
 	}),
-	'tashkent-022': q("Qaysi universitet Mirzo Ulug'bek nomi bilan atalgan?", {
-		'national-university': "O'zbekiston Milliy universiteti",
+	'tashkent-022': q('Qaysi universitet Mirzo Ulug‘bek nomi bilan atalgan?', {
+		'national-university': 'O‘zbekiston Milliy universiteti',
 		'world-economy': 'Jahon iqtisodiyoti va diplomatiya universiteti',
 		'medical-academy': 'Toshkent tibbiyot akademiyasi',
 		'architecture-university': 'Toshkent arxitektura-qurilish universiteti',
@@ -1187,7 +1190,7 @@ const UZ_LATN_QUIZ_TRANSLATIONS = {
 		'botanical-garden': 'Botanika bog‘i',
 	}),
 	'tashkent-029': q(
-		"Qaysi tuman shaharning shimoli-sharqida joylashgan va yirik turar-joy massiviga nom bergan?",
+		'Qaysi tuman shaharning shimoliy qismida joylashgan va yirik turar-joy massiviga nom bergan?',
 		{
 			yunusabad: 'Yunusobod',
 			chilanzar: 'Chilonzor',

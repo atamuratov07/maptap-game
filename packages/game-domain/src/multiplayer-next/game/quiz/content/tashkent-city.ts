@@ -422,7 +422,7 @@ export const TASHKENT_CITY_QUESTIONS: readonly QuizChoiceQuestion[] = [
 	{
 		kind: 'quiz_choice',
 		id: 'tashkent-029',
-		prompt: 'Какой район находится на северо-востоке города и дал название крупному жилому массиву?',
+		prompt: 'Какой район находится на севере города и дал название крупному жилому массиву?',
 		choices: [
 			{ id: 'yunusabad', label: 'Юнусабад' },
 			{ id: 'chilanzar', label: 'Чиланзар' },

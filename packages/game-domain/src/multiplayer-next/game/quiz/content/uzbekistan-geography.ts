@@ -461,7 +461,7 @@ export const UZBEKISTAN_GEOGRAPHY_QUESTIONS: readonly QuizChoiceQuestion[] = [
 	{
 		kind: 'quiz_choice',
 		id: 'uz-geo-032',
-		prompt: 'Какой город часто называют «музеем под открытым небом» из-за исторического центра?',
+		prompt: 'Исторический центр какого города входит в список Всемирного наследия ЮНЕСКО?',
 		choices: [
 			{ id: 'bukhara', label: 'Бухара' },
 			{ id: 'angren', label: 'Ангрен' },
