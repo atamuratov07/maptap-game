@@ -23,6 +23,8 @@ export {
 	roomCodeSchema,
 	scopeSchema,
 	startGameRequestSchema,
+	advanceRoundRequestSchema,
+	revealRoundRequestSchema,
 	submitAnswerRequestSchema,
 	terminateRoomRequestSchema,
 	type CreateRoomRequest,

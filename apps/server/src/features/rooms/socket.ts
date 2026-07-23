@@ -1,11 +1,13 @@
 import type { AckCallback, GameProtocolError } from '@maptap/game-protocol'
 import {
+	advanceRoundRequestSchema,
 	createRoomRequestSchema,
 	joinRoomRequestSchema,
 	lookupRoomRequestSchema,
 	resumeHostRoomRequestSchema,
 	resumePlayerRoomRequestSchema,
 	returnToLobbyRequestSchema,
+	revealRoundRequestSchema,
 	startGameRequestSchema,
 	submitAnswerRequestSchema,
 	terminateRoomRequestSchema,
@@ -329,7 +331,7 @@ export function registerRoomHandlers({
 				})
 			}
 
-			const parsed = parsePayload(createRoomRequestSchema, payload)
+			const parsed = parsePayload(revealRoundRequestSchema, payload)
 			if (!parsed.ok) {
 				return respondWithError(ack, {
 					code: 'invalid_payload',
@@ -355,7 +357,7 @@ export function registerRoomHandlers({
 				})
 			}
 
-			const parsed = parsePayload(createRoomRequestSchema, payload)
+			const parsed = parsePayload(advanceRoundRequestSchema, payload)
 			if (!parsed.ok) {
 				return respondWithError(ack, {
 					code: 'invalid_payload',
