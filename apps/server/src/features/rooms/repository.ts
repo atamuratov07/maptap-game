@@ -20,10 +20,16 @@ export interface ScheduledRoomAdvance {
 	handle: NodeJS.Timeout
 }
 
+export interface ScheduledRoomExpire {
+	dueAt: number
+	handle: NodeJS.Timeout
+}
+
 export interface RoomContext {
 	state: RoomState
 	memberSessionTokensByMemberId: Map<MemberId, MemberSessionToken>
 	scheduledAdvance: ScheduledRoomAdvance | null
+	scheduledExpire: ScheduledRoomExpire | null
 }
 
 export class RoomsRepository {
@@ -54,6 +60,7 @@ export class RoomsRepository {
 			state,
 			memberSessionTokensByMemberId: new Map(),
 			scheduledAdvance: null,
+			scheduledExpire: null,
 		}
 
 		this.roomsById.set(state.roomId, context)
@@ -110,6 +117,22 @@ export class RoomsRepository {
 		context.scheduledAdvance = scheduledRoomAdvance
 	}
 
+	setScheduledRoomExpire(
+		roomId: RoomId,
+		scheduledRoomExpire: ScheduledRoomExpire | null,
+	) {
+		const context = this.roomsById.get(roomId)
+		if (!context) {
+			return
+		}
+
+		if (context.scheduledExpire) {
+			clearTimeout(context.scheduledExpire.handle)
+		}
+
+		context.scheduledExpire = scheduledRoomExpire
+	}
+
 	deleteRoom(roomId: RoomId): RoomContext | undefined {
 		const context = this.roomsById.get(roomId)
 		if (!context) {
@@ -118,6 +141,9 @@ export class RoomsRepository {
 
 		if (context.scheduledAdvance) {
 			clearTimeout(context.scheduledAdvance.handle)
+		}
+		if (context.scheduledExpire) {
+			clearTimeout(context.scheduledExpire.handle)
 		}
 
 		for (const token of context.memberSessionTokensByMemberId.values()) {
@@ -155,9 +181,9 @@ export class RoomsRepository {
 	}
 
 	getMemberSession(
-		MemberSessionToken: MemberSessionToken,
+		memberSessionToken: MemberSessionToken,
 	): MemberSessionRecord | undefined {
-		return this.sessionsByToken.get(MemberSessionToken)
+		return this.sessionsByToken.get(memberSessionToken)
 	}
 
 	getMemberSessionBySocketId(

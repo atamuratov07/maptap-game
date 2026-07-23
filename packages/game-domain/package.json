@@ -9,7 +9,6 @@
 		".": "./src/index.ts",
 		"./singleplayer": "./src/singleplayer/index.ts",
 		"./multiplayer": "./src/multiplayer/index.ts",
-		"./multiplayer": "./src/multiplayer/index.ts",
 		"./multiplayer/game": "./src/multiplayer/game/index.ts",
 		"./multiplayer/room": "./src/multiplayer/room/index.ts"
 	},

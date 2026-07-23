@@ -32,6 +32,8 @@ import {
 	type RoomId,
 	type RoomPlayerView,
 	type RoomState,
+	getRoomExpireDueAt,
+	type RoomExpireTTLConfig,
 } from '@maptap/game-domain/multiplayer/room'
 import {
 	createGameId,
@@ -49,7 +51,7 @@ interface RoomUpdateOptions {
 	excludeMemberId?: MemberId
 }
 
-interface GameRoomServiceHooks {
+interface RoomsServiceHooks {
 	onRoomUpdated: (roomId: RoomId, options?: RoomUpdateOptions) => void
 	onRoomClosed: (roomId: RoomId, reason: RoomClosedEvent['reason']) => void
 }
@@ -59,7 +61,9 @@ export interface RoomsServiceOptions {
 	repository: RoomsRepository
 	revealDurationMs: number
 	leaderboardDurationMs: number
-	hooks: GameRoomServiceHooks
+	hooks: RoomsServiceHooks
+	roomCapacityLimit: number
+	roomExpireTTL: RoomExpireTTLConfig
 	now?: () => number
 }
 
@@ -106,8 +110,10 @@ export class RoomsService {
 	private readonly repository: RoomsRepository
 	private readonly revealDurationMs: number
 	private readonly leaderboardDurationMs: number
-	private readonly hooks: GameRoomServiceHooks
+	private readonly hooks: RoomsServiceHooks
+	private readonly roomCapacityLimit: number
 	private readonly now: () => number
+	private readonly roomExpireTTL: RoomExpireTTLConfig
 
 	constructor(options: RoomsServiceOptions) {
 		this.countryPool = options.countryPool
@@ -115,6 +121,8 @@ export class RoomsService {
 		this.revealDurationMs = options.revealDurationMs
 		this.leaderboardDurationMs = options.leaderboardDurationMs
 		this.hooks = options.hooks
+		this.roomCapacityLimit = options.roomCapacityLimit
+		this.roomExpireTTL = options.roomExpireTTL
 		this.now = options.now ?? Date.now
 	}
 
@@ -201,6 +209,12 @@ export class RoomsService {
 		if (!context) {
 			return err({
 				code: 'room_not_found',
+			})
+		}
+
+		if (context.state.memberOrder.length >= this.roomCapacityLimit) {
+			return err({
+				code: 'room_participant_capacity_limit_exceeded',
 			})
 		}
 
@@ -418,7 +432,7 @@ export class RoomsService {
 			memberSession.role !== 'host' ||
 			memberSession.memberId !== state.hostId
 		) {
-			return err({ code: 'unauthorized' })
+			return err({ code: 'only_host_can_manage_room' })
 		}
 
 		this.closeRoom(state.roomId, 'host_terminated')
@@ -597,6 +611,7 @@ export class RoomsService {
 	): void {
 		this.repository.setRoomState(roomId, nextState)
 		this.rescheduleRoomAdvance(roomId)
+		this.rescheduleRoomExpire(roomId)
 		this.hooks.onRoomUpdated(roomId, options)
 	}
 
@@ -618,7 +633,11 @@ export class RoomsService {
 
 		const delayMs = Math.max(0, dueAt - this.now())
 		const handle = setTimeout(() => {
-			this.executeScheduledRoomAdvance(roomId, dueAt)
+			try {
+				this.executeScheduledRoomAdvance(roomId, dueAt)
+			} catch (error) {
+				console.error(`Failed to advance room ${roomId}`, error)
+			}
 		}, delayMs)
 
 		this.repository.setScheduledRoomAdvance(roomId, {
@@ -641,6 +660,43 @@ export class RoomsService {
 		}
 
 		this.commitRoomState(roomId, transitionedState.value)
+	}
+
+	private rescheduleRoomExpire(roomId: RoomId): void {
+		const context = this.repository.getRoomById(roomId)
+		if (!context) {
+			return
+		}
+
+		const dueAt = getRoomExpireDueAt(context.state, this.roomExpireTTL)
+
+		if (dueAt === null) {
+			this.repository.setScheduledRoomExpire(roomId, null)
+			return
+		}
+
+		const ttlMs = Math.max(0, dueAt - this.now())
+		const handle = setTimeout(() => {
+			try {
+				this.executeScheduledRoomExpire(roomId, dueAt)
+			} catch (error) {
+				console.error(`Failed to expire room ${roomId}`, error)
+			}
+		}, ttlMs)
+
+		this.repository.setScheduledRoomExpire(roomId, {
+			dueAt,
+			handle,
+		})
+	}
+
+	private executeScheduledRoomExpire(roomId: RoomId, dueAt: number): void {
+		const context = this.repository.getRoomById(roomId)
+		if (!context || context.scheduledExpire?.dueAt !== dueAt) {
+			return
+		}
+
+		this.closeRoom(roomId, 'expired')
 	}
 
 	private shouldRevealImmediately(state: RoomState): boolean {

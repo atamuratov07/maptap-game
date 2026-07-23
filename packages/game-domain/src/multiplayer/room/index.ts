@@ -17,6 +17,7 @@ export {
 	isRoomJoinable,
 } from './selectors'
 export { applyRoomTransition, type RoomTransition } from './transitions'
+export { getRoomExpireDueAt, type RoomExpireTTLConfig } from './expiry'
 export {
 	ROOM_PHASES,
 	getRoomStateBase,

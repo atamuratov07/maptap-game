@@ -48,6 +48,8 @@ export function formatGatewayErrorMessage(error: unknown): string {
 			return 'Сервер вернул внутреннюю ошибку.'
 		case 'room_not_joinable':
 			return 'К этой комнате сейчас нельзя присоединиться.'
+		case 'room_participant_capacity_limit_exceeded':
+			return 'Превышен лимит участников комнаты'
 		case 'only_host_can_manage_room':
 			return 'Это действие доступно только хосту.'
 		case 'room_not_in_lobby':

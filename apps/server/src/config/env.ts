@@ -6,6 +6,22 @@ const envSchema = z.object({
 	CORS_ORIGIN: z.string().default('http://localhost:5173'),
 	REVEAL_DURATION_MS: z.coerce.number().int().min(1_000).default(3_000),
 	LEADERBOARD_DURATION_MS: z.coerce.number().int().min(1_000).default(3_000),
+	ROOM_CAPACITY_LIMIT: z.coerce.number().int().min(40).default(40),
+	ROOM_NO_CONNECTED_MEMBERS_TTL: z.coerce
+		.number()
+		.int()
+		.min(1_000 * 60 * 5)
+		.default(1_000 * 60 * 10),
+	ROOM_HOST_DISCONNECTED_TTL: z.coerce
+		.number()
+		.int()
+		.min(1_000 * 60 * 3)
+		.default(1_000 * 60 * 5),
+	ROOM_FINISHED_TTL: z.coerce
+		.number()
+		.int()
+		.min(1_000 * 60 * 10)
+		.default(1_000 * 60 * 15),
 })
 
 export interface AppEnv {
@@ -14,6 +30,10 @@ export interface AppEnv {
 	corsOrigins: string[]
 	revealDurationMs: number
 	leaderboardDurationMs: number
+	roomCapacityLimit: number
+	roomNoConnectedMembersTTL: number
+	roomHostDisconnectedTTL: number
+	roomFinishedTTL: number
 }
 
 function parseCorsOrigins(value: string): string[] {
@@ -32,5 +52,9 @@ export function parseEnv(input: NodeJS.ProcessEnv): AppEnv {
 		corsOrigins: parseCorsOrigins(env.CORS_ORIGIN),
 		revealDurationMs: env.REVEAL_DURATION_MS,
 		leaderboardDurationMs: env.LEADERBOARD_DURATION_MS,
+		roomCapacityLimit: env.ROOM_CAPACITY_LIMIT,
+		roomNoConnectedMembersTTL: env.ROOM_NO_CONNECTED_MEMBERS_TTL,
+		roomHostDisconnectedTTL: env.ROOM_HOST_DISCONNECTED_TTL,
+		roomFinishedTTL: env.ROOM_FINISHED_TTL,
 	}
 }

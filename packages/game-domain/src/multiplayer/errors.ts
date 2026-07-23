@@ -19,6 +19,9 @@ export type CommandError =
 			code: 'room_not_joinable'
 	  }
 	| {
+			code: 'room_participant_capacity_limit_exceeded'
+	  }
+	| {
 			code: 'room_not_active'
 	  }
 	| {

@@ -30,6 +30,12 @@ const roomsService = new RoomsService({
 	repository,
 	revealDurationMs: env.revealDurationMs,
 	leaderboardDurationMs: env.leaderboardDurationMs,
+	roomCapacityLimit: env.roomCapacityLimit,
+	roomExpireTTL: {
+		noConnectedMembersMs: env.roomNoConnectedMembersTTL,
+		hostDisconnectedMs: env.roomHostDisconnectedTTL,
+		finishedMs: env.roomFinishedTTL,
+	},
 	hooks: {
 		onRoomUpdated: (roomId, options) => {
 			publisher.publishRoomSnapshots(roomId, options)
@@ -39,6 +45,7 @@ const roomsService = new RoomsService({
 		},
 	},
 })
+
 getHealthSnapshot = () => roomsService.getHealthSnapshot()
 
 registerRoomHandlers({

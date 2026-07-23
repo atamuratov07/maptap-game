@@ -1,9 +1,5 @@
 import type { GameResult, GameState } from '../game/types'
-import type {
-	MemberId,
-	RoomMemberState,
-	RoomState,
-} from './types'
+import type { MemberId, RoomMemberState, RoomState } from './types'
 
 export function getMember(
 	state: RoomState,
@@ -19,9 +15,7 @@ export function getMembers(state: RoomState): RoomMemberState[] {
 	})
 }
 
-export function getHostMember(
-	state: RoomState,
-): RoomMemberState | undefined {
+export function getHostMember(state: RoomState): RoomMemberState | undefined {
 	return getMember(state, state.hostId)
 }
 
