@@ -6,7 +6,7 @@ const envSchema = z.object({
 	CORS_ORIGIN: z.string().default('http://localhost:5173'),
 	REVEAL_DURATION_MS: z.coerce.number().int().min(1_000).default(3_000),
 	LEADERBOARD_DURATION_MS: z.coerce.number().int().min(1_000).default(3_000),
-	ROOM_CAPACITY_LIMIT: z.coerce.number().int().min(40).default(40),
+	ROOM_CAPACITY_LIMIT: z.coerce.number().int().min(1).default(40),
 	ROOM_NO_CONNECTED_MEMBERS_TTL: z.coerce
 		.number()
 		.int()
