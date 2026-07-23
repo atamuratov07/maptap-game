@@ -1,68 +1,33 @@
-export { applyRoomCommand, type RoomCommand } from './commands'
 export {
-	createGameRoom,
-	normalizePlayerName,
-	type CreateRoomInput,
-} from './factory'
-export { calculateAnswerScore } from './score'
+	assertNever,
+	type CommandError,
+	type DomainError,
+	type SessionPreparationError,
+} from './errors'
 export {
-	getActiveRound,
-	getAnsweredPlayerCount,
-	getConnectedPlayerCount,
-	getCurrentQuestionId,
-	getCurrentQuestionIndex,
-	getCurrentQuestionNumber,
-	getLeaderboard,
-	getPlayer,
-	getPlayers,
-	getPlayerSubmission,
-	getQuestionCount,
-	hasPlayerSubmitted,
-} from './selectors'
-export { prepareGameSession } from './session'
-export { applyRoomTransition, type RoomTransition } from './transitions'
+	advanceActiveRoomGame,
+	getNextActiveRoomGameAdvanceAt,
+	startRoomGame,
+	submitRoomGameAnswer,
+	type StartRoomGameInput,
+} from './orchestration'
+
 export {
-	DEFAULT_GAME_CONFIG,
-	ROOM_PHASES,
-	type ActiveRoundGameState,
-	type CompletedGameRoundState,
-	type EvaluatedGameSubmission,
-	type GameConfig,
-	type GamePlayerState,
-	type GameSession,
-	type LeaderboardRoundGameState as LeaderboardGRoundGameState,
-	type LockedGameSubmission,
-	type OpenRoundGameState,
-	type PlayerId,
-	type PlayerRole,
-	type RevealedRoundGameState,
-	type RoomCode,
-	type RoomFinishedState,
-	type RoomId,
-	type RoomLeaderboardEntry,
-	type RoomLeaderboardState,
-	type RoomLobbyState,
-	type RoomPhase,
-	type RoomQuestionOpenState,
-	type RoomQuestionRevealedState,
-	type RoomState,
-} from './types'
-export {
+	createRoom,
 	toHostRoomView,
 	toPlayerRoomView,
-	type EvaluatedViewerSubmissionState,
-	type HostSubmissionView,
-	type LeaderboardRoundHostView,
-	type LeaderboardRoundPlayerView,
-	type OpenRoundHostView,
-	type OpenRoundPlayerView,
-	type RevealedRoundHostView,
-	type RevealedRoundPlayerView,
+	toRoomView,
+	type MemberId,
 	type RoomHostView,
 	type RoomPlayerView,
+	type RoomState,
 	type RoomView,
-	type RoundHostView,
-	type RoundPlayerView,
-	type ViewerSubmissionState,
-	type VisiblePlayerInfo,
-} from './visibility'
+} from './room/index'
+
+export {
+	DEFAULT_GAME_CONFIG,
+	prepareGameSession,
+	type GameCommand,
+	type GameConfig,
+	type GameSession,
+} from './game/index'

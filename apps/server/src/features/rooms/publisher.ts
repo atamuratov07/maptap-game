@@ -1,11 +1,11 @@
 import type { RoomClosedEvent } from '@maptap/game-protocol'
 
-import type { MemberId } from '@maptap/game-domain/multiplayer-next'
+import type { MemberId } from '@maptap/game-domain/multiplayer'
 import {
 	toHostRoomView,
 	toPlayerRoomView,
 	type RoomId,
-} from '@maptap/game-domain/multiplayer-next/room'
+} from '@maptap/game-domain/multiplayer/room'
 import type { RoomsRepository } from './repository.js'
 import type { GameNamespace } from './types.js'
 

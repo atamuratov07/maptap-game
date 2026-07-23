@@ -1,7 +1,7 @@
 import type {
 	CommandError,
 	SessionPreparationError,
-} from '@maptap/game-domain/multiplayer-next'
+} from '@maptap/game-domain/multiplayer'
 
 export type TransportError =
 	| { code: 'invalid_payload' }

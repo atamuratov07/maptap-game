@@ -1,5 +1,5 @@
-import type { GameView } from '@maptap/game-domain/multiplayer-next/game'
-import type { VisibleMemberInfo } from '@maptap/game-domain/multiplayer-next/room'
+import type { GameView } from '@maptap/game-domain/multiplayer/game'
+import type { VisibleMemberInfo } from '@maptap/game-domain/multiplayer/room'
 import { CountryMapGameScreen } from './country-map/CountryMapGameScreen'
 
 interface ActiveGameScreenProps {

@@ -1,4 +1,4 @@
-import type { GameView } from '@maptap/game-domain/multiplayer-next/game'
+import type { GameView } from '@maptap/game-domain/multiplayer/game'
 import { useCallback, useMemo } from 'react'
 import type { MapHighlight, MapRendererProps } from '../../../shared/map/types'
 import { CountryInfoCard } from '../../../shared/widgets/CountryInfoCard'

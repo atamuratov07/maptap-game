@@ -12,7 +12,7 @@ import {
 } from '@maptap/game-protocol'
 import type { ZodType } from 'zod'
 
-import type { RoomMemberRole } from '@maptap/game-domain/multiplayer-next/room'
+import type { RoomMemberRole } from '@maptap/game-domain/multiplayer/room'
 import type { RoomsService } from './service.js'
 import type { GameNamespace, GameSocket } from './types.js'
 

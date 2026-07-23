@@ -1,6 +1,6 @@
 # Multiplayer
 
-The active multiplayer implementation uses `packages/game-domain/src/multiplayer-next`. An older `packages/game-domain/src/multiplayer` tree still exists in the package, but the server only imports the `multiplayer-next` room/game model.
+The active multiplayer implementation uses `packages/game-domain/src/multiplayer`. An older `packages/game-domain/src/multiplayer` tree still exists in the package, but the server only imports the `multiplayer` room/game model.
 
 Multiplayer is split into four layers:
 
@@ -27,7 +27,7 @@ sequenceDiagram
     participant Socket as Socket.IO /game
     participant Handlers as socket.ts
     participant Service as RoomsService
-    participant Domain as multiplayer-next
+    participant Domain as multiplayer
     participant Repo as RoomsRepository
     participant Publisher as publisher.ts
 
@@ -94,7 +94,7 @@ graph TD
     Realtime --> Namespace["Socket.IO namespace /game"]
     Handlers --> Service
     Service --> Repo
-    Service --> Domain["game-domain/multiplayer-next"]
+    Service --> Domain["game-domain/multiplayer"]
     Service --> Publisher
     Publisher --> Namespace
 ```
@@ -109,7 +109,7 @@ graph TD
 
 ## Room and game state model
 
-`multiplayer-next` separates room state from active game state.
+`multiplayer` separates room state from active game state.
 
 **Room phases:**
 

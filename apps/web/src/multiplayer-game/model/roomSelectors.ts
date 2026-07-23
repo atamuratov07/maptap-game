@@ -2,7 +2,7 @@ import type { RoomClosedEvent } from '@maptap/game-protocol'
 import type {
 	RoomView,
 	VisibleMemberInfo,
-} from '@maptap/game-domain/multiplayer-next/room'
+} from '@maptap/game-domain/multiplayer/room'
 
 export function getViewerMember(room: RoomView): VisibleMemberInfo | null {
 	return (

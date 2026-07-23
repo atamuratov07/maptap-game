@@ -1,8 +1,8 @@
-import type { GameConfig } from '@maptap/game-domain/multiplayer-next'
+import type { GameConfig } from '@maptap/game-domain/multiplayer'
 import type {
 	RoomMemberRole,
 	VisibleMemberInfo,
-} from '@maptap/game-domain/multiplayer-next/room'
+} from '@maptap/game-domain/multiplayer/room'
 import { DoorClosed, Play, UserRound } from 'lucide-react'
 import { useMemo } from 'react'
 import { AlertMessage, Button, CopyButton } from '../../shared/ui'

@@ -2,7 +2,7 @@ import type {
 	MemberId,
 	RoomId,
 	RoomMemberRole,
-} from '@maptap/game-domain/multiplayer-next/room'
+} from '@maptap/game-domain/multiplayer/room'
 import type {
 	ClientToServerEvents,
 	InterServerEvents,

@@ -3,8 +3,8 @@ import type {
 	GameLeaderboardEntry,
 	GameResult,
 	GameView,
-} from '@maptap/game-domain/multiplayer-next/game'
-import type { VisibleMemberInfo } from '@maptap/game-domain/multiplayer-next/room'
+} from '@maptap/game-domain/multiplayer/game'
+import type { VisibleMemberInfo } from '@maptap/game-domain/multiplayer/room'
 import { getMemberName } from './roomSelectors'
 
 export interface CurrentRoundView {
@@ -25,7 +25,8 @@ export function getLeaderboardEntries(
 	limit?: number,
 ): NamedLeaderboardEntry[] {
 	const entries = game.leaderboard ?? []
-	const visibleEntries = limit === undefined ? entries : entries.slice(0, limit)
+	const visibleEntries =
+		limit === undefined ? entries : entries.slice(0, limit)
 
 	return visibleEntries.map(entry => ({
 		...entry,
@@ -58,9 +59,7 @@ export function getCountryInfo(
 }
 
 export function getPromptCountryInfo(game: GameView): CountryInfo | null {
-	return game.phase === 'open'
-		? getCountryInfo(game.questionCountryId)
-		: null
+	return game.phase === 'open' ? getCountryInfo(game.questionCountryId) : null
 }
 
 export function getCorrectCountryInfo(game: GameView): CountryInfo | null {

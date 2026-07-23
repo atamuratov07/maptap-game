@@ -1,4 +1,4 @@
-import type { GameConfig } from '@maptap/game-domain/multiplayer-next'
+import type { GameConfig } from '@maptap/game-domain/multiplayer'
 import { Gauge, Globe2, ListChecks, Timer } from 'lucide-react'
 import { useEffect, useState, type FormEvent } from 'react'
 import { SelectControl } from '../../shared/ui'
@@ -23,11 +23,7 @@ interface ConfigFieldProps {
 	children: JSX.Element
 }
 
-function ConfigField({
-	icon,
-	label,
-	children,
-}: ConfigFieldProps): JSX.Element {
+function ConfigField({ icon, label, children }: ConfigFieldProps): JSX.Element {
 	return (
 		<label className='group block rounded-2xl border border-slate-200 bg-white/88 p-4 shadow-[0_14px_34px_rgba(15,23,42,0.08)] transition hover:border-amber-300/80 hover:bg-white'>
 			<span className='mb-3 flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500'>
@@ -81,11 +77,7 @@ export function GameConfigPanel({
 			<div className='grid gap-3 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-4'>
 				<ConfigField
 					icon={
-						<ListChecks
-							aria-hidden='true'
-							size={17}
-							strokeWidth={2.4}
-						/>
+						<ListChecks aria-hidden='true' size={17} strokeWidth={2.4} />
 					}
 					label='Вопросы'
 				>
@@ -108,13 +100,7 @@ export function GameConfigPanel({
 				</ConfigField>
 
 				<ConfigField
-					icon={
-						<Timer
-							aria-hidden='true'
-							size={17}
-							strokeWidth={2.4}
-						/>
-					}
+					icon={<Timer aria-hidden='true' size={17} strokeWidth={2.4} />}
 					label='Таймер'
 				>
 					<SelectControl
@@ -136,13 +122,7 @@ export function GameConfigPanel({
 				</ConfigField>
 
 				<ConfigField
-					icon={
-						<Globe2
-							aria-hidden='true'
-							size={17}
-							strokeWidth={2.4}
-						/>
-					}
+					icon={<Globe2 aria-hidden='true' size={17} strokeWidth={2.4} />}
 					label='Регион'
 				>
 					<SelectControl
@@ -164,13 +144,7 @@ export function GameConfigPanel({
 				</ConfigField>
 
 				<ConfigField
-					icon={
-						<Gauge
-							aria-hidden='true'
-							size={17}
-							strokeWidth={2.4}
-						/>
-					}
+					icon={<Gauge aria-hidden='true' size={17} strokeWidth={2.4} />}
 					label='Сложность'
 				>
 					<SelectControl

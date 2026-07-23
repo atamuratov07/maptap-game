@@ -16,12 +16,12 @@ import {
 	getNextActiveRoomGameAdvanceAt,
 	startRoomGame,
 	submitRoomGameAnswer,
-} from '@maptap/game-domain/multiplayer-next'
+} from '@maptap/game-domain/multiplayer'
 import {
 	getAnsweredParticipantCount,
 	prepareGameSession,
 	type GameConfig,
-} from '@maptap/game-domain/multiplayer-next/game'
+} from '@maptap/game-domain/multiplayer/game'
 import {
 	applyRoomCommand,
 	createRoom,
@@ -32,7 +32,7 @@ import {
 	type RoomId,
 	type RoomPlayerView,
 	type RoomState,
-} from '@maptap/game-domain/multiplayer-next/room'
+} from '@maptap/game-domain/multiplayer/room'
 import {
 	createGameId,
 	createMemberId,
@@ -606,13 +606,10 @@ export class RoomsService {
 			return
 		}
 
-		const dueAt = getNextActiveRoomGameAdvanceAt(
-			context.state,
-			{
-				revealDurationMs: this.revealDurationMs,
-				leaderboardDurationMs: this.leaderboardDurationMs,
-			},
-		)
+		const dueAt = getNextActiveRoomGameAdvanceAt(context.state, {
+			revealDurationMs: this.revealDurationMs,
+			leaderboardDurationMs: this.leaderboardDurationMs,
+		})
 
 		if (dueAt === null) {
 			this.repository.setScheduledRoomAdvance(roomId, null)

@@ -2,7 +2,7 @@ import type {
 	MemberId,
 	RoomCode,
 	RoomId,
-} from '@maptap/game-domain/multiplayer-next/room'
+} from '@maptap/game-domain/multiplayer/room'
 import type { RoomClosedEvent } from '@maptap/game-protocol'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { formatGatewayErrorMessage, toGatewayError } from '../api/errors'

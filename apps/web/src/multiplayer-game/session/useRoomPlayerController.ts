@@ -1,4 +1,4 @@
-import type { RoomPlayerView } from '@maptap/game-domain/multiplayer-next'
+import type { RoomPlayerView } from '@maptap/game-domain/multiplayer'
 import type { LookupRoomFoundResponse } from '@maptap/game-protocol'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { formatGatewayErrorMessage } from '../api/errors'

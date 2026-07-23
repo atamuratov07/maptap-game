@@ -1,7 +1,4 @@
-import type {
-	GameConfig,
-	RoomHostView,
-} from '@maptap/game-domain/multiplayer-next'
+import type { GameConfig, RoomHostView } from '@maptap/game-domain/multiplayer'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createSocketGateway } from '../api/socketGateway'
 import { clearRoomGameConfig } from '../model/gameConfig'

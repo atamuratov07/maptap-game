@@ -6,7 +6,7 @@ import {
 	type RoomId,
 	type RoomMemberRole,
 	type RoomPlayerView,
-} from '@maptap/game-domain/multiplayer-next/room'
+} from '@maptap/game-domain/multiplayer/room'
 
 import { z } from 'zod'
 export const roomPhaseSchema = z.enum(ROOM_PHASES)

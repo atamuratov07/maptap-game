@@ -1,10 +1,10 @@
-import type { MemberId } from '@maptap/game-domain/multiplayer-next'
+import type { MemberId } from '@maptap/game-domain/multiplayer'
 import type {
 	RoomCode,
 	RoomId,
 	RoomMemberRole,
 	RoomState,
-} from '@maptap/game-domain/multiplayer-next/room'
+} from '@maptap/game-domain/multiplayer/room'
 import type { MemberSessionToken } from './types'
 
 export interface MemberSessionRecord {

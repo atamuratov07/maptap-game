@@ -1,4 +1,4 @@
-import type { RoomFinishedView } from '@maptap/game-domain/multiplayer-next/room'
+import type { RoomFinishedView } from '@maptap/game-domain/multiplayer/room'
 import { DoorClosed, RotateCcw } from 'lucide-react'
 import {
 	AlertMessage,

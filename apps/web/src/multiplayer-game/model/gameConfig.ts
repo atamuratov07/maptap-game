@@ -2,7 +2,7 @@ import type { GameDifficulty, GameScope } from '@maptap/game-domain'
 import {
 	DEFAULT_GAME_CONFIG,
 	type GameConfig,
-} from '@maptap/game-domain/multiplayer-next'
+} from '@maptap/game-domain/multiplayer'
 
 export const QUESTION_COUNT_OPTIONS = [5, 10, 15, 20] as const
 export const QUESTION_DURATION_MS_OPTIONS = [
