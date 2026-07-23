@@ -1,4 +1,9 @@
-import { getConnectedMemberCount, getHostMember, getMembers } from './selectors'
+import {
+	getConnectedMemberCount,
+	getHostMember,
+	getMembers,
+	isRoomInGroupMode,
+} from './selectors'
 import type { RoomState } from './types'
 
 export interface RoomExpireTTLConfig {
@@ -25,7 +30,8 @@ export function getRoomExpireDueAt(
 
 	const host = getHostMember(state)
 	if (host && !host.connected) {
-		if (state.phase !== 'active') {
+		const exempt = isRoomInGroupMode(state) && state.phase === 'active'
+		if (!exempt) {
 			return (host.lastDisconnectedAt ?? 0) + config.hostDisconnectedMs
 		}
 	}

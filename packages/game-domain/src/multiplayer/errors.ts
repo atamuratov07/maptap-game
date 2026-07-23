@@ -1,5 +1,8 @@
 export type SessionPreparationError =
 	| {
+			code: 'invalid_game_config'
+	  }
+	| {
 			code: 'no_eligible_countries'
 	  }
 	| {
@@ -26,6 +29,9 @@ export type CommandError =
 	  }
 	| {
 			code: 'room_not_finished'
+	  }
+	| {
+			code: 'room_not_in_classroom_mode'
 	  }
 	| {
 			code: 'active_game_not_completed'

@@ -5,12 +5,12 @@ export type GamePhase = 'open' | 'revealed' | 'leaderboard' | 'completed'
 
 export interface GameConfig {
 	questionCount: number
-	questionDurationMs: number
+	questionDurationMs?: number | undefined
 	difficulty: GameDifficulty
 	scope: GameScope
 }
 
-export const DEFAULT_GAME_CONFIG: GameConfig = {
+export const DEFAULT_GAME_CONFIG: Required<GameConfig> = {
 	questionCount: 10,
 	difficulty: 'easy',
 	scope: 'all',
@@ -43,7 +43,7 @@ export interface LockedSubmission extends SubmissionBase {}
 export interface EvaluatedSubmission {
 	participantId: MemberId
 	countryId: CountryId | null
-	submittedAt: number
+	submittedAt: number | null
 	isCorrect: boolean
 	score: GameParticipantScore
 }
@@ -59,7 +59,7 @@ interface RoundStateBase {
 	questionIndex: number
 	questionId: CountryId
 	startedAt: number
-	deadlineAt: number
+	deadlineAt: number | null
 }
 
 export interface OpenRoundState extends RoundStateBase {

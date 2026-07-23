@@ -138,6 +138,7 @@ export function registerRoomHandlers({
 
 			const createdRoom = roomsService.createRoom({
 				hostName: parsed.value.hostName,
+				roomMode: parsed.value.roomMode,
 				socketId: socket.id,
 			})
 			if (!createdRoom.ok) {
@@ -318,6 +319,58 @@ export function registerRoomHandlers({
 			}
 
 			return respondWithSuccess(ack, startedGame.value)
+		})
+
+		socket.on('game:reveal-round', (payload, ack) => {
+			const auth = requireAuthenticated(socket)
+			if (!auth.ok) {
+				return respondWithError(ack, {
+					code: 'unauthorized',
+				})
+			}
+
+			const parsed = parsePayload(createRoomRequestSchema, payload)
+			if (!parsed.ok) {
+				return respondWithError(ack, {
+					code: 'invalid_payload',
+				})
+			}
+
+			const revealedGameRound = roomsService.revealGameRound({
+				memberSessionToken: auth.value,
+			})
+
+			if (!revealedGameRound.ok) {
+				return respondWithError(ack, revealedGameRound.error)
+			}
+
+			return respondWithSuccess(ack, revealedGameRound.value)
+		})
+
+		socket.on('game:advance-round', (payload, ack) => {
+			const auth = requireAuthenticated(socket)
+			if (!auth.ok) {
+				return respondWithError(ack, {
+					code: 'unauthorized',
+				})
+			}
+
+			const parsed = parsePayload(createRoomRequestSchema, payload)
+			if (!parsed.ok) {
+				return respondWithError(ack, {
+					code: 'invalid_payload',
+				})
+			}
+
+			const advancedGameRound = roomsService.advanceGameRound({
+				memberSessionToken: auth.value,
+			})
+
+			if (!advancedGameRound.ok) {
+				return respondWithError(ack, advancedGameRound.error)
+			}
+
+			return respondWithSuccess(ack, advancedGameRound.value)
 		})
 
 		socket.on('game:submit-answer', (payload, ack) => {

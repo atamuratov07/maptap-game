@@ -2,7 +2,9 @@ import type { RoomClosedEvent } from '@maptap/game-protocol'
 
 import type { MemberId } from '@maptap/game-domain/multiplayer'
 import {
-	toHostRoomView,
+	isRoomInGroupMode,
+	toClassroomHostRoomView,
+	toGroupHostRoomView,
 	toPlayerRoomView,
 	type RoomId,
 } from '@maptap/game-domain/multiplayer/room'
@@ -40,7 +42,10 @@ export function createRoomPublisher({
 			}
 
 			if (session.role === 'host') {
-				const snapshot = toHostRoomView(context.state, session.memberId)
+				const snapshot = isRoomInGroupMode(context.state)
+					? toGroupHostRoomView(context.state, session.memberId)
+					: toClassroomHostRoomView(context.state, session.memberId)
+
 				if (!snapshot) {
 					continue
 				}

@@ -33,6 +33,8 @@ export {
 	type ReturnToLobbyRequest,
 	type StartGameRequest,
 	type SubmitAnswerRequest,
+	type AdvanceRoundRequest,
+	type RevealRoundRequest,
 	type TerminateRoomRequest,
 } from './requests'
 export {

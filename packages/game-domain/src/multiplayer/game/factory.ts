@@ -1,8 +1,8 @@
 import type { CommandError, SessionPreparationError } from '../errors'
 import { err, ok, type Result } from '../../shared/result'
 import type { MemberId } from '../room/types'
-import { createRound } from './transitions'
 import type { GameOpenState, GameSession } from './types'
+import { createRound } from './commands'
 
 export interface CreateGameInput {
 	gameId: string

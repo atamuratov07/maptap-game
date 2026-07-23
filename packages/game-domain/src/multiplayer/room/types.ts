@@ -9,6 +9,7 @@ export type MemberId = string
 
 export type RoomId = string
 export type RoomCode = string
+export type RoomMode = 'group' | 'classroom'
 export type RoomMemberRole = 'host' | 'player'
 
 export const ROOM_PHASES = ['lobby', 'active', 'finished'] as const
@@ -27,6 +28,7 @@ export interface RoomMemberState {
 export interface RoomStateBase {
 	roomId: RoomId
 	roomCode: RoomCode
+	roomMode: RoomMode
 	hostId: MemberId
 	membersById: Record<MemberId, RoomMemberState>
 	memberOrder: MemberId[]
@@ -60,6 +62,7 @@ export function getRoomStateBase(state: RoomState): RoomStateBase {
 	return {
 		roomId: state.roomId,
 		roomCode: state.roomCode,
+		roomMode: state.roomMode,
 		hostId: state.hostId,
 		membersById: state.membersById,
 		memberOrder: state.memberOrder,

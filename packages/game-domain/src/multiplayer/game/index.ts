@@ -23,13 +23,10 @@ export {
 } from './selectors'
 export { prepareGameSession } from './session'
 export {
+	advanceGameRound,
 	advanceGame,
-	applyGameTransition,
-	archiveRound,
-	createRound,
-	type GameTransition,
-	type GameTransitionContext,
-} from './transitions'
+	type GameAdvanceContext,
+} from './orchestration'
 export {
 	DEFAULT_GAME_CONFIG,
 	type CompletedRoundState,
@@ -53,24 +50,20 @@ export {
 	type RevealedRoundState,
 } from './types'
 export {
-	toGameView,
-	toHostGameView,
-	toPlayerGameView,
-	type CompletedGameView,
+	toGameHostView,
+	toGameParticipantView,
+	type CompletedGameParticipantView,
 	type EvaluatedViewerSubmissionView,
 	type GameView,
 	type GameViewOptions,
-	type HostGameView,
-	type HostSubmissionView,
-	type LeaderboardGameHostView,
-	type LeaderboardGamePlayerView,
-	type LeaderboardGameView,
-	type OpenGameHostView,
-	type OpenGamePlayerView,
-	type OpenGameView,
-	type PlayerGameView,
-	type RevealedGameHostView,
-	type RevealedGamePlayerView,
-	type RevealedGameView,
+	type GameHostView,
+	type GameHostSubmissionView,
+	type GameHostLeaderboardView,
+	type LeaderboardGameParticipantView,
+	type GameHostOpenView,
+	type OpenGameParticipantView,
+	type GameParticipantView,
+	type GameHostRevealedView,
+	type RevealedGameParticipantView,
 	type ViewerSubmissionView,
 } from './visibility'

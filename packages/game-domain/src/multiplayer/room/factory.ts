@@ -1,6 +1,6 @@
 import type { CommandError } from '../errors'
 import { err, ok, type Result } from '../../shared/result'
-import type { MemberId, RoomCode, RoomId, RoomState } from './types'
+import type { MemberId, RoomCode, RoomId, RoomMode, RoomState } from './types'
 
 export function normalizeMemberName(name: string): string {
 	return name.trim()
@@ -9,9 +9,9 @@ export function normalizeMemberName(name: string): string {
 export interface CreateRoomInput {
 	roomId: RoomId
 	roomCode: RoomCode
+	roomMode: RoomMode
 	hostId: MemberId
 	hostName: string
-	// isPlaying: boolean
 	now: number
 }
 
@@ -29,6 +29,7 @@ export function createRoom(
 		phase: 'lobby',
 		roomId: input.roomId,
 		roomCode: input.roomCode,
+		roomMode: input.roomMode,
 		hostId: input.hostId,
 		membersById: {
 			[input.hostId]: {

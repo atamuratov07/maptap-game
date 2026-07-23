@@ -1,8 +1,8 @@
 import type { GameState } from './types'
 
 export interface GameAdvanceScheduleConfig {
-	revealDurationMs: number
-	leaderboardDurationMs: number
+	revealDurationMs?: number | undefined
+	leaderboardDurationMs?: number | undefined
 }
 
 export function getNextGameAdvanceAt(
@@ -14,9 +14,15 @@ export function getNextGameAdvanceAt(
 			return game.currentRound.deadlineAt
 
 		case 'revealed':
+			if (!config.revealDurationMs) {
+				return null
+			}
 			return game.currentRound.revealedAt + config.revealDurationMs
 
 		case 'leaderboard':
+			if (!config.leaderboardDurationMs) {
+				return null
+			}
 			return (
 				game.currentRound.leaderboardShownAt + config.leaderboardDurationMs
 			)

@@ -3,9 +3,11 @@ import type {
 	CreateRoomRequest,
 	JoinRoomRequest,
 	LookupRoomRequest,
+	AdvanceRoundRequest,
 	ResumeHostRoomRequest,
 	ResumePlayerRoomRequest,
 	ReturnToLobbyRequest,
+	RevealRoundRequest,
 	StartGameRequest,
 	SubmitAnswerRequest,
 	TerminateRoomRequest,
@@ -55,6 +57,14 @@ export interface ClientToServerEvents {
 	) => void
 	'game:start': (
 		payload: StartGameRequest,
+		ack: AckCallback<EmptyAckData>,
+	) => void
+	'game:reveal-round': (
+		payload: RevealRoundRequest,
+		ack: AckCallback<EmptyAckData>,
+	) => void
+	'game:advance-round': (
+		payload: AdvanceRoundRequest,
 		ack: AckCallback<EmptyAckData>,
 	) => void
 	'game:submit-answer': (

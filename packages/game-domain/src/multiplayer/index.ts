@@ -5,6 +5,8 @@ export {
 	type SessionPreparationError,
 } from './errors'
 export {
+	advanceActiveRoomGameRound,
+	revealActiveRoomGameRound,
 	advanceActiveRoomGame,
 	getNextActiveRoomGameAdvanceAt,
 	startRoomGame,
@@ -14,11 +16,12 @@ export {
 
 export {
 	createRoom,
-	toHostRoomView,
+	toGroupHostRoomView,
+	toClassroomHostRoomView,
 	toPlayerRoomView,
-	toRoomView,
 	type MemberId,
-	type RoomHostView,
+	type ClassroomHostRoomView,
+	type GroupHostRoomView,
 	type RoomPlayerView,
 	type RoomState,
 	type RoomView,

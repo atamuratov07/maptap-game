@@ -31,6 +31,14 @@ export function isRoomJoinable(state: RoomState): boolean {
 	return state.phase === 'lobby'
 }
 
+export function isRoomInGroupMode(state: RoomState): boolean {
+	return state.roomMode === 'group'
+}
+
+export function isRoomInClassroomMode(state: RoomState): boolean {
+	return state.roomMode === 'classroom'
+}
+
 export function getActiveGame(state: RoomState): GameState | undefined {
 	return state.phase === 'active' ? state.activeGame : undefined
 }

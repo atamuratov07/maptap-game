@@ -13,25 +13,30 @@ import type {
 
 import {
 	advanceActiveRoomGame,
+	advanceActiveRoomGameRound,
 	getNextActiveRoomGameAdvanceAt,
+	revealActiveRoomGameRound,
 	startRoomGame,
 	submitRoomGameAnswer,
 } from '@maptap/game-domain/multiplayer'
 import {
 	getAnsweredParticipantCount,
-	prepareGameSession,
 	type GameConfig,
 } from '@maptap/game-domain/multiplayer/game'
 import {
 	applyRoomCommand,
 	createRoom,
-	toHostRoomView,
 	toPlayerRoomView,
 	type MemberId,
-	type RoomHostView,
+	type ClassroomHostRoomView,
+	type GroupHostRoomView,
 	type RoomId,
+	type RoomMode,
 	type RoomPlayerView,
 	type RoomState,
+	toClassroomHostRoomView,
+	toGroupHostRoomView,
+	isRoomInGroupMode,
 	getRoomExpireDueAt,
 	type RoomExpireTTLConfig,
 } from '@maptap/game-domain/multiplayer/room'
@@ -69,6 +74,7 @@ export interface RoomsServiceOptions {
 
 export interface CreateRoomInput {
 	hostName: string
+	roomMode: RoomMode
 	socketId: string
 }
 
@@ -90,6 +96,14 @@ export interface ResumePlayerRoomInput {
 export interface StartGameInput {
 	memberSessionToken: MemberSessionToken
 	gameConfig: GameConfig
+}
+
+export interface RevealRoundInput {
+	memberSessionToken: MemberSessionToken
+}
+
+export interface AdvanceRoundInput {
+	memberSessionToken: MemberSessionToken
 }
 
 export interface SubmitAnswerInput {
@@ -165,6 +179,7 @@ export class RoomsService {
 		const roomResult = createRoom({
 			roomId,
 			roomCode,
+			roomMode: input.roomMode,
 			hostId,
 			hostName: input.hostName,
 			now: this.now(),
@@ -185,7 +200,10 @@ export class RoomsService {
 			socketId: input.socketId,
 		})
 
-		const snapshot = this.buildRoomHostSnapshot(roomResult.value, hostId)
+		const snapshot = isRoomInGroupMode(roomResult.value)
+			? this.buildGroupHostRoomSnapshot(roomResult.value, hostId)
+			: this.buildClassroomHostRoomSnapshot(roomResult.value, hostId)
+
 		if (!snapshot.ok) {
 			return snapshot
 		}
@@ -310,7 +328,9 @@ export class RoomsService {
 			input.socketId,
 		)
 
-		const snapshot = this.buildRoomHostSnapshot(nextState, session.memberId)
+		const snapshot = isRoomInGroupMode(nextState)
+			? this.buildGroupHostRoomSnapshot(nextState, session.memberId)
+			: this.buildClassroomHostRoomSnapshot(nextState, session.memberId)
 		if (!snapshot.ok) {
 			return snapshot
 		}
@@ -441,10 +461,6 @@ export class RoomsService {
 	}
 
 	startGame(input: StartGameInput): ServiceResult<EmptyAckData> {
-		const gameSession = prepareGameSession(this.countryPool, input.gameConfig)
-		if (!gameSession.ok) {
-			return gameSession
-		}
 		const sessionContext = this.getMemberSessionContext(
 			input.memberSessionToken,
 		)
@@ -454,9 +470,10 @@ export class RoomsService {
 
 		const nextState = startRoomGame({
 			gameId: createGameId(),
-			room: sessionContext.value.state,
-			session: gameSession.value,
 			actorId: sessionContext.value.memberSession.memberId,
+			room: sessionContext.value.state,
+			config: input.gameConfig,
+			countryPool: this.countryPool,
 			now: this.now(),
 		})
 		if (!nextState.ok) {
@@ -468,19 +485,66 @@ export class RoomsService {
 		return ok({})
 	}
 
-	submitAnswer(input: SubmitAnswerInput): ServiceResult<SubmitAnswerResponse> {
-		const memberSessionContext = this.getMemberSessionContext(
+	revealGameRound(input: RevealRoundInput): ServiceResult<EmptyAckData> {
+		const sessionContext = this.getMemberSessionContext(
 			input.memberSessionToken,
 		)
-		if (!memberSessionContext.ok) {
-			return memberSessionContext
+		if (!sessionContext.ok) {
+			return sessionContext
 		}
-		const { memberSession, state: room } = memberSessionContext.value
+
+		const { memberSession, state: room } = sessionContext.value
+		const advancedResult = revealActiveRoomGameRound(
+			room,
+			memberSession.memberId,
+			this.now(),
+		)
+
+		if (!advancedResult.ok) {
+			return advancedResult
+		}
+
+		this.commitRoomState(room.roomId, advancedResult.value)
+
+		return ok({})
+	}
+
+	advanceGameRound(input: AdvanceRoundInput): ServiceResult<EmptyAckData> {
+		const sessionContext = this.getMemberSessionContext(
+			input.memberSessionToken,
+		)
+		if (!sessionContext.ok) {
+			return sessionContext
+		}
+		const { memberSession, state: room } = sessionContext.value
+		const advancedResult = advanceActiveRoomGameRound(
+			room,
+			this.now(),
+			memberSession.memberId,
+		)
+
+		if (!advancedResult.ok) {
+			return advancedResult
+		}
+
+		this.commitRoomState(room.roomId, advancedResult.value)
+
+		return ok({})
+	}
+
+	submitAnswer(input: SubmitAnswerInput): ServiceResult<SubmitAnswerResponse> {
+		const sessionContext = this.getMemberSessionContext(
+			input.memberSessionToken,
+		)
+		if (!sessionContext.ok) {
+			return sessionContext
+		}
+		const { memberSession, state: room } = sessionContext.value
 
 		const acceptedAt = this.now()
-		const submittedState = submitRoomGameAnswer(room, {
-			type: 'SUBMIT_ANSWER',
-			participantId: memberSession.memberId,
+		const submittedState = submitRoomGameAnswer({
+			room,
+			memberId: memberSession.memberId,
 			countryId: input.countryId,
 			now: acceptedAt,
 		})
@@ -578,11 +642,23 @@ export class RoomsService {
 		})
 	}
 
-	private buildRoomHostSnapshot(
+	private buildClassroomHostRoomSnapshot(
 		state: RoomState,
 		memberId: MemberId,
-	): ServiceResult<RoomHostView> {
-		const snapshot = toHostRoomView(state, memberId)
+	): ServiceResult<ClassroomHostRoomView> {
+		const snapshot = toClassroomHostRoomView(state, memberId)
+		return snapshot
+			? ok(snapshot)
+			: err({
+					code: 'internal_error',
+				})
+	}
+
+	private buildGroupHostRoomSnapshot(
+		state: RoomState,
+		memberId: MemberId,
+	): ServiceResult<GroupHostRoomView> {
+		const snapshot = toGroupHostRoomView(state, memberId)
 
 		return snapshot
 			? ok(snapshot)
