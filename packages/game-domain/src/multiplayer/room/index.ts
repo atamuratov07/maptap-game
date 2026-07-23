@@ -13,6 +13,7 @@ export {
 	getLastGameResult,
 	getMember,
 	getMembers,
+	getRoomOccupancy,
 	isHostMember,
 	isRoomJoinable,
 	isRoomInGroupMode,

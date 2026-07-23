@@ -39,6 +39,7 @@ import {
 	isRoomInGroupMode,
 	getRoomExpireDueAt,
 	type RoomExpireTTLConfig,
+	getRoomOccupancy,
 } from '@maptap/game-domain/multiplayer/room'
 import {
 	createGameId,
@@ -230,7 +231,7 @@ export class RoomsService {
 			})
 		}
 
-		if (context.state.memberOrder.length >= this.roomCapacityLimit) {
+		if (getRoomOccupancy(context.state) >= this.roomCapacityLimit) {
 			return err({
 				code: 'room_participant_capacity_limit_exceeded',
 			})

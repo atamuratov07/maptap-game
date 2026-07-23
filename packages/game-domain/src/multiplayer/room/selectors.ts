@@ -1,6 +1,14 @@
 import type { GameResult, GameState } from '../game/types'
 import type { MemberId, RoomMemberState, RoomState } from './types'
 
+export function isRoomInGroupMode(state: RoomState): boolean {
+	return state.roomMode === 'group'
+}
+
+export function isRoomInClassroomMode(state: RoomState): boolean {
+	return state.roomMode === 'classroom'
+}
+
 export function getMember(
 	state: RoomState,
 	memberId: MemberId,
@@ -27,16 +35,13 @@ export function getConnectedMemberCount(state: RoomState): number {
 	return getMembers(state).filter(member => member.connected).length
 }
 
+export function getRoomOccupacy(state: RoomState): number {
+	const excludeHost = isRoomInClassroomMode(state)
+	return state.memberOrder.length - Number(excludeHost)
+}
+
 export function isRoomJoinable(state: RoomState): boolean {
 	return state.phase === 'lobby'
-}
-
-export function isRoomInGroupMode(state: RoomState): boolean {
-	return state.roomMode === 'group'
-}
-
-export function isRoomInClassroomMode(state: RoomState): boolean {
-	return state.roomMode === 'classroom'
 }
 
 export function getActiveGame(state: RoomState): GameState | undefined {
