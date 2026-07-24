@@ -62,7 +62,7 @@ export function parseEnv(input: NodeJS.ProcessEnv): AppEnv {
 		roomNoConnectedMembersTTL: env.ROOM_NO_CONNECTED_MEMBERS_TTL,
 		roomHostDisconnectedInGroupTTL: env.ROOM_HOST_DISCONNECTED_IN_GROUP_TTL,
 		roomHostDisconnectedInClassroomTTL:
-			env.ROOM_HOST_DISCONNECTED_IN_GROUP_TTL,
+			env.ROOM_HOST_DISCONNECTED_IN_CLASSROOM_TTL,
 		roomFinishedTTL: env.ROOM_FINISHED_TTL,
 	}
 }
