@@ -9,7 +9,8 @@ import type { RoomState } from './types'
 export interface RoomExpireTTLConfig {
 	noConnectedMembersMs: number
 	finishedMs: number
-	hostDisconnectedMs: number
+	hostDisconnectedInGroupMs: number
+	hostDisconnectedInClassroomMs: number
 }
 
 export function getRoomExpireDueAt(
@@ -30,9 +31,19 @@ export function getRoomExpireDueAt(
 
 	const host = getHostMember(state)
 	if (host && !host.connected) {
-		const exempt = isRoomInGroupMode(state) && state.phase === 'active'
-		if (!exempt) {
-			return (host.lastDisconnectedAt ?? 0) + config.hostDisconnectedMs
+		if (isRoomInGroupMode(state)) {
+			if (state.phase === 'active') {
+				return null
+			}
+
+			return (
+				(host.lastDisconnectedAt ?? 0) + config.hostDisconnectedInGroupMs
+			)
+		} else {
+			return (
+				(host.lastDisconnectedAt ?? 0) +
+				config.hostDisconnectedInClassroomMs
+			)
 		}
 	}
 

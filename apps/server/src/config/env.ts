@@ -12,11 +12,16 @@ const envSchema = z.object({
 		.int()
 		.min(1_000 * 60 * 5)
 		.default(1_000 * 60 * 10),
-	ROOM_HOST_DISCONNECTED_TTL: z.coerce
+	ROOM_HOST_DISCONNECTED_IN_GROUP_TTL: z.coerce
 		.number()
 		.int()
 		.min(1_000 * 60 * 3)
 		.default(1_000 * 60 * 5),
+	ROOM_HOST_DISCONNECTED_IN_CLASSROOM_TTL: z.coerce
+		.number()
+		.int()
+		.min(1_000 * 60 * 1)
+		.default(1_000 * 60 * 3),
 	ROOM_FINISHED_TTL: z.coerce
 		.number()
 		.int()
@@ -32,7 +37,8 @@ export interface AppEnv {
 	leaderboardDurationMs: number
 	roomCapacityLimit: number
 	roomNoConnectedMembersTTL: number
-	roomHostDisconnectedTTL: number
+	roomHostDisconnectedInGroupTTL: number
+	roomHostDisconnectedInClassroomTTL: number
 	roomFinishedTTL: number
 }
 
@@ -54,7 +60,9 @@ export function parseEnv(input: NodeJS.ProcessEnv): AppEnv {
 		leaderboardDurationMs: env.LEADERBOARD_DURATION_MS,
 		roomCapacityLimit: env.ROOM_CAPACITY_LIMIT,
 		roomNoConnectedMembersTTL: env.ROOM_NO_CONNECTED_MEMBERS_TTL,
-		roomHostDisconnectedTTL: env.ROOM_HOST_DISCONNECTED_TTL,
+		roomHostDisconnectedInGroupTTL: env.ROOM_HOST_DISCONNECTED_IN_GROUP_TTL,
+		roomHostDisconnectedInClassroomTTL:
+			env.ROOM_HOST_DISCONNECTED_IN_GROUP_TTL,
 		roomFinishedTTL: env.ROOM_FINISHED_TTL,
 	}
 }

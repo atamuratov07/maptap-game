@@ -33,7 +33,8 @@ const roomsService = new RoomsService({
 	roomCapacityLimit: env.roomCapacityLimit,
 	roomExpireTTL: {
 		noConnectedMembersMs: env.roomNoConnectedMembersTTL,
-		hostDisconnectedMs: env.roomHostDisconnectedTTL,
+		hostDisconnectedInGroupMs: env.roomHostDisconnectedInGroupTTL,
+		hostDisconnectedInClassroomMs: env.roomHostDisconnectedInClassroomTTL,
 		finishedMs: env.roomFinishedTTL,
 	},
 	hooks: {
