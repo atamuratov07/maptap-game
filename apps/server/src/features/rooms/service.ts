@@ -2,12 +2,12 @@ import { err, ok, type CountryPool, type Result } from '@maptap/game-domain'
 import type {
 	CreateRoomResponse,
 	EmptyAckData,
-	GameProtocolError,
 	JoinRoomResponse,
 	LookupRoomResponse,
 	ResumeHostRoomResponse,
 	ResumePlayerRoomResponse,
 	RoomClosedEvent,
+	RoomProtocolError,
 	SubmitAnswerResponse,
 } from '@maptap/game-protocol'
 
@@ -51,7 +51,7 @@ import {
 import type { MemberSessionRecord, RoomsRepository } from './repository.js'
 import type { BoundServiceResponse, MemberSessionToken } from './types.js'
 
-type ServiceResult<T> = Result<T, GameProtocolError>
+type ServiceResult<T> = Result<T, RoomProtocolError>
 
 interface RoomUpdateOptions {
 	excludeMemberId?: MemberId
@@ -289,7 +289,7 @@ export class RoomsService {
 			})
 		}
 		if (session.role !== 'host') {
-			return err({ code: 'unauthorized' })
+			return err({ code: 'insufficient_permissions' })
 		}
 
 		const context = this.repository.getRoomById(session.roomId)
@@ -357,7 +357,7 @@ export class RoomsService {
 		}
 
 		if (session.role !== 'player') {
-			return err({ code: 'unauthorized' })
+			return err({ code: 'insufficient_permissions' })
 		}
 
 		const context = this.repository.getRoomById(session.roomId)

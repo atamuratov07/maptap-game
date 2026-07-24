@@ -16,6 +16,9 @@ export type CommandError =
 			code: 'only_host_can_manage_room'
 	  }
 	| {
+			code: 'insufficient_permissions'
+	  }
+	| {
 			code: 'room_not_in_lobby'
 	  }
 	| {

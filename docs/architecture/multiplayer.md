@@ -161,7 +161,7 @@ The room stores membership, host identity, connection state, and game history. T
 **Ack shape** — every request-response socket event uses:
 
 ```ts
-type Ack<T> = { ok: true; data: T } | { ok: false; error: GameProtocolError }
+type Ack<T> = { ok: true; data: T } | { ok: false; error: RoomProtocolError }
 ```
 
 The transport contract is: validate request payloads at the server edge, return typed success payloads, return typed protocol/domain errors instead of throwing exceptions across the wire, and push room updates as role-specific snapshots rather than raw internal state.

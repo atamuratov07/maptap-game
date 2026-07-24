@@ -1,4 +1,4 @@
-import type { AckCallback, GameProtocolError } from '@maptap/game-protocol'
+import type { AckCallback, RoomProtocolError } from '@maptap/game-protocol'
 import {
 	advanceRoundRequestSchema,
 	createRoomRequestSchema,
@@ -25,7 +25,7 @@ export interface RegisterRoomHandlersOptions {
 
 function respondWithError<T>(
 	ack: AckCallback<T>,
-	error: GameProtocolError,
+	error: RoomProtocolError,
 ): void {
 	ack({
 		ok: false,

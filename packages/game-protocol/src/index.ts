@@ -5,7 +5,7 @@ export {
 	type AckSuccess,
 	type EmptyAckData,
 } from './ack'
-export { type GameProtocolError, type TransportError } from './errors'
+export { type RoomProtocolError, type TransportError } from './errors'
 export {
 	GAME_NAMESPACE,
 	type ClientToServerEvents,

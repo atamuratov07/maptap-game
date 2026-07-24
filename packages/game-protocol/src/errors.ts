@@ -11,7 +11,7 @@ export type TransportError =
 	| { code: 'room_closed' }
 	| { code: 'internal_error' }
 
-export type GameProtocolError =
+export type RoomProtocolError =
 	| TransportError
 	| CommandError
 	| SessionPreparationError

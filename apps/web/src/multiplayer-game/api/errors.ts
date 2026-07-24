@@ -1,7 +1,7 @@
-import type { GameProtocolError } from '@maptap/game-protocol'
+import type { RoomProtocolError } from '@maptap/game-protocol'
 
 export type GatewayError =
-	| GameProtocolError
+	| RoomProtocolError
 	| {
 			code: 'transport_error'
 			message: string
@@ -52,6 +52,8 @@ export function formatGatewayErrorMessage(error: unknown): string {
 			return 'Превышен лимит участников комнаты'
 		case 'only_host_can_manage_room':
 			return 'Это действие доступно только хосту.'
+		case 'insufficient_permissions':
+			return 'У вас недостаточно прав для выполнения этого действия.'
 		case 'room_not_in_lobby':
 			return 'Комната уже не в лобби.'
 		case 'room_not_active':
