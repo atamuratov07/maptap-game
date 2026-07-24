@@ -35,7 +35,7 @@ export function getConnectedMemberCount(state: RoomState): number {
 	return getMembers(state).filter(member => member.connected).length
 }
 
-export function getRoomOccupacy(state: RoomState): number {
+export function getRoomOccupancy(state: RoomState): number {
 	const excludeHost = isRoomInClassroomMode(state)
 	return state.memberOrder.length - Number(excludeHost)
 }
