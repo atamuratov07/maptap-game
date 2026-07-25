@@ -20,6 +20,7 @@ import {
 	submitRoomGameAnswer,
 } from '@maptap/game-domain/multiplayer'
 import {
+	applyGameCommand,
 	getAnsweredParticipantCount,
 	type GameConfig,
 } from '@maptap/game-domain/multiplayer/game'
@@ -555,11 +556,20 @@ export class RoomsService {
 		}
 
 		let nextState = submittedState.value
-		if (this.shouldRevealImmediately(nextState)) {
-			const revealedState = advanceActiveRoomGame(nextState, acceptedAt)
+		if (
+			this.shouldRevealImmediately(nextState) &&
+			nextState.phase === 'active'
+		) {
+			const revealedGameState = applyGameCommand(nextState.activeGame, {
+				type: 'REVEAL_ROUND',
+				now: acceptedAt,
+			})
 
-			if (revealedState.ok) {
-				nextState = revealedState.value
+			if (revealedGameState.ok) {
+				nextState = {
+					...nextState,
+					activeGame: revealedGameState.value,
+				}
 			}
 		}
 
