@@ -189,23 +189,23 @@ export class RoomsRepository {
 	getMemberSessionBySocketId(
 		socketId: string,
 	): MemberSessionRecord | undefined {
-		const MemberSessionToken = this.sessionTokensBySocketId.get(socketId)
-		return MemberSessionToken
-			? this.sessionsByToken.get(MemberSessionToken)
+		const memberSessionToken = this.sessionTokensBySocketId.get(socketId)
+		return memberSessionToken
+			? this.sessionsByToken.get(memberSessionToken)
 			: undefined
 	}
 
 	bindSocketToSession(
-		MemberSessionToken: MemberSessionToken,
+		memberSessionToken: MemberSessionToken,
 		socketId: string,
 	): string | undefined {
-		const session = this.sessionsByToken.get(MemberSessionToken)
+		const session = this.sessionsByToken.get(memberSessionToken)
 		if (!session) {
 			return undefined
 		}
 
 		const previousToken = this.sessionTokensBySocketId.get(socketId)
-		if (previousToken && previousToken !== MemberSessionToken) {
+		if (previousToken && previousToken !== memberSessionToken) {
 			const previousSession = this.sessionsByToken.get(previousToken)
 			if (previousSession && previousSession.socketId === socketId) {
 				previousSession.socketId = null
@@ -224,20 +224,20 @@ export class RoomsRepository {
 		}
 
 		session.socketId = socketId
-		this.sessionTokensBySocketId.set(socketId, MemberSessionToken)
+		this.sessionTokensBySocketId.set(socketId, memberSessionToken)
 
 		return previousSocketId
 	}
 
 	unbindSocket(socketId: string): MemberSessionRecord | undefined {
-		const MemberSessionToken = this.sessionTokensBySocketId.get(socketId)
-		if (!MemberSessionToken) {
+		const memberSessionToken = this.sessionTokensBySocketId.get(socketId)
+		if (!memberSessionToken) {
 			return undefined
 		}
 
 		this.sessionTokensBySocketId.delete(socketId)
 
-		const session = this.sessionsByToken.get(MemberSessionToken)
+		const session = this.sessionsByToken.get(memberSessionToken)
 		if (session && session.socketId === socketId) {
 			session.socketId = null
 		}
