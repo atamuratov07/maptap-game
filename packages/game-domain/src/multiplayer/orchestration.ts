@@ -173,12 +173,23 @@ export function advanceActiveRoomGameRound(
 	}
 
 	const gameResult = advanceGameRound(room.activeGame, { now })
+
 	if (!gameResult.ok) {
 		return gameResult
 	}
-	return ok({
+
+	const activeRoom: RoomState = {
 		...room,
 		activeGame: gameResult.value,
+	}
+
+	if (gameResult.value.phase !== 'completed') {
+		return ok(activeRoom)
+	}
+
+	return applyRoomTransition(activeRoom, {
+		type: 'FINISH_ACTIVE_GAME',
+		now,
 	})
 }
 

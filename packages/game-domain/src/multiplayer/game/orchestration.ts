@@ -20,6 +20,7 @@ export function advanceGameRound(
 	const nextQuestionIndex = state.currentRound.questionIndex + 1
 
 	let command: GameCommand
+
 	if (nextQuestionIndex < state.session.questionIds.length) {
 		command = {
 			type: 'ADVANCE_ROUND',
