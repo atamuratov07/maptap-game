@@ -22,6 +22,7 @@ import {
 import {
 	applyGameCommand,
 	getAnsweredParticipantCount,
+	getGameParticipantCount,
 	type GameConfig,
 } from '@maptap/game-domain/multiplayer/game'
 import {
@@ -807,7 +808,7 @@ export class RoomsService {
 
 		return (
 			getAnsweredParticipantCount(state.activeGame) >=
-			connectedParticipantCount
+			getGameParticipantCount(state.activeGame)
 		)
 	}
 }
