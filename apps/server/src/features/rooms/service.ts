@@ -497,17 +497,17 @@ export class RoomsService {
 		}
 
 		const { memberSession, state: room } = sessionContext.value
-		const advancedResult = revealActiveRoomGameRound(
+		const revealedResult = revealActiveRoomGameRound(
 			room,
 			memberSession.memberId,
 			this.now(),
 		)
 
-		if (!advancedResult.ok) {
-			return advancedResult
+		if (!revealedResult.ok) {
+			return revealedResult
 		}
 
-		this.commitRoomState(room.roomId, advancedResult.value)
+		this.commitRoomState(room.roomId, revealedResult.value)
 
 		return ok({})
 	}
