@@ -6,7 +6,13 @@ import {
 	type GameParticipantView,
 } from '../game/visibility'
 import { getConnectedMemberCount, getMember, getMembers } from './selectors'
-import type { MemberId, RoomMemberRole, RoomPhase, RoomState } from './types'
+import type {
+	MemberId,
+	RoomMemberRole,
+	RoomMode,
+	RoomPhase,
+	RoomState,
+} from './types'
 
 export interface VisibleMemberInfo {
 	memberId: MemberId
@@ -19,6 +25,7 @@ export interface VisibleMemberInfo {
 interface RoomViewBase {
 	roomId: string
 	roomCode: string
+	roomMode: RoomMode
 	phase: RoomPhase
 	hostId: MemberId
 	viewerMemberId: MemberId
@@ -62,19 +69,23 @@ interface RoomHostViewBase extends RoomViewBase {
 	viewerRole: 'host'
 }
 
-export interface GroupHostRoomLobbyView extends RoomHostViewBase {
+interface GroupHostRoomViewBase extends RoomHostViewBase {
+	roomMode: 'group'
+}
+
+export interface GroupHostRoomLobbyView extends GroupHostRoomViewBase {
 	phase: 'lobby'
 	activeGame: null
 	lastGameResult: null
 }
 
-export interface GroupHostRoomActiveView extends RoomHostViewBase {
+export interface GroupHostRoomActiveView extends GroupHostRoomViewBase {
 	phase: 'active'
 	activeGame: GameParticipantView
 	lastGameResult: null
 }
 
-export interface GroupHostRoomFinishedView extends RoomHostViewBase {
+export interface GroupHostRoomFinishedView extends GroupHostRoomViewBase {
 	phase: 'finished'
 	activeGame: null
 	finishedAt: number
@@ -87,19 +98,24 @@ export type GroupHostRoomView =
 	| GroupHostRoomActiveView
 	| GroupHostRoomFinishedView
 
-export interface ClassroomHostRoomLobbyView extends RoomHostViewBase {
+interface ClassroomHostRoomViewBase extends RoomHostViewBase {
+	viewerRole: 'host'
+	roomMode: 'classroom'
+}
+
+export interface ClassroomHostRoomLobbyView extends ClassroomHostRoomViewBase {
 	phase: 'lobby'
 	activeGame: null
 	lastGameResult: null
 }
 
-export interface ClassroomHostRoomActiveView extends RoomHostViewBase {
+export interface ClassroomHostRoomActiveView extends ClassroomHostRoomViewBase {
 	phase: 'active'
 	activeGame: GameHostView
 	lastGameResult: null
 }
 
-export interface ClassroomHostRoomFinishedView extends RoomHostViewBase {
+export interface ClassroomHostRoomFinishedView extends ClassroomHostRoomViewBase {
 	phase: 'finished'
 	activeGame: null
 	finishedAt: number
@@ -148,6 +164,7 @@ function getRoomViewBase(
 	return {
 		roomId: state.roomId,
 		roomCode: state.roomCode,
+		roomMode: state.roomMode,
 		phase: state.phase,
 		hostId: state.hostId,
 		viewerMemberId,
@@ -159,15 +176,16 @@ function getRoomViewBase(
 	}
 }
 
-function getHostRoomViewBase(
+function getGroupHostRoomViewBase(
 	state: RoomState,
 	viewerMemberId: MemberId,
-): RoomHostViewBase | undefined {
+): GroupHostRoomViewBase | undefined {
 	const base = getRoomViewBase(state, viewerMemberId)
-	return base?.viewerRole === 'host'
+	return base?.viewerRole === 'host' && base?.roomMode === 'group'
 		? {
 				...base,
 				viewerRole: 'host',
+				roomMode: 'group',
 			}
 		: undefined
 }
@@ -176,7 +194,7 @@ export function toGroupHostRoomView(
 	state: RoomState,
 	viewerMemberId: MemberId,
 ): GroupHostRoomView | undefined {
-	const base = getHostRoomViewBase(state, viewerMemberId)
+	const base = getGroupHostRoomViewBase(state, viewerMemberId)
 	if (!base) {
 		return undefined
 	}
@@ -213,11 +231,25 @@ export function toGroupHostRoomView(
 	}
 }
 
+function getClassroomHostRoomViewBase(
+	state: RoomState,
+	viewerMemberId: MemberId,
+): ClassroomHostRoomViewBase | undefined {
+	const base = getRoomViewBase(state, viewerMemberId)
+	return base?.viewerRole === 'host' && base?.roomMode === 'classroom'
+		? {
+				...base,
+				viewerRole: 'host',
+				roomMode: 'classroom',
+			}
+		: undefined
+}
+
 export function toClassroomHostRoomView(
 	state: RoomState,
 	viewerMemberId: MemberId,
 ): ClassroomHostRoomView | undefined {
-	const base = getHostRoomViewBase(state, viewerMemberId)
+	const base = getClassroomHostRoomViewBase(state, viewerMemberId)
 	if (!base) {
 		return undefined
 	}
