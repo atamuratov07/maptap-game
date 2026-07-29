@@ -679,6 +679,19 @@ describe('RoomsService.revealGameRound', () => {
 		})
 		if (!created.ok) throw new Error('setup failed')
 
+		const joined = service.joinRoom({
+			memberName: 'Bob',
+			roomCode: created.value.response.roomCode,
+			socketId: 'socket-2',
+		})
+		if (!joined.ok) throw new Error('setup failed')
+
+		const started = service.startGame({
+			memberSessionToken: created.value.response.memberSessionToken,
+			gameConfig: DEFAULT_GAME_CONFIG,
+		})
+		if (!started.ok) throw new Error('setup failed')
+
 		const revealed = service.revealGameRound({
 			memberSessionToken: created.value.response.memberSessionToken,
 		})
@@ -716,12 +729,8 @@ describe('RoomsService.advanceGameRound', () => {
 		vi.useRealTimers()
 	})
 
-	function reachLeaderboardPhase(options: { questionCount?: number } = {}) {
-		const revealDurationMs = 1000
-
-		const helpers = createService({
-			revealDurationMs,
-		})
+	function reachRevealedPhase(options: { questionCount?: number } = {}) {
+		const helpers = createService()
 		const created = helpers.service.createRoom({
 			hostName: 'Alice',
 			roomMode: 'classroom',
@@ -752,18 +761,16 @@ describe('RoomsService.advanceGameRound', () => {
 		})
 		if (!revealed.ok) throw new Error('setup failed')
 
-		vi.advanceTimersByTime(revealDurationMs + 1)
-
 		return { ...helpers, created, joined }
 	}
 
-	it('advances from the leaderboard to the next round for the host', () => {
-		const { service, repository, created } = reachLeaderboardPhase()
+	it('advances from the revealed stage to the next round for the host', () => {
+		const { service, repository, created } = reachRevealedPhase()
 
 		const before = repository.getRoomById(created.value.response.roomId)
 		if (before?.state.phase !== 'active')
 			throw new Error('expected active phase')
-		expect(before.state.activeGame.phase).toBe('leaderboard')
+		expect(before.state.activeGame.phase).toBe('revealed')
 
 		const advanced = service.advanceGameRound({
 			memberSessionToken: created.value.response.memberSessionToken,
@@ -777,7 +784,7 @@ describe('RoomsService.advanceGameRound', () => {
 	})
 
 	it('rejects a non-host actor', () => {
-		const { service, joined } = reachLeaderboardPhase()
+		const { service, joined } = reachRevealedPhase()
 
 		const advanced = service.advanceGameRound({
 			memberSessionToken: joined.value.response.memberSessionToken,
@@ -798,6 +805,19 @@ describe('RoomsService.advanceGameRound', () => {
 		})
 		if (!created.ok) throw new Error('setup failed')
 
+		const joined = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+		if (!joined.ok) throw new Error('setup failed')
+
+		const started = service.startGame({
+			memberSessionToken: created.value.response.memberSessionToken,
+			gameConfig: DEFAULT_GAME_CONFIG,
+		})
+		if (!started.ok) throw new Error('setup failed')
+
 		const advanced = service.advanceGameRound({
 			memberSessionToken: created.value.response.memberSessionToken,
 		})
@@ -808,7 +828,7 @@ describe('RoomsService.advanceGameRound', () => {
 		})
 	})
 
-	it('rejects advancing before the round has reached the leaderboard', () => {
+	it('rejects advancing before the round has reached the revealed stage', () => {
 		const { service } = createService()
 		const room = service.createRoom({
 			hostName: 'Alice',
@@ -835,18 +855,18 @@ describe('RoomsService.advanceGameRound', () => {
 		})
 		expect(advanced.ok).toBe(false)
 		if (advanced.ok) return
-		expect(advanced.error).toMatchObject({ code: 'game_not_on_leaderboard' })
+		expect(advanced.error).toMatchObject({ code: 'game_not_advanceable' })
 	})
 
 	it('moves a classroom room to finished once the host advances past the last round', () => {
-		const { service, repository, created } = reachLeaderboardPhase({
+		const { service, repository, created } = reachRevealedPhase({
 			questionCount: 1,
 		})
 
 		const before = repository.getRoomById(created.value.response.roomId)
 		if (before?.state.phase !== 'active')
 			throw new Error('expected active phase')
-		expect(before.state.activeGame.phase).toBe('leaderboard')
+		expect(before.state.activeGame.phase).toBe('revealed')
 
 		const advanced = service.advanceGameRound({
 			memberSessionToken: created.value.response.memberSessionToken,
@@ -867,7 +887,7 @@ describe('RoomsService game auto advance', () => {
 		vi.useRealTimers()
 	})
 
-	it('auto-reveals the answer once the question deadline passes, when a duration was configured', () => {
+	it('auto-reveals the answer once the question deadline passes, in group mode', () => {
 		const { repository, service } = createService()
 		const created = service.createRoom({
 			hostName: 'Alice',
@@ -886,6 +906,37 @@ describe('RoomsService game auto advance', () => {
 		if (before?.state.phase !== 'active')
 			throw new Error('expected active phase')
 		expect(before.state.activeGame.phase).toBe('open')
+
+		vi.advanceTimersByTime(DEFAULT_GAME_CONFIG.questionDurationMs + 1)
+
+		const after = repository.getRoomById(created.value.response.roomId)
+		if (after?.state.phase !== 'active')
+			throw new Error('expected active phase')
+		expect(after.state.activeGame.phase).toBe('revealed')
+	})
+
+	it('auto-reveals the answer once the question deadline passes, in classroom mode', () => {
+		const revealDurationMs = 1_000
+		const { repository, service } = createService({ revealDurationMs })
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joined = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+		if (!joined.ok) throw new Error('setup failed')
+
+		const started = service.startGame({
+			gameConfig: DEFAULT_GAME_CONFIG,
+			memberSessionToken: created.value.response.memberSessionToken,
+		})
+		if (!started.ok) throw new Error('setup failed')
 
 		vi.advanceTimersByTime(DEFAULT_GAME_CONFIG.questionDurationMs + 1)
 
@@ -961,9 +1012,11 @@ describe('RoomsService game auto advance', () => {
 		expect(after.state.activeGame.phase).toBe('leaderboard')
 	})
 
-	it('auto-shows the leaderboard once the reveal duration passes, in classroom mode', () => {
+	it("doesn't auto-advance past the revealed stage in classroom mode", () => {
 		const revealDurationMs = 1_000
-		const { repository, service } = createService({ revealDurationMs })
+		const { repository, service } = createService({
+			revealDurationMs,
+		})
 		const created = service.createRoom({
 			hostName: 'Alice',
 			roomMode: 'classroom',
@@ -991,7 +1044,8 @@ describe('RoomsService game auto advance', () => {
 		const after = repository.getRoomById(created.value.response.roomId)
 		if (after?.state.phase !== 'active')
 			throw new Error('expected active phase')
-		expect(after.state.activeGame.phase).toBe('leaderboard')
+
+		expect(after.state.activeGame.phase).toBe('revealed')
 	})
 
 	it('auto-advances to the next round in group mode', () => {
@@ -1025,47 +1079,6 @@ describe('RoomsService game auto advance', () => {
 		if (after?.state.phase !== 'active')
 			throw new Error('expected active phase')
 		expect(after.state.activeGame.phase).toBe('open')
-	})
-
-	it("doesn't auto-advance past the leaderboard in classroom mode", () => {
-		const revealDurationMs = 1_000
-		const leaderboardDurationMs = 1_000
-		const { repository, service } = createService({
-			revealDurationMs,
-			leaderboardDurationMs,
-		})
-		const created = service.createRoom({
-			hostName: 'Alice',
-			roomMode: 'classroom',
-			socketId: 'socket-1',
-		})
-		if (!created.ok) throw new Error('setup failed')
-
-		const joined = service.joinRoom({
-			roomCode: created.value.response.roomCode,
-			memberName: 'Bob',
-			socketId: 'socket-2',
-		})
-		if (!joined.ok) throw new Error('setup failed')
-
-		const started = service.startGame({
-			gameConfig: DEFAULT_GAME_CONFIG,
-			memberSessionToken: created.value.response.memberSessionToken,
-		})
-		if (!started.ok) throw new Error('setup failed')
-
-		vi.advanceTimersByTime(
-			DEFAULT_GAME_CONFIG.questionDurationMs +
-				revealDurationMs +
-				leaderboardDurationMs +
-				1,
-		)
-
-		const after = repository.getRoomById(created.value.response.roomId)
-		if (after?.state.phase !== 'active')
-			throw new Error('expected active phase')
-
-		expect(after.state.activeGame.phase).toBe('leaderboard')
 	})
 
 	it('auto-advances through the last round to a finished room, in group mode', () => {

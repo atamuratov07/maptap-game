@@ -66,8 +66,8 @@ export function formatGatewayErrorMessage(error: unknown): string {
 			return 'Игра сейчас не принимает ответы.'
 		case 'game_not_revealed':
 			return 'Игра сейчас не в фазе раскрытия ответа.'
-		case 'game_not_on_leaderboard':
-			return 'Игра сейчас не показывает таблицу лидеров.'
+		case 'game_not_advanceable':
+			return 'Игра ещё не готова перейти к следующему вопросу.'
 		case 'game_not_ready_to_complete':
 			return 'Игра ещё не готова к завершению.'
 		case 'game_already_completed':

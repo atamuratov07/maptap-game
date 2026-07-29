@@ -121,16 +121,18 @@ export function revealActiveRoomGameRound(
 	actorId: MemberId,
 	now: number,
 ): Result<RoomState, CommandError> {
-	if (!isRoomInClassroomMode(room)) {
-		return err({
-			code: 'room_not_in_classroom_mode',
-		})
-	}
 	if (room.phase !== 'active') {
 		return err({
 			code: 'room_not_active',
 		})
 	}
+
+	if (!isRoomInClassroomMode(room)) {
+		return err({
+			code: 'room_not_in_classroom_mode',
+		})
+	}
+
 	const hostResult = requireHost(room, actorId)
 	if (!hostResult.ok) {
 		return hostResult
@@ -155,15 +157,15 @@ export function advanceActiveRoomGameRound(
 	now: number,
 	actorId: MemberId,
 ): Result<RoomState, CommandError> {
-	if (!isRoomInClassroomMode(room)) {
-		return err({
-			code: 'room_not_in_classroom_mode',
-		})
-	}
-
 	if (room.phase !== 'active') {
 		return err({
 			code: 'room_not_active',
+		})
+	}
+
+	if (!isRoomInClassroomMode(room)) {
+		return err({
+			code: 'room_not_in_classroom_mode',
 		})
 	}
 
@@ -172,7 +174,10 @@ export function advanceActiveRoomGameRound(
 		return hostResult
 	}
 
-	const gameResult = advanceGameRound(room.activeGame, { now })
+	const gameResult = advanceGameRound(room.activeGame, {
+		advanceablePhase: 'revealed',
+		now,
+	})
 
 	if (!gameResult.ok) {
 		return gameResult
@@ -195,18 +200,16 @@ export function advanceActiveRoomGameRound(
 
 export function getNextActiveRoomGameAdvanceAt(
 	room: RoomState,
-	config: GameAdvanceScheduleConfig,
+	config: Required<GameAdvanceScheduleConfig>,
 ): number | null {
 	if (room.phase !== 'active') {
 		return null
 	}
 
-	return getNextGameAdvanceAt(room.activeGame, {
-		revealDurationMs: config.revealDurationMs,
-		leaderboardDurationMs: isRoomInGroupMode(room)
-			? config.leaderboardDurationMs
-			: undefined,
-	})
+	return getNextGameAdvanceAt(
+		room.activeGame,
+		isRoomInGroupMode(room) ? config : {},
+	)
 }
 
 export function advanceActiveRoomGame(
@@ -220,6 +223,7 @@ export function advanceActiveRoomGame(
 	}
 
 	const gameResult = advanceGame(room.activeGame, {
+		advanceablePhase: 'leaderboard',
 		now,
 	})
 

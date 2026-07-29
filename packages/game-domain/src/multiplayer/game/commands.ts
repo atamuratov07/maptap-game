@@ -212,9 +212,9 @@ export function applyGameCommand(
 		}
 
 		case 'ADVANCE_ROUND': {
-			if (state.phase !== 'leaderboard') {
+			if (state.phase !== 'revealed' && state.phase !== 'leaderboard') {
 				return err({
-					code: 'game_not_on_leaderboard',
+					code: 'game_not_advanceable',
 				})
 			}
 

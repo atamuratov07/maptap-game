@@ -75,9 +75,9 @@ export interface LeaderboardRoundState extends RoundStateBase {
 	leaderboardShownAt: number
 }
 export interface CompletedRoundState extends RoundStateBase {
+	submissions: Record<MemberId, EvaluatedSubmission>
 	revealedAt: number
 	leaderboardShownAt: number | null
-	submissions: Record<MemberId, EvaluatedSubmission>
 }
 
 export interface GameResult {
@@ -120,7 +120,4 @@ export interface GameCompletedState {
 }
 
 export type GameState =
-	| GameOpenState
-	| GameRevealedState
-	| GameLeaderboardState
-	| GameCompletedState
+	GameOpenState | GameRevealedState | GameLeaderboardState | GameCompletedState
