@@ -1,14 +1,7 @@
 import type { CountryId, GameDifficulty, GameScope } from '../../shared/types'
 import type { MemberId } from '../room/types'
 
-export const GamePhases = {
-	Open: 'open',
-	Revealed: 'revealed',
-	Leaderboard: 'leaderboard',
-	Completed: 'completed',
-} as const
-
-export type GamePhase = (typeof GamePhases)[keyof typeof GamePhases]
+export type GamePhase = 'open' | 'revealed' | 'leaderboard' | 'completed'
 
 export interface GameConfig {
 	questionCount: number
@@ -103,22 +96,22 @@ export interface GameStateBase {
 }
 
 export interface GameOpenState extends GameStateBase {
-	phase: typeof GamePhases.Open
+	phase: 'open'
 	currentRound: OpenRoundState
 }
 
 export interface GameRevealedState extends GameStateBase {
-	phase: typeof GamePhases.Revealed
+	phase: 'revealed'
 	currentRound: RevealedRoundState
 }
 
 export interface GameLeaderboardState extends GameStateBase {
-	phase: typeof GamePhases.Leaderboard
+	phase: 'leaderboard'
 	currentRound: LeaderboardRoundState
 }
 
 export interface GameCompletedState {
-	phase: typeof GamePhases.Completed
+	phase: 'completed'
 	gameId: string
 	session: GameSession
 	participantsById: Record<MemberId, GameParticipantState>

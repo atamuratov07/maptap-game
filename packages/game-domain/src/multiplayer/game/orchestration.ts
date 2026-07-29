@@ -1,10 +1,10 @@
 import { err, ok, type Result } from '../../shared/result'
 import type { CommandError } from '../errors'
 import { applyGameCommand, type GameCommand } from './commands'
-import type { GamePhases, GameState } from './types'
+import type { GameState } from './types'
 
 export interface GameAdvanceContext {
-	advanceablePhase: typeof GamePhases.Revealed | typeof GamePhases.Leaderboard
+	advanceablePhase: 'revealed' | 'leaderboard'
 	now: number
 }
 
@@ -60,10 +60,6 @@ export function advanceGame(
 		}
 
 		case 'revealed': {
-			if (context.advanceablePhase === 'revealed') {
-				return advanceGameRound(state, context)
-			}
-
 			return applyGameCommand(state, {
 				type: 'SHOW_LEADERBOARD',
 				now: context.now,
@@ -71,29 +67,10 @@ export function advanceGame(
 		}
 
 		case 'leaderboard': {
-			const nextQuestionIndex = state.currentRound.questionIndex + 1
-
-			let command: GameCommand
-
-			if (nextQuestionIndex < state.session.questionIds.length) {
-				command = {
-					type: 'ADVANCE_ROUND',
-					now: context.now,
-				}
-			} else {
-				command = {
-					type: 'COMPLETE_GAME',
-					now: context.now,
-				}
-			}
-
-			const commandResult = applyGameCommand(state, command)
-
-			if (!commandResult.ok) {
-				return err(commandResult.error)
-			}
-
-			return ok(commandResult.value)
+			return advanceGameRound(state, {
+				...context,
+				advanceablePhase: 'leaderboard',
+			})
 		}
 
 		case 'completed': {

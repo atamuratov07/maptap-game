@@ -1,8 +1,8 @@
 import type { GameState } from './types'
 
 export interface GameAdvanceScheduleConfig {
-	revealDurationMs?: number | undefined
-	leaderboardDurationMs?: number | undefined
+	revealDurationMs?: number
+	leaderboardDurationMs?: number
 }
 
 export function getNextGameAdvanceAt(

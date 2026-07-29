@@ -61,9 +61,7 @@ export interface RoomPlayerFinishedView extends RoomPlayerViewBase {
 }
 
 export type RoomPlayerView =
-	| RoomPlayerLobbyView
-	| RoomPlayerActiveView
-	| RoomPlayerFinishedView
+	RoomPlayerLobbyView | RoomPlayerActiveView | RoomPlayerFinishedView
 
 interface RoomHostViewBase extends RoomViewBase {
 	viewerRole: 'host'
@@ -94,9 +92,7 @@ export interface GroupHostRoomFinishedView extends GroupHostRoomViewBase {
 }
 
 export type GroupHostRoomView =
-	| GroupHostRoomLobbyView
-	| GroupHostRoomActiveView
-	| GroupHostRoomFinishedView
+	GroupHostRoomLobbyView | GroupHostRoomActiveView | GroupHostRoomFinishedView
 
 interface ClassroomHostRoomViewBase extends RoomHostViewBase {
 	viewerRole: 'host'
