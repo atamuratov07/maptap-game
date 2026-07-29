@@ -46,7 +46,7 @@ export type CommandError =
 			code: 'game_not_revealed'
 	  }
 	| {
-			code: 'game_not_on_leaderboard'
+			code: 'game_not_advanceable'
 	  }
 	| {
 			code: 'game_not_ready_to_complete'

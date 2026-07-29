@@ -1,7 +1,14 @@
 import type { CountryId, GameDifficulty, GameScope } from '../../shared/types'
 import type { MemberId } from '../room/types'
 
-export type GamePhase = 'open' | 'revealed' | 'leaderboard' | 'completed'
+export const GamePhases = {
+	Open: 'open',
+	Revealed: 'revealed',
+	Leaderboard: 'leaderboard',
+	Completed: 'completed',
+} as const
+
+export type GamePhase = (typeof GamePhases)[keyof typeof GamePhases]
 
 export interface GameConfig {
 	questionCount: number
@@ -75,9 +82,9 @@ export interface LeaderboardRoundState extends RoundStateBase {
 	leaderboardShownAt: number
 }
 export interface CompletedRoundState extends RoundStateBase {
+	submissions: Record<MemberId, EvaluatedSubmission>
 	revealedAt: number
 	leaderboardShownAt: number | null
-	submissions: Record<MemberId, EvaluatedSubmission>
 }
 
 export interface GameResult {
@@ -96,22 +103,22 @@ export interface GameStateBase {
 }
 
 export interface GameOpenState extends GameStateBase {
-	phase: 'open'
+	phase: typeof GamePhases.Open
 	currentRound: OpenRoundState
 }
 
 export interface GameRevealedState extends GameStateBase {
-	phase: 'revealed'
+	phase: typeof GamePhases.Revealed
 	currentRound: RevealedRoundState
 }
 
 export interface GameLeaderboardState extends GameStateBase {
-	phase: 'leaderboard'
+	phase: typeof GamePhases.Leaderboard
 	currentRound: LeaderboardRoundState
 }
 
 export interface GameCompletedState {
-	phase: 'completed'
+	phase: typeof GamePhases.Completed
 	gameId: string
 	session: GameSession
 	participantsById: Record<MemberId, GameParticipantState>
@@ -120,7 +127,4 @@ export interface GameCompletedState {
 }
 
 export type GameState =
-	| GameOpenState
-	| GameRevealedState
-	| GameLeaderboardState
-	| GameCompletedState
+	GameOpenState | GameRevealedState | GameLeaderboardState | GameCompletedState

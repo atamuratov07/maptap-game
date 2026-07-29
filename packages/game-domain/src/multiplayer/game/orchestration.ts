@@ -1,9 +1,10 @@
 import { err, ok, type Result } from '../../shared/result'
 import type { CommandError } from '../errors'
 import { applyGameCommand, type GameCommand } from './commands'
-import type { GameState } from './types'
+import type { GamePhases, GameState } from './types'
 
 export interface GameAdvanceContext {
+	advanceablePhase: typeof GamePhases.Revealed | typeof GamePhases.Leaderboard
 	now: number
 }
 
@@ -11,9 +12,9 @@ export function advanceGameRound(
 	state: GameState,
 	context: GameAdvanceContext,
 ): Result<GameState, CommandError> {
-	if (state.phase !== 'leaderboard') {
+	if (state.phase !== context.advanceablePhase) {
 		return err({
-			code: 'game_not_on_leaderboard',
+			code: 'game_not_advanceable',
 		})
 	}
 
@@ -59,6 +60,10 @@ export function advanceGame(
 		}
 
 		case 'revealed': {
+			if (context.advanceablePhase === 'revealed') {
+				return advanceGameRound(state, context)
+			}
+
 			return applyGameCommand(state, {
 				type: 'SHOW_LEADERBOARD',
 				now: context.now,

@@ -29,6 +29,7 @@ export {
 } from './orchestration'
 export {
 	DEFAULT_GAME_CONFIG,
+	GamePhases,
 	type CompletedRoundState,
 	type EvaluatedSubmission,
 	type GameCompletedState,
@@ -38,7 +39,7 @@ export {
 	type GameOpenState,
 	type GameParticipantScore,
 	type GameParticipantState,
-	type GamePhase,
+	type GamePhase as GamePhase,
 	type GameResult,
 	type GameRevealedState,
 	type GameSession,
