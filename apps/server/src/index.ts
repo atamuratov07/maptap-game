@@ -16,10 +16,12 @@ let getHealthSnapshot = (): Record<string, unknown> => ({})
 const app = createApp({
 	getHealthSnapshot: () => getHealthSnapshot(),
 })
+
 const { httpServer, io, gameNamespace } = createRealtimeServer({
 	app,
 	corsOrigins: env.corsOrigins,
 })
+
 const publisher = createRoomPublisher({
 	namespace: gameNamespace,
 	repository,
