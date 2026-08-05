@@ -9,6 +9,7 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
+		"@fontsource-variable/rubik": "^5.3.0",
 		"@maptap/country-catalog": "*",
 		"@maptap/game-domain": "*",
 		"@maptap/game-protocol": "*",

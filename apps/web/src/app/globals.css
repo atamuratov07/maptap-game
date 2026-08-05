@@ -3,8 +3,7 @@
 @layer base {
 	:root {
 		color-scheme: light;
-		--app-font-sans:
-			'Segoe UI', 'SF Pro Display', 'Trebuchet MS', system-ui, sans-serif;
+		--app-font-sans: 'Rubik Variable', sans-serif;
 		--app-color-text: #0f172a;
 		--app-color-muted: #475569;
 		--app-color-surface: rgba(255, 255, 255, 0.92);
@@ -144,6 +143,11 @@
 .button-3d-teal {
 	--button-3d-edge: #0f4f49;
 	--button-3d-glow: rgba(13, 148, 136, 0.26);
+}
+
+.button-3d-indigo {
+	--button-3d-edge: #3730a3;
+	--button-3d-glow: rgba(79, 70, 229, 0.45);
 }
 
 .button-3d-danger {
