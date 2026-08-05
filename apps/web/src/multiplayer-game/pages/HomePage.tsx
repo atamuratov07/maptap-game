@@ -3,13 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { ButtonLink, ScreenShell } from '../../shared/ui'
 import { formatGatewayErrorMessage } from '../api/errors'
 import { createSocketGateway } from '../api/socketGateway'
-import {
-	CreateRoomForm,
-	type CreateRoomFormValues,
-} from '../create/CreateRoomForm'
+import { CreateRoomForm } from '../create/CreateRoomForm'
 import { JoinRoomForm } from '../join/JoinRoomForm'
 import { saveRoomSession } from '../session/sessionStorage'
 import type { RoomSession } from '../session/types'
+import type { CreateRoomRequest } from '@maptap/game-protocol'
 
 export function HomePage(): JSX.Element {
 	const navigate = useNavigate()
@@ -24,13 +22,14 @@ export function HomePage(): JSX.Element {
 	}, [gateway])
 
 	const handleCreateRoom = useCallback(
-		async (values: CreateRoomFormValues) => {
+		async (values: CreateRoomRequest) => {
 			setIsCreating(true)
 			setCreateError(null)
 
 			try {
 				const response = await gateway.createRoom({
 					hostName: values.hostName,
+					roomMode: values.roomMode,
 				})
 
 				const storedSession: RoomSession = {

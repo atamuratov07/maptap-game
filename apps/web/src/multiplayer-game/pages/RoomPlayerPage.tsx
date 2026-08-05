@@ -1,12 +1,73 @@
 import { useParams } from 'react-router-dom'
 import { RoomFinishedScreen } from '../finished/RoomFinishedScreen'
-import { ActiveGameScreen } from '../game/ActiveGameScreen'
+import { ActiveGameParticipantScreen } from '../game/ActiveGameParticipantScreen'
 import { PlayerJoinScreen } from '../join/PlayerJoinScreen'
 import { RoomLobbyScreen } from '../lobby/RoomLobbyScreen'
 import { RoomClosedScreen } from '../screens/RoomClosedScreen'
 import { RoomErrorScreen } from '../screens/RoomErrorScreen'
 import { RoomLoadingScreen } from '../screens/RoomLoadingScreen'
 import { useRoomPlayerController } from '../session/useRoomPlayerController'
+import { AnimatePresence } from 'motion/react'
+import { FloatingNotice } from '../../shared/ui/FloatingNotice'
+import { useEffect, useRef, useState } from 'react'
+import { CheckIcon, LoaderIcon } from 'lucide-react'
+
+function HostConnectionNotice({ hostConnected }: { hostConnected?: boolean }) {
+	const [notice, setNotice] = useState<'disconnected' | 'reconnected' | null>(
+		null,
+	)
+	const prevHostConnected = useRef<boolean | undefined>(undefined)
+
+	useEffect(() => {
+		if (!hostConnected) {
+			setNotice('disconnected')
+		} else if (!prevHostConnected.current) {
+			setNotice('reconnected')
+			const timer = setTimeout(() => {
+				// if (notice === 'reconnected')
+				setNotice(null)
+			}, 1000)
+
+			return () => clearTimeout(timer)
+		} else {
+			setNotice(null)
+		}
+
+		prevHostConnected.current = hostConnected
+	}, [hostConnected])
+	return (
+		<>
+			{notice === 'reconnected' && (
+				<AnimatePresence mode='wait'>
+					<FloatingNotice
+						tone='neutral'
+						offsetTop='1rem'
+						className='flex gap-2 items-center'
+					>
+						<CheckIcon className='text-xl stroke-3' />
+						<p>Сессия хоста возоблена</p>
+					</FloatingNotice>
+				</AnimatePresence>
+			)}
+			{notice === 'disconnected' && (
+				<AnimatePresence mode='wait'>
+					<FloatingNotice
+						tone='error'
+						offsetTop='1rem'
+						className='flex gap-2 items-center'
+					>
+						<LoaderIcon className='animate-spin text-xl stroke-3' />
+						<p>
+							Хост отключился от игры
+							<br />
+							Ожидаем переподключения
+						</p>
+					</FloatingNotice>
+				</AnimatePresence>
+			)}
+		</>
+	)
+}
 
 export function RoomPlayerPage(): JSX.Element {
 	const params = useParams<{ roomCode: string }>()
@@ -71,35 +132,52 @@ export function RoomPlayerPage(): JSX.Element {
 		)
 	}
 
+	const hostConnected = room.members.find(member => member.isHost)?.connected
+
+	const renderHostConnectionStatus =
+		room.roomMode === 'classroom' ? (
+			<HostConnectionNotice hostConnected={hostConnected} />
+		) : null
+
 	if (room.phase === 'lobby') {
 		return (
-			<RoomLobbyScreen
-				role='player'
-				roomCode={roomCode}
-				members={room.members}
-				actionErrorMessage={actionErrorMessage}
-				isReconnecting={isReconnecting}
-			/>
+			<>
+				{renderHostConnectionStatus}
+
+				<RoomLobbyScreen
+					role='player'
+					roomCode={roomCode}
+					members={room.members}
+					actionErrorMessage={actionErrorMessage}
+					isReconnecting={isReconnecting}
+				/>
+			</>
 		)
 	}
 
 	if (room.phase === 'finished') {
 		return (
-			<RoomFinishedScreen
-				room={room}
-				capabilities={{
-					canPlayAgain: false,
-					canTerminateRoom: false,
-					canLeaveRoom: true,
-				}}
-				isReconnecting={isReconnecting}
-			/>
+			<>
+				{renderHostConnectionStatus}
+
+				<RoomFinishedScreen
+					room={room}
+					capabilities={{
+						canPlayAgain: false,
+						canTerminateRoom: false,
+						canLeaveRoom: true,
+					}}
+					isReconnecting={isReconnecting}
+				/>
+			</>
 		)
 	}
 
 	return (
 		<div className='fixed inset-0 overflow-hidden bg-slate-950'>
-			<ActiveGameScreen
+			{renderHostConnectionStatus}
+
+			<ActiveGameParticipantScreen
 				game={room.activeGame}
 				members={room.members}
 				submitPending={actionPending === 'submit'}

@@ -1,6 +1,9 @@
 import { countryCatalog, type CountryInfo } from '@maptap/country-catalog'
 import type {
+	ActiveGameHostView,
+	GameHostSubmissionView,
 	GameLeaderboardEntry,
+	GameParticipantView,
 	GameResult,
 	GameView,
 } from '@maptap/game-domain/multiplayer/game'
@@ -9,7 +12,7 @@ import { getMemberName } from './roomSelectors'
 
 export interface CurrentRoundView {
 	startedAt: number
-	deadlineAt: number
+	deadlineAt: number | null
 	questionCountryId: string
 	currentQuestionNumber: number
 	questionCount: number
@@ -19,8 +22,21 @@ export interface NamedLeaderboardEntry extends GameLeaderboardEntry {
 	name: string
 }
 
+export interface HostParticipantStanding {
+	participantId: string
+	name: string
+	connected: boolean
+	rank: number
+	score: number
+	correctCount: number
+	submittedAt: number | null
+	submission: GameHostSubmissionView | null
+}
+
 export function getLeaderboardEntries(
-	game: Pick<GameView, 'leaderboard'> | Pick<GameResult, 'leaderboard'>,
+	game:
+		| Pick<GameParticipantView, 'leaderboard'>
+		| Pick<GameResult, 'leaderboard'>,
 	members: readonly VisibleMemberInfo[],
 	limit?: number,
 ): NamedLeaderboardEntry[] {
@@ -32,6 +48,32 @@ export function getLeaderboardEntries(
 		...entry,
 		name: getMemberName(members, entry.participantId),
 	}))
+}
+
+export function getHostStandings(
+	game: ActiveGameHostView,
+	members: VisibleMemberInfo[],
+): HostParticipantStanding[] {
+	return game.participants
+		.map(participant => {
+			const participantInfo = members.find(
+				member => member.memberId === participant.participantId,
+			)
+			if (!participantInfo) return
+			return {
+				participantId: participant.participantId,
+				name: participantInfo.name,
+				connected: participantInfo.connected,
+				rank: participant.rank,
+				score: participant.score,
+				correctCount: participant.correctCount,
+				submittedAt:
+					'submittedAt' in participant ? participant?.submittedAt : null,
+				submission:
+					'submission' in participant ? participant?.submission : null,
+			}
+		})
+		.filter(standing => !!standing)
 }
 
 export function getCurrentRound(game: GameView): CurrentRoundView | null {
