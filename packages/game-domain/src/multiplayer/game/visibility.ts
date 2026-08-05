@@ -28,7 +28,7 @@ export interface EvaluatedViewerSubmissionView {
 	scoreAwarded: number
 }
 
-interface GameViewBase {
+interface GameParticipantViewBase {
 	gameId: string
 	phase: GamePhase
 	viewerParticipantId: MemberId
@@ -43,7 +43,7 @@ interface GameViewBase {
 	leaderboard: GameLeaderboardEntry[] | null
 }
 
-interface ActiveGameViewBase extends GameViewBase {
+interface ActiveGameViewBase extends GameParticipantViewBase {
 	startedAt: number
 	deadlineAt: number | null
 	answeredCount: number
@@ -72,7 +72,7 @@ export interface LeaderboardGameParticipantView extends ActiveGameViewBase {
 	leaderboard: GameLeaderboardEntry[]
 }
 
-export interface CompletedGameParticipantView extends GameViewBase {
+export interface CompletedGameParticipantView extends GameParticipantViewBase {
 	phase: 'completed'
 	result: GameResult
 	leaderboard: GameLeaderboardEntry[]
@@ -83,6 +83,11 @@ export type GameParticipantView =
 	| RevealedGameParticipantView
 	| LeaderboardGameParticipantView
 	| CompletedGameParticipantView
+
+export type ActiveGameParticipantView =
+	| OpenGameParticipantView
+	| RevealedGameParticipantView
+	| LeaderboardGameParticipantView
 
 export type GameView = GameParticipantView | GameHostView
 
@@ -165,10 +170,10 @@ export function toGameParticipantView(
 				...base,
 				phase: 'revealed',
 				startedAt: state.currentRound.startedAt,
+				revealedAt: state.currentRound.revealedAt,
 				deadlineAt: state.currentRound.deadlineAt,
 				answeredCount: getAnsweredParticipantCount(state),
 				questionCountryId: state.currentRound.questionId,
-				revealedAt: state.currentRound.revealedAt,
 				correctCountryId: state.currentRound.questionId,
 				viewerSubmission:
 					viewerSubmission && 'isCorrect' in viewerSubmission
@@ -209,9 +214,11 @@ export function toGameParticipantView(
 
 interface GameHostViewBase {
 	gameId: string
-	scope: GameScope
+	phase: GamePhase
+	viewerParticipantId: MemberId
 	questionCount: number
 	currentQuestionNumber: number
+	scope: GameScope
 	participantCount: number
 }
 
@@ -219,55 +226,59 @@ interface ActiveGameHostViewBase extends GameHostViewBase {
 	startedAt: number
 	deadlineAt: number | null
 	answeredCount: number
+	questionCountryId: CountryId
 }
 
-interface GameHostParticipantStanding {
+interface GameParticipantsEntry {
+	participantId: MemberId
 	rank: number
 	score: number
 	correctCount: number
-}
-
-export interface GameHostOpenParticipantEntry extends GameHostParticipantStanding {
 	submittedAt: number | null
 }
 
 export interface GameHostSubmissionView {
 	countryId: CountryId | null
-	submittedAt: number | null
 	isCorrect: boolean
 	scoreAwarded: number
+	submittedAt: number | null
 }
 
-export interface GameHostRevealedParticipantEntry extends GameHostParticipantStanding {
+export interface GameEvaluatedParticipantsEntry {
+	participantId: MemberId
+	rank: number
+	score: number
+	correctCount: number
 	submission: GameHostSubmissionView | null
 }
-
-export type GameHostCompletedParticipantEntry = GameHostParticipantStanding
 
 export interface GameHostOpenView extends ActiveGameHostViewBase {
 	phase: 'open'
 	questionCountryId: CountryId
-	participants: Record<MemberId, GameHostOpenParticipantEntry>
+	participants: GameParticipantsEntry[]
 }
 
 export interface GameHostRevealedView extends ActiveGameHostViewBase {
 	phase: 'revealed'
-	questionCountryId: CountryId
+	revealedAt: number
 	correctCountryId: CountryId
-	participants: Record<MemberId, GameHostRevealedParticipantEntry>
+	participants: GameEvaluatedParticipantsEntry[]
 }
 
 export interface GameHostLeaderboardView extends ActiveGameHostViewBase {
 	phase: 'leaderboard'
-	questionCountryId: CountryId
+	revealedAt: number
 	correctCountryId: CountryId
-	participants: Record<MemberId, GameHostRevealedParticipantEntry>
+	participants: GameEvaluatedParticipantsEntry[]
 }
 
 export interface GameHostCompletedView extends GameHostViewBase {
 	phase: 'completed'
-	participants: Record<MemberId, GameHostCompletedParticipantEntry>
+	result: GameResult
 }
+
+export type ActiveGameHostView =
+	GameHostOpenView | GameHostRevealedView | GameHostLeaderboardView
 
 export type GameHostView =
 	| GameHostOpenView
@@ -275,34 +286,37 @@ export type GameHostView =
 	| GameHostLeaderboardView
 	| GameHostCompletedView
 
-export function toGameHostView(state: GameState): GameHostView {
-	const base = {
+export function toGameHostView(
+	state: GameState,
+	viewerId: MemberId,
+): GameHostView {
+	const base: GameHostViewBase = {
 		gameId: state.gameId,
-		scope: state.session.config.scope,
+		phase: state.phase,
+		viewerParticipantId: viewerId,
 		questionCount: getGameQuestionCount(state),
 		currentQuestionNumber: getGameCurrentQuestionNumber(state),
+		scope: state.session.config.scope,
 		participantCount: getGameParticipantCount(state),
 	}
 	const leaderboard = getGameLeaderboard(state)
 
 	switch (state.phase) {
 		case 'open': {
-			const participants = Object.fromEntries(
-				leaderboard.map(leaderboardEntry => {
+			const participants: GameParticipantsEntry[] = leaderboard.map(
+				leaderboardEntry => {
 					const participantSubmission =
 						state.currentRound.submissions[leaderboardEntry.participantId]
-					return [
-						leaderboardEntry.participantId,
-						{
-							rank: leaderboardEntry.rank,
-							score: leaderboardEntry.score,
-							correctCount: leaderboardEntry.correctCount,
-							submittedAt: participantSubmission
-								? participantSubmission.submittedAt
-								: null,
-						},
-					]
-				}),
+					return {
+						participantId: leaderboardEntry.participantId,
+						rank: leaderboardEntry.rank,
+						score: leaderboardEntry.score,
+						correctCount: leaderboardEntry.correctCount,
+						submittedAt: participantSubmission
+							? participantSubmission.submittedAt
+							: null,
+					}
+				},
 			)
 			return {
 				...base,
@@ -317,34 +331,31 @@ export function toGameHostView(state: GameState): GameHostView {
 
 		case 'revealed':
 		case 'leaderboard': {
-			const participants = Object.fromEntries(
-				leaderboard.map(leaderboardEntry => {
+			const participants: GameEvaluatedParticipantsEntry[] = leaderboard.map(
+				leaderboardEntry => {
 					const participantSubmission =
 						state.currentRound.submissions[leaderboardEntry.participantId]
-					return [
-						leaderboardEntry.participantId,
-						{
-							rank: leaderboardEntry.rank,
-							score: leaderboardEntry.score,
-							correctCount: leaderboardEntry.correctCount,
-							submission: participantSubmission
-								? {
-										isCorrect: participantSubmission.isCorrect,
-										countryId: participantSubmission.countryId,
-										scoreAwarded: participantSubmission.score,
-										submittedAt: participantSubmission
-											? participantSubmission.submittedAt
-											: null,
-									}
-								: null,
-						},
-					]
-				}),
+					return {
+						participantId: leaderboardEntry.participantId,
+						rank: leaderboardEntry.rank,
+						score: leaderboardEntry.score,
+						correctCount: leaderboardEntry.correctCount,
+						submission: participantSubmission
+							? {
+									isCorrect: participantSubmission.isCorrect,
+									countryId: participantSubmission.countryId,
+									scoreAwarded: participantSubmission.score,
+									submittedAt: participantSubmission.submittedAt,
+								}
+							: null,
+					}
+				},
 			)
 			return {
 				...base,
 				phase: state.phase,
 				startedAt: state.currentRound.startedAt,
+				revealedAt: state.currentRound.revealedAt,
 				deadlineAt: state.currentRound.deadlineAt,
 				answeredCount: getAnsweredParticipantCount(state),
 				questionCountryId: state.currentRound.questionId,
@@ -352,23 +363,12 @@ export function toGameHostView(state: GameState): GameHostView {
 				participants,
 			}
 		}
+
 		case 'completed': {
-			const participants = Object.fromEntries(
-				leaderboard.map(leaderboardEntry => {
-					return [
-						leaderboardEntry.participantId,
-						{
-							rank: leaderboardEntry.rank,
-							score: leaderboardEntry.score,
-							correctCount: leaderboardEntry.correctCount,
-						},
-					]
-				}),
-			)
 			return {
 				...base,
 				phase: 'completed',
-				participants,
+				result: state.result,
 			}
 		}
 	}

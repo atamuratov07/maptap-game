@@ -57,8 +57,10 @@ export {
 	type RoomPlayerFinishedView,
 	type RoomPlayerLobbyView,
 	type RoomPlayerView,
+	type RoomHostView,
 	type RoomView,
 	type GroupRoomView,
 	type ClassroomView,
+	type RoomFinishedView,
 	type VisibleMemberInfo,
 } from './visibility'

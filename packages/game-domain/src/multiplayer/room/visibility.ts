@@ -95,7 +95,6 @@ export type GroupHostRoomView =
 	GroupHostRoomLobbyView | GroupHostRoomActiveView | GroupHostRoomFinishedView
 
 interface ClassroomHostRoomViewBase extends RoomHostViewBase {
-	viewerRole: 'host'
 	roomMode: 'classroom'
 }
 
@@ -123,9 +122,17 @@ export type ClassroomHostRoomView =
 	| ClassroomHostRoomLobbyView
 	| ClassroomHostRoomFinishedView
 
-export type RoomView = GroupHostRoomView | RoomPlayerView
+export type RoomView =
+	ClassroomHostRoomView | GroupHostRoomView | RoomPlayerView
 export type ClassroomView = RoomPlayerView | ClassroomHostRoomView
 export type GroupRoomView = RoomPlayerView | GroupHostRoomView
+
+export type RoomHostView = GroupHostRoomView | ClassroomHostRoomView
+
+export type RoomFinishedView =
+	| ClassroomHostRoomFinishedView
+	| GroupHostRoomFinishedView
+	| RoomPlayerFinishedView
 
 function toVisibleMembers(state: RoomState): VisibleMemberInfo[] {
 	return getMembers(state).map(member => ({
@@ -263,7 +270,7 @@ export function toClassroomHostRoomView(
 			return {
 				...base,
 				phase: 'active',
-				activeGame: toGameHostView(state.activeGame),
+				activeGame: toGameHostView(state.activeGame, viewerMemberId),
 				lastGameResult: null,
 			}
 
