@@ -21,11 +21,12 @@ function HostConnectionNotice({ hostConnected }: { hostConnected?: boolean }) {
 	useEffect(() => {
 		if (!hostConnected) {
 			setNotice('disconnected')
-		} else if (!prevHostConnected.current) {
+		} else if (prevHostConnected.current === false) {
 			setNotice('reconnected')
 			const timer = setTimeout(() => {
-				// if (notice === 'reconnected')
-				setNotice(null)
+				if (notice === 'reconnected') {
+					setNotice(null)
+				}
 			}, 1000)
 
 			return () => clearTimeout(timer)
