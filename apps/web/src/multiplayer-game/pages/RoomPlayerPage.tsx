@@ -42,7 +42,7 @@ function HostConnectionNotice({ hostConnected }: { hostConnected?: boolean }) {
 				<AnimatePresence mode='wait'>
 					<FloatingNotice
 						tone='neutral'
-						offsetTop='1rem'
+						offsetTop='compact'
 						className='flex gap-2 items-center'
 					>
 						<CheckIcon className='text-xl stroke-3' />
@@ -54,7 +54,7 @@ function HostConnectionNotice({ hostConnected }: { hostConnected?: boolean }) {
 				<AnimatePresence mode='wait'>
 					<FloatingNotice
 						tone='error'
-						offsetTop='1rem'
+						offsetTop='compact'
 						className='flex gap-2 items-center'
 					>
 						<LoaderIcon className='animate-spin text-xl stroke-3' />

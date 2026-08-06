@@ -255,7 +255,7 @@ export function ActiveGameHostScreen({
 				{actionErrorMessage ? (
 					<FloatingNotice
 						tone='error'
-						offsetTop={isReconnecting ? '8.5rem' : '5.25rem'}
+						offsetTop={isReconnecting ? 'stacked' : 'default'}
 					>
 						{actionErrorMessage}
 					</FloatingNotice>

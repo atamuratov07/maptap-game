@@ -5,12 +5,12 @@ import { cn } from '../utils'
 export function FloatingNotice({
 	tone = 'neutral',
 	className,
-	offsetTop = '5.25rem',
+	offsetTop = 'default',
 	children,
 }: {
 	tone?: 'neutral' | 'error'
 	className?: string
-	offsetTop?: string
+	offsetTop?: 'default' | 'stacked' | 'compact'
 	children: ReactNode
 }): JSX.Element {
 	return (
@@ -37,7 +37,11 @@ export function FloatingNotice({
 			}}
 			className={cn(
 				'absolute inset-x-0 z-40 flex justify-center px-4',
-				`top-[${offsetTop}]`,
+				{
+					default: 'top-21',
+					stacked: 'top-34',
+					compact: 'top-4',
+				}[offsetTop],
 			)}
 		>
 			<p
