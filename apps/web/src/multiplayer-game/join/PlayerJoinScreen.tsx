@@ -46,11 +46,7 @@ export function PlayerJoinScreen({
 							Хост: {hostName}
 						</p>
 					</div>
-					<ButtonLink
-						to='/multiplayer'
-						variant='secondary'
-						size='pill'
-					>
+					<ButtonLink to='/multiplayer' variant='secondary' size='pill'>
 						Назад
 					</ButtonLink>
 				</div>
@@ -67,10 +63,14 @@ export function PlayerJoinScreen({
 					</AlertMessage>
 				) : null}
 
-				<div className='mt-8 rounded-[28px] border border-slate-200 bg-slate-50 p-5 sm:p-6'>
+				<form
+					className='mt-8 rounded-[28px] border border-slate-200 bg-slate-50 p-5 sm:p-6'
+					onSubmit={() => void onJoin(playerName)}
+				>
 					<Field label='Имя игрока'>
 						<TextInput
 							type='text'
+							autoFocus
 							value={playerName}
 							onChange={event => {
 								setPlayerName(event.target.value)
@@ -81,9 +81,9 @@ export function PlayerJoinScreen({
 					</Field>
 
 					<Button
-						type='button'
+						type='submit'
+						is3d
 						className='mt-5 px-5'
-						onClick={() => void onJoin(playerName)}
 						disabled={
 							!joinable || playerName.trim().length === 0 || pending
 						}
@@ -96,7 +96,7 @@ export function PlayerJoinScreen({
 							Присоединиться к этой комнате уже нельзя.
 						</p>
 					) : null}
-				</div>
+				</form>
 			</SurfacePanel>
 		</ScreenShell>
 	)
