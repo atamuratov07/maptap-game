@@ -59,7 +59,12 @@ export function useRoomPlayerController(
 				gateway.resumePlayerRoom({
 					memberSessionToken: session.memberSessionToken,
 				}),
-			subscribe: handlers => gateway.subscribePlayerRoom(handlers),
+			subscribe: ({ onRoomClosed, onRoomSnapshot, onSocketDisconnect }) =>
+				gateway.subscribePlayerRoom({
+					onRoomSnapshot,
+					onRoomClosed,
+					onSocketDisconnect,
+				}),
 			close: () => gateway.disconnect(),
 		}),
 		[gateway],
