@@ -24,7 +24,7 @@ function HostConnectionNotice({ hostConnected }: { hostConnected?: boolean }) {
 		} else if (prevHostConnected.current === false) {
 			setNotice('reconnected')
 			const timer = setTimeout(() => {
-				setNotice(current => (current === 'disconnected' ? null : current))
+				setNotice(null)
 			}, 1000)
 
 			return () => clearTimeout(timer)
