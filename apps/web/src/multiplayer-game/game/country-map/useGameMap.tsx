@@ -1,4 +1,4 @@
-import type { GameView } from '@maptap/game-domain/multiplayer/game'
+import type { GameParticipantView } from '@maptap/game-domain/multiplayer/game'
 import { useCallback, useMemo } from 'react'
 import type { MapHighlight, MapRendererProps } from '../../../shared/map/types'
 import { CountryInfoCard } from '../../../shared/widgets/CountryInfoCard'
@@ -13,7 +13,7 @@ const EMPTY_MARKERS: NonNullable<MapRendererProps['markers']> = []
 const noopPick = () => undefined
 
 interface UseRoomGameMapArgs {
-	game: GameView
+	game: GameParticipantView
 	submitPending: boolean
 	onSubmitAnswer: (countryId: string) => void
 }
@@ -30,7 +30,7 @@ export function useGameMap({
 	const eligibleCountryIdsKey = game.eligibleCountryIds.join('|')
 	const interactiveIds = useMemo<ReadonlySet<string>>(
 		() => new Set(game.eligibleCountryIds),
-		[eligibleCountryIdsKey],
+		[game, eligibleCountryIdsKey],
 	)
 
 	const isCompleted = game.phase === 'completed'

@@ -2,6 +2,7 @@ import {
 	GAME_NAMESPACE,
 	type Ack,
 	type AckCallback,
+	type AdvanceRoundRequest,
 	type ClientToServerEvents,
 	type CreateRoomRequest,
 	type CreateRoomResponse,
@@ -17,6 +18,7 @@ import {
 	type ResumePlayerRoomRequest,
 	type ResumePlayerRoomResponse,
 	type ReturnToLobbyRequest,
+	type RevealRoundRequest,
 	type RoomClosedEvent,
 	type ServerToClientEvents,
 	type StartGameRequest,
@@ -27,7 +29,7 @@ import {
 import { io, type Socket } from 'socket.io-client'
 import { toGatewayError } from './errors'
 
-type GameSocket = Socket<ServerToClientEvents, ClientToServerEvents>
+type RoomSocket = Socket<ServerToClientEvents, ClientToServerEvents>
 type ClientEventName = keyof ClientToServerEvents
 
 type ClientEventPayloadMap = {
@@ -52,12 +54,12 @@ interface TimedAckEmitter {
 interface HostRoomSubscriptionHandlers {
 	onRoomSnapshot?: (payload: HostRoomSnapshotEvent) => void
 	onRoomClosed?: (payload: RoomClosedEvent) => void
-	onDisconnect?: (reason: string) => void
+	onSocketDisconnect?: (reason: string) => void
 }
 interface PlayerRoomSubscriptionHandlers {
 	onRoomSnapshot?: (payload: PlayerRoomSnapshotEvent) => void
 	onRoomClosed?: (payload: RoomClosedEvent) => void
-	onDisconnect?: (reason: string) => void
+	onSocketDisconnect?: (reason: string) => void
 }
 
 export interface SocketGateway {
@@ -74,6 +76,8 @@ export interface SocketGateway {
 	terminateRoom: (payload: TerminateRoomRequest) => Promise<EmptyAckData>
 	startGame: (payload: StartGameRequest) => Promise<EmptyAckData>
 	submitAnswer: (payload: SubmitAnswerRequest) => Promise<SubmitAnswerResponse>
+	revealRound: (payload: RevealRoundRequest) => Promise<EmptyAckData>
+	advanceRound: (payload: AdvanceRoundRequest) => Promise<EmptyAckData>
 	subscribeHostRoom: (handlers: HostRoomSubscriptionHandlers) => () => void
 	subscribePlayerRoom: (handlers: PlayerRoomSubscriptionHandlers) => () => void
 	disconnect: () => void
@@ -100,10 +104,10 @@ function unwrapAck<TResponse>(response: Ack<TResponse>): TResponse {
 }
 
 export function createSocketGateway(): SocketGateway {
-	let socket: GameSocket | null = null
+	let socket: RoomSocket | null = null
 	let intentionalDisconnect = false
 
-	function getSocket(): GameSocket {
+	function getSocket(): RoomSocket {
 		if (!socket) {
 			socket = io(buildSocketUrl(), {
 				autoConnect: false,
@@ -114,7 +118,7 @@ export function createSocketGateway(): SocketGateway {
 		return socket
 	}
 
-	async function ensureConnected(): Promise<GameSocket> {
+	async function ensureConnected(): Promise<RoomSocket> {
 		const currentSocket = getSocket()
 		if (currentSocket.connected) {
 			return currentSocket
@@ -208,6 +212,14 @@ export function createSocketGateway(): SocketGateway {
 			return request('game:submit-answer', payload)
 		},
 
+		revealRound(payload) {
+			return request('game:reveal-round', payload)
+		},
+
+		advanceRound(payload) {
+			return request('game:advance-round', payload)
+		},
+
 		subscribeHostRoom(handlers) {
 			const currentSocket = getSocket()
 
@@ -219,22 +231,22 @@ export function createSocketGateway(): SocketGateway {
 				handlers.onRoomClosed?.(payload)
 			}
 
-			const handleDisconnect = (reason: string) => {
+			const handleSocketDisconnect = (reason: string) => {
 				if (intentionalDisconnect) {
 					return
 				}
 
-				handlers.onDisconnect?.(reason)
+				handlers.onSocketDisconnect?.(reason)
 			}
 
 			currentSocket.on('room:host-snapshot', handleRoomSnapshot)
 			currentSocket.on('room:closed', handleRoomClosed)
-			currentSocket.on('disconnect', handleDisconnect)
+			currentSocket.on('disconnect', handleSocketDisconnect)
 
 			return () => {
 				currentSocket.off('room:host-snapshot', handleRoomSnapshot)
 				currentSocket.off('room:closed', handleRoomClosed)
-				currentSocket.off('disconnect', handleDisconnect)
+				currentSocket.off('disconnect', handleSocketDisconnect)
 			}
 		},
 
@@ -249,22 +261,22 @@ export function createSocketGateway(): SocketGateway {
 				handlers.onRoomClosed?.(payload)
 			}
 
-			const handleDisconnect = (reason: string) => {
+			const handleSocketDisconnect = (reason: string) => {
 				if (intentionalDisconnect) {
 					return
 				}
 
-				handlers.onDisconnect?.(reason)
+				handlers.onSocketDisconnect?.(reason)
 			}
 
 			currentSocket.on('room:player-snapshot', handleRoomSnapshot)
 			currentSocket.on('room:closed', handleRoomClosed)
-			currentSocket.on('disconnect', handleDisconnect)
+			currentSocket.on('disconnect', handleSocketDisconnect)
 
 			return () => {
 				currentSocket.off('room:player-snapshot', handleRoomSnapshot)
 				currentSocket.off('room:closed', handleRoomClosed)
-				currentSocket.off('disconnect', handleDisconnect)
+				currentSocket.off('disconnect', handleSocketDisconnect)
 			}
 		},
 

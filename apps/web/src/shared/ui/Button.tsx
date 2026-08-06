@@ -1,9 +1,12 @@
 import type { ButtonHTMLAttributes } from 'react'
 import { Link, type LinkProps } from 'react-router-dom'
-import { getButtonClassName, type ButtonSize, type ButtonVariant } from './buttonStyles'
+import {
+	getButtonClassName,
+	type ButtonSize,
+	type ButtonVariant,
+} from './buttonStyles'
 
-export interface ButtonProps
-	extends ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 	variant?: ButtonVariant
 	size?: ButtonSize
 	is3d?: boolean

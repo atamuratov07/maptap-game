@@ -13,6 +13,7 @@ interface RoomLobbyScreenProps {
 	role: RoomMemberRole
 	roomCode: string
 	members: VisibleMemberInfo[]
+	requireQuestionDuration?: boolean
 	startPending?: boolean
 	terminatePending?: boolean
 	actionErrorMessage?: string | null
@@ -97,6 +98,7 @@ function MemberTile({ member }: { member: VisibleMemberInfo }): JSX.Element {
 export function RoomLobbyScreen({
 	role,
 	roomCode,
+	requireQuestionDuration,
 	members,
 	startPending = false,
 	terminatePending = false,
@@ -142,6 +144,7 @@ export function RoomLobbyScreen({
 					<GameConfigPanel
 						roomCode={roomCode}
 						formId={gameConfigFormId}
+						requireQuestionDuration={!!requireQuestionDuration}
 						onStartGame={onStartGame}
 					/>
 				) : null}

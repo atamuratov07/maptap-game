@@ -35,8 +35,8 @@ type RoomPlayerEntryState =
 	  }
 
 type RoomPlayerControllerState =
-	| RoomPlayerEntryState
-	| RoomRuntimeState<RoomPlayerView>
+	RoomPlayerEntryState | RoomRuntimeState<RoomPlayerView>
+
 type RoomPlayerAction = 'join' | 'submit'
 
 interface UseRoomPlayerControllerResult {
@@ -52,7 +52,6 @@ export function useRoomPlayerController(
 	roomCode: string,
 ): UseRoomPlayerControllerResult {
 	const gateway = useMemo(() => createSocketGateway(), [])
-	const entryRunIdRef = useRef(0)
 
 	const playerConnectionPort = useMemo(
 		(): RoomRuntimeAdapter<RoomPlayerView> => ({
@@ -60,7 +59,12 @@ export function useRoomPlayerController(
 				gateway.resumePlayerRoom({
 					memberSessionToken: session.memberSessionToken,
 				}),
-			subscribe: handlers => gateway.subscribePlayerRoom(handlers),
+			subscribe: ({ onRoomClosed, onRoomSnapshot, onSocketDisconnect }) =>
+				gateway.subscribePlayerRoom({
+					onRoomSnapshot,
+					onRoomClosed,
+					onSocketDisconnect,
+				}),
 			close: () => gateway.disconnect(),
 		}),
 		[gateway],
@@ -81,10 +85,7 @@ export function useRoomPlayerController(
 	const [runtimeStarted, setRuntimeStarted] = useState(false)
 	const state = runtimeStarted ? runtime.state : entryState
 
-	const cleanupController = useCallback(() => {
-		entryRunIdRef.current++
-		runtime.disconnect()
-	}, [runtime.disconnect])
+	const entryRunIdRef = useRef(0)
 
 	const beginEntryRun = useCallback(() => {
 		return ++entryRunIdRef.current
@@ -93,6 +94,11 @@ export function useRoomPlayerController(
 	const isActiveEntryRun = useCallback((runId: number) => {
 		return entryRunIdRef.current === runId
 	}, [])
+
+	const cleanupController = useCallback(() => {
+		entryRunIdRef.current++
+		runtime.disconnect()
+	}, [runtime.disconnect])
 
 	const joinRoom = useCallback(
 		async (playerName: string) => {

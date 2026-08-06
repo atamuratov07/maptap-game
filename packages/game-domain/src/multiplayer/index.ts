@@ -25,6 +25,9 @@ export {
 	type RoomPlayerView,
 	type RoomState,
 	type RoomView,
+	type RoomHostView,
+	type RoomFinishedView,
+	type RoomMode,
 } from './room/index'
 
 export {

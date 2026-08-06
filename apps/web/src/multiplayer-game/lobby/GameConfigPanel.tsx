@@ -14,6 +14,7 @@ import {
 interface GameConfigPanelProps {
 	roomCode: string
 	formId: string
+	requireQuestionDuration: boolean
 	onStartGame: (config: GameConfig) => void
 }
 
@@ -40,6 +41,7 @@ function ConfigField({ icon, label, children }: ConfigFieldProps): JSX.Element {
 export function GameConfigPanel({
 	roomCode,
 	formId,
+	requireQuestionDuration,
 	onStartGame,
 }: GameConfigPanelProps): JSX.Element {
 	const [config, setConfig] = useState<GameConfig>(() =>
@@ -107,12 +109,22 @@ export function GameConfigPanel({
 						value={config.questionDurationMs}
 						className='h-12 rounded-2xl border-slate-200 bg-slate-50 font-black'
 						onChange={event => {
-							setConfig(current => ({
-								...current,
-								questionDurationMs: Number(event.target.value),
-							}))
+							const newValue = event.target.value
+								? Number(event.target.value)
+								: undefined
+							setConfig(current => {
+								return {
+									...current,
+									questionDurationMs: newValue,
+								}
+							})
 						}}
 					>
+						{!requireQuestionDuration && (
+							<option key={'no-timer'} value={''}>
+								Без таймера
+							</option>
+						)}
 						{QUESTION_DURATION_MS_OPTIONS.map(option => (
 							<option key={option} value={option}>
 								{option / 1000} сек.

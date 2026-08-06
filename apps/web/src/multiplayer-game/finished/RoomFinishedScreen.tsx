@@ -1,4 +1,3 @@
-import type { RoomFinishedView } from '@maptap/game-domain/multiplayer/room'
 import { DoorClosed, RotateCcw } from 'lucide-react'
 import {
 	AlertMessage,
@@ -9,6 +8,8 @@ import {
 } from '../../shared/ui'
 import { getLeaderboardEntries } from '../model/gameSelectors'
 import { ResultsList } from './ResultsList'
+import type { RoomFinishedView } from '@maptap/game-domain/multiplayer'
+import type { GameLeaderboardEntry } from '@maptap/game-domain/multiplayer/game'
 
 interface RoomFinishedScreenCapabilities {
 	canPlayAgain: boolean
@@ -37,7 +38,12 @@ export function RoomFinishedScreen({
 	onPlayAgain,
 	onTerminateRoom,
 }: RoomFinishedScreenProps): JSX.Element {
-	const viewerEntry = room.viewerLeaderboardEntry
+	let viewerEntry: GameLeaderboardEntry | null = null
+
+	if (!(room.roomMode === 'classroom' && room.viewerRole === 'host')) {
+		viewerEntry = room.viewerLeaderboardEntry
+	}
+
 	const leaderboardEntries = getLeaderboardEntries(
 		room.lastGameResult,
 		room.members,

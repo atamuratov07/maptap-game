@@ -1,12 +1,15 @@
 import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { RoomFinishedScreen } from '../finished/RoomFinishedScreen'
-import { ActiveGameScreen } from '../game/ActiveGameScreen'
 import { RoomLobbyScreen } from '../lobby/RoomLobbyScreen'
 import { RoomClosedScreen } from '../screens/RoomClosedScreen'
 import { RoomErrorScreen } from '../screens/RoomErrorScreen'
 import { RoomLoadingScreen } from '../screens/RoomLoadingScreen'
+import { ActiveGameParticipantScreen } from '../game/ActiveGameParticipantScreen'
 import { useRoomHostController } from '../session/useRoomHostController'
+import { useGroupHostActions } from '../session/useGroupHostActions'
+import { ActiveGameHostScreen } from '../game/ActiveGameHostScreen'
+import { useClassroomHostActions } from '../session/useClassroomHostActions'
 
 export function RoomHostPage(): JSX.Element {
 	const params = useParams<{ roomCode: string }>()
@@ -14,14 +17,27 @@ export function RoomHostPage(): JSX.Element {
 	const roomCode = (params.roomCode ?? '').trim().toUpperCase()
 	const {
 		state,
+		gateway,
 		actionPending,
 		actionErrorMessage,
+		runAction,
 		startGame,
-		submitAnswer,
 		returnToLobby,
 		terminateRoom,
 		retry,
 	} = useRoomHostController(roomCode)
+
+	const { submitAnswer } = useGroupHostActions({
+		state,
+		gateway,
+		runAction,
+	})
+	const { revealRound, advanceRound } = useClassroomHostActions({
+		state,
+		gateway,
+		runAction,
+	})
+
 	const closedReason = state.status === 'closed' ? state.reason : null
 
 	useEffect(() => {
@@ -78,11 +94,13 @@ export function RoomHostPage(): JSX.Element {
 		)
 	}
 
+	const requireQuestionDuration = room.roomMode === 'group'
 	if (room.phase === 'lobby') {
 		return (
 			<RoomLobbyScreen
 				role='host'
 				roomCode={roomCode}
+				requireQuestionDuration={requireQuestionDuration}
 				members={room.members}
 				startPending={actionPending === 'start'}
 				terminatePending={actionPending === 'terminate-room'}
@@ -121,16 +139,31 @@ export function RoomHostPage(): JSX.Element {
 		)
 	}
 
+	if (room.roomMode === 'group') {
+		return (
+			<div className='fixed inset-0 overflow-hidden bg-slate-950'>
+				<ActiveGameParticipantScreen
+					game={room.activeGame}
+					members={room.members}
+					submitPending={actionPending === 'submit'}
+					actionErrorMessage={actionErrorMessage}
+					isReconnecting={isReconnecting}
+					onSubmitAnswer={submitAnswer}
+				/>
+			</div>
+		)
+	}
+
 	return (
-		<div className='fixed inset-0 overflow-hidden bg-slate-950'>
-			<ActiveGameScreen
-				game={room.activeGame}
-				members={room.members}
-				submitPending={actionPending === 'submit'}
-				actionErrorMessage={actionErrorMessage}
-				isReconnecting={isReconnecting}
-				onSubmitAnswer={submitAnswer}
-			/>
-		</div>
+		<ActiveGameHostScreen
+			game={room.activeGame}
+			members={room.members}
+			onRevealRound={revealRound}
+			onAdvanceRound={advanceRound}
+			isReconnecting={isReconnecting}
+			revealPending={actionPending === 'reveal'}
+			advancePending={actionPending === 'advance'}
+			actionErrorMessage={actionErrorMessage}
+		/>
 	)
 }

@@ -348,19 +348,22 @@ describe('multiplayer server integration', () => {
 			expect(hostSnapshotEvent.snapshot.activeGame.phase).toBe('revealed')
 			if (hostSnapshotEvent.snapshot.activeGame.phase !== 'revealed') return
 
-			expect(
-				hostSnapshotEvent.snapshot.activeGame.participants,
-			).toHaveProperty(joined.data.memberId, {
-				rank: 1,
-				score: 0,
-				correctCount: 0,
-				submission: {
-					countryId: null,
-					isCorrect: false,
-					scoreAwarded: 0,
-					submittedAt: null,
-				},
-			})
+			expect(hostSnapshotEvent.snapshot.activeGame.participants).toEqual(
+				expect.arrayContaining([
+					{
+						participantId: joined.data.memberId,
+						rank: 1,
+						score: 0,
+						correctCount: 0,
+						submission: {
+							countryId: null,
+							isCorrect: false,
+							scoreAwarded: 0,
+							submittedAt: null,
+						},
+					},
+				]),
+			)
 
 			const playerSnapshotEvent = await playerSnapshotPromise
 

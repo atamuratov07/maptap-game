@@ -55,12 +55,13 @@ function normalizeGameConfig(value: unknown): GameConfig {
 		questionCount: includesValue(QUESTION_COUNT_OPTIONS, draft.questionCount)
 			? draft.questionCount
 			: DEFAULT_GAME_CONFIG.questionCount,
-		questionDurationMs: includesValue(
-			QUESTION_DURATION_MS_OPTIONS,
-			draft.questionDurationMs,
-		)
-			? draft.questionDurationMs
-			: DEFAULT_GAME_CONFIG.questionDurationMs,
+		questionDurationMs:
+			includesValue(
+				QUESTION_DURATION_MS_OPTIONS,
+				draft.questionDurationMs,
+			) || draft.questionDurationMs === undefined
+				? draft.questionDurationMs
+				: DEFAULT_GAME_CONFIG.questionDurationMs,
 		difficulty: includesValue(
 			DIFFICULTY_OPTIONS.map(option => option.value),
 			draft.difficulty,

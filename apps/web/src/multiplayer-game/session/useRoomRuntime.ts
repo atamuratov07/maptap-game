@@ -41,7 +41,7 @@ export type RoomRuntimeState<TView> =
 type RoomSubscriptionHandlers<TView> = {
 	onRoomSnapshot: (payload: { roomId: RoomId; snapshot: TView }) => void
 	onRoomClosed: (payload: RoomClosedEvent) => void
-	onDisconnect: (reason: string) => void
+	onSocketDisconnect: (reason: string) => void
 }
 
 export type RoomRuntimeAdapter<TView> = {
@@ -183,7 +183,7 @@ export function useRoomRuntime<TView>({
 						adapter.close()
 					}, 0)
 				},
-				onDisconnect: () => {
+				onSocketDisconnect: () => {
 					setState({
 						status: 'reconnecting',
 						roomCode,

@@ -46,6 +46,8 @@ export function formatGatewayErrorMessage(error: unknown): string {
 			return 'Сервер отклонил данные запроса.'
 		case 'internal_error':
 			return 'Сервер вернул внутреннюю ошибку.'
+		case 'room_not_in_classroom_mode':
+			return 'Комната не в режиме класса'
 		case 'room_not_joinable':
 			return 'К этой комнате сейчас нельзя присоединиться.'
 		case 'room_participant_capacity_limit_exceeded':
@@ -94,6 +96,8 @@ export function formatGatewayErrorMessage(error: unknown): string {
 			return 'Вы уже подключены к этой комнате.'
 		case 'participant_already_submitted':
 			return 'Вы уже отправили ответ в этом раунде.'
+		case 'invalid_game_config':
+			return 'Недействительные настройки игры'
 		case 'no_eligible_countries':
 			return 'Для этих настроек нет доступных стран.'
 		case 'insufficient_eligible_countries':
@@ -101,4 +105,6 @@ export function formatGatewayErrorMessage(error: unknown): string {
 		case 'transport_error':
 			return 'Не удалось подключиться к игровому серверу.'
 	}
+
+	return 'Неизвестная ошибка'
 }

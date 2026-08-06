@@ -1,13 +1,31 @@
 import { useState, type FormEvent } from 'react'
-import { AlertMessage, Button, Field, TextInput } from '../../shared/ui'
+import {
+	AlertMessage,
+	Button,
+	Field,
+	SelectControl,
+	TextInput,
+} from '../../shared/ui'
 import { cn } from '../../shared/utils'
+import type { CreateRoomRequest } from '@maptap/game-protocol'
+import type { RoomMode } from '@maptap/game-domain/multiplayer'
 
-export interface CreateRoomFormValues {
-	hostName: string
-}
+const ROOM_MODE_OPTIONS: Array<{
+	value: RoomMode
+	label: string
+}> = [
+	{
+		label: 'Игра в классе',
+		value: 'classroom',
+	},
+	{
+		label: 'Игра в группе',
+		value: 'group',
+	},
+] as const
 
 interface CreateRoomFormProps {
-	onSubmit: (values: CreateRoomFormValues) => Promise<void> | void
+	onSubmit: (values: CreateRoomRequest) => Promise<void> | void
 	pending: boolean
 	submitError: string | null
 	className?: string
@@ -20,6 +38,7 @@ export function CreateRoomForm({
 	className,
 }: CreateRoomFormProps): JSX.Element {
 	const [hostName, setHostName] = useState('')
+	const [roomMode, setRoomMode] = useState<RoomMode>('group')
 	const trimmedHostName = hostName.trim()
 
 	function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -31,6 +50,7 @@ export function CreateRoomForm({
 
 		void onSubmit({
 			hostName: trimmedHostName,
+			roomMode: roomMode,
 		})
 	}
 
@@ -60,6 +80,23 @@ export function CreateRoomForm({
 					maxLength={20}
 					placeholder='Введите имя хоста'
 				/>
+			</Field>
+
+			<Field label='Режим комнаты'>
+				<SelectControl
+					accent='amber'
+					className='rounded-lg border-slate-400 py-2 shadow-sm'
+					value={roomMode}
+					onChange={event => {
+						setRoomMode(event.target.value as RoomMode)
+					}}
+				>
+					{ROOM_MODE_OPTIONS.map(option => (
+						<option key={option.value} value={option.value}>
+							{option.label}
+						</option>
+					))}
+				</SelectControl>
 			</Field>
 
 			{submitError ? (
