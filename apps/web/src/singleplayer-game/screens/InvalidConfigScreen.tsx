@@ -2,7 +2,7 @@ import { ButtonLink, ScreenShell, SurfacePanel } from '../../shared/ui'
 
 export function InvalidConfigScreen(): JSX.Element {
 	return (
-		<ScreenShell center>
+		<ScreenShell center className='px-5 py-8'>
 			<SurfacePanel>
 				<p className='text-[11px] font-black uppercase tracking-[0.22em] text-rose-700'>
 					Одиночная игра
@@ -14,16 +14,10 @@ export function InvalidConfigScreen(): JSX.Element {
 					Проверьте настройки и попробуйте снова.
 				</p>
 				<div className='mt-6 flex flex-wrap gap-3'>
-					<ButtonLink
-						to='/singleplayer'
-						variant='teal'
-					>
+					<ButtonLink to='/singleplayer' variant='teal'>
 						Открыть настройки
 					</ButtonLink>
-					<ButtonLink
-						to='/'
-						variant='secondary'
-					>
+					<ButtonLink to='/' variant='secondary'>
 						На главную
 					</ButtonLink>
 				</div>

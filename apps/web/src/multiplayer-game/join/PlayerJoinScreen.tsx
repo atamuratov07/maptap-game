@@ -29,7 +29,7 @@ export function PlayerJoinScreen({
 	const [playerName, setPlayerName] = useState('')
 
 	return (
-		<ScreenShell center>
+		<ScreenShell center className='px-5 py-8'>
 			<SurfacePanel
 				width='xl'
 				className='rounded-4xl border-white/60 bg-white/92 shadow-[0_28px_80px_rgba(15,23,42,0.12)] backdrop-blur sm:p-8'

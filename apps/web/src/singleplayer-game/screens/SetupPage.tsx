@@ -43,16 +43,11 @@ export function SetupPage(): JSX.Element {
 			?.label ?? config.difficulty
 
 	return (
-		<ScreenShell className='sm:px-8'>
+		<ScreenShell className='px-5 py-8 sm:px-8'>
 			<div className='mx-auto max-w-3xl'>
 				<div className='mb-6 flex flex-wrap items-center justify-between gap-3'>
-					<ButtonLink
-						to='/'
-						variant='nav'
-						size='pill'
-					>
-						<span aria-hidden='true'>&larr;</span>
-						К режимам
+					<ButtonLink to='/' variant='nav' size='pill'>
+						<span aria-hidden='true'>&larr;</span>К режимам
 					</ButtonLink>
 				</div>
 

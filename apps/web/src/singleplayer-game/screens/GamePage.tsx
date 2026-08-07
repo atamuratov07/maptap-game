@@ -57,7 +57,7 @@ function GameContent({ config }: { config: GameConfig }): JSX.Element {
 
 	if (loadErrorCode || !gameData) {
 		return (
-			<ScreenShell center>
+			<ScreenShell center className='px-5 py-8'>
 				<SurfacePanel>
 					<p className='text-[11px] font-black uppercase tracking-[0.22em] text-rose-700'>
 						Одиночная игра
@@ -69,17 +69,10 @@ function GameContent({ config }: { config: GameConfig }): JSX.Element {
 						{getLoadErrorMessage(loadErrorCode)}
 					</p>
 					<div className='mt-6 flex flex-wrap gap-3'>
-						<Button
-							type='button'
-							variant='teal'
-							onClick={handleTryAgain}
-						>
+						<Button type='button' variant='teal' onClick={handleTryAgain}>
 							Повторить
 						</Button>
-						<ButtonLink
-							to='/singleplayer'
-							variant='secondary'
-						>
+						<ButtonLink to='/singleplayer' variant='secondary'>
 							Изменить настройки
 						</ButtonLink>
 					</div>

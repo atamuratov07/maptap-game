@@ -9,7 +9,7 @@ export function RoomClosedScreen({
 	reason,
 }: RoomClosedScreenProps): JSX.Element {
 	return (
-		<ScreenShell center>
+		<ScreenShell center className='px-5 py-8'>
 			<SurfacePanel>
 				<p className='text-[11px] font-black uppercase tracking-[0.22em] text-rose-700'>
 					Комната закрыта
