@@ -66,7 +66,7 @@ export function CreateRoomForm({
 				Создание комнаты
 			</p>
 			<h1 className='mt-3 text-4xl font-black tracking-tight text-slate-950'>
-				Новая мультиплеерная комната
+				Новая комната
 			</h1>
 
 			<Field label='Имя хоста' className='mt-6'>
