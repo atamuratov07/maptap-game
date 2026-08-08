@@ -1,48 +1,14 @@
-import fs from 'node:fs'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import {
+	buildCachePath,
+	ensureCacheDir,
+	readCachedJson,
+	writeCachedJson,
+} from './cache.mjs'
 
 const WDQS_ENDPOINT = 'https://query.wikidata.org/sparql'
 const WDQS_MAX_RETRIES = 3
 const WDQS_USER_AGENT =
 	'MapTapCountryBuildBot/1.0 https://github.com/atamuratov07/maptap-game'
-
-const helperDir = path.dirname(fileURLToPath(import.meta.url))
-const defaultCacheDir = path.resolve(helperDir, '../../build/cache')
-
-function ensureCacheDir(cacheDir) {
-	fs.mkdirSync(cacheDir, { recursive: true })
-}
-
-function sanitizeCacheKey(cacheKey) {
-	const sanitized = String(cacheKey ?? '')
-		.trim()
-		.toLowerCase()
-		.replace(/[^a-z0-9._-]+/g, '-')
-		.replace(/^-+|-+$/g, '')
-
-	if (!sanitized) {
-		throw new Error('WDQS cache key must contain at least one safe character')
-	}
-
-	return sanitized
-}
-
-function buildCachePath(cacheDir, cacheKey) {
-	return path.join(cacheDir, `${sanitizeCacheKey(cacheKey)}.json`)
-}
-
-function readCachedJson(cachePath) {
-	if (!fs.existsSync(cachePath)) {
-		return null
-	}
-
-	return JSON.parse(fs.readFileSync(cachePath, 'utf8'))
-}
-
-function writeCachedJson(cachePath, value) {
-	fs.writeFileSync(cachePath, JSON.stringify(value, null, 2), 'utf8')
-}
 
 function parseRetryAfterMs(rawValue) {
 	if (!rawValue) {
@@ -87,7 +53,7 @@ export async function fetchWdqsJson({
 	endpoint = WDQS_ENDPOINT,
 	maxRetries = WDQS_MAX_RETRIES,
 	userAgent = WDQS_USER_AGENT,
-	cacheDir = defaultCacheDir,
+	cacheDir,
 }) {
 	ensureCacheDir(cacheDir)
 

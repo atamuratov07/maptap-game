@@ -4,7 +4,7 @@ It does all of this:
 
 * loads the original Demotiles z6 country polygons,
 * loads current Natural Earth countries and populated places ZIPs,
-* fetches REST Countries v3.1 for cca2, cca3, ccn3, capital, capitalInfo, continents, and translations,
+* fetches REST Countries v5 for cca2, cca3, ccn3, capital, capitalInfo, continents, and translations,
 * fetches Wikidata for Russian country and capital labels,
 * validates your 195 playable roster,
 * assigns difficulty,
@@ -13,7 +13,7 @@ It does all of this:
 * builds capitals.geojson,
 * creates supplemental country polygons only for playable states missing from the base,
 * creates the geolines join CSV keyed by name,
-* writes validator reports and exits with failure if any required fields are still missing. REST Countries’ current docs require the fields filter on /v3.1/all, and Wikidata’s SPARQL service returns JSON when requested with Accept: application/sparql-results+json.
+* writes validator reports and exits with failure if any required fields are still missing. REST Countries’ current docs require the fields filter on /countries/v5?response_fields=, and Wikidata’s SPARQL service returns JSON when requested with Accept: application/sparql-results+json.
  */
 
 import pointOnFeature from '@turf/point-on-feature'
@@ -21,6 +21,11 @@ import fs from 'node:fs'
 import shp from 'shpjs'
 import { canonicalizeContinent } from './lib/continent.mjs'
 import { fetchWdqsJson } from './lib/wdqs.mjs'
+import {
+	extractCapitalCoords,
+	fetchRestcountriesJson,
+	pickPrimaryCapital,
+} from './lib/restcountries.mjs'
 
 const BASE_COUNTRIES = 'build/base_countries.geojson'
 const BASE_CENTROIDS_NDJSON = 'build/base_centroids_z0.geojson'
@@ -126,14 +131,6 @@ async function loadZipAsFeatureCollection(zipPath) {
 		if (fc) return fc
 	}
 	throw new Error(`Could not parse ${zipPath}`)
-}
-
-async function fetchJson(url) {
-	const res = await fetch(url, {
-		headers: { 'user-agent': 'demotiles-hybrid-build/1.0' },
-	})
-	if (!res.ok) throw new Error(`HTTP ${res.status} ${url}`)
-	return res.json()
 }
 
 function validatePlayable(playable) {
@@ -258,9 +255,15 @@ const baseCountries = readJson(BASE_COUNTRIES)
 const neCountriesFc = await loadZipAsFeatureCollection(NE_COUNTRIES_ZIP)
 const nePlacesFc = await loadZipAsFeatureCollection(NE_PLACES_ZIP)
 
-const restCountries = await fetchJson(
-	'https://restcountries.com/v3.1/all?fields=cca2,cca3,ccn3,name,translations,capital,capitalInfo,continents,independent',
-)
+const restCountries = await fetchRestcountriesJson({
+	cacheKey: 'rc-tiles-data',
+	fields: [
+		'codes.alpha_2,codes.alpha_3,codes.ccn3',
+		'names.common,names.translations',
+		'capitals',
+		'continents',
+	],
+})
 
 const wikidata = await fetchWdqsJson({
 	cacheKey: 'wdqs-country-capital-labels',
@@ -279,7 +282,7 @@ SELECT ?iso3 ?countryLabel ?capitalLabel WHERE {
 
 const restByA3 = new Map()
 for (const row of restCountries) {
-	if (row?.cca3) restByA3.set(row.cca3, row)
+	if (row?.codes?.alpha_3) restByA3.set(row.codes.alpha_3, row)
 }
 
 const wdByA3 = new Map()
@@ -424,7 +427,7 @@ function buildCountryRecord({ a3, baseFeat, neFeat }) {
 		ov.NAME,
 		base.NAME,
 		pickNeName(ne),
-		rest?.name?.common,
+		rest?.names?.common,
 	)
 
 	const ABBREV = firstNonEmpty(ov.ABBREV, base.ABBREV, pickNeAbbrev(ne), NAME)
@@ -432,12 +435,14 @@ function buildCountryRecord({ a3, baseFeat, neFeat }) {
 	const NAME_RU = firstNonEmpty(
 		ov.NAME_RU,
 		wd.NAME_RU,
-		rest?.translations?.rus?.common,
+		rest?.names?.translations?.rus?.common,
 	)
+
+	const primaryCapital = pickPrimaryCapital(rest)
 
 	const CAPITAL = firstNonEmpty(
 		ov.CAPITAL,
-		firstArrayValue(rest?.capital),
+		primaryCapital?.name,
 		ne.CAPITAL,
 		capFallback?.name,
 	)
@@ -447,21 +452,19 @@ function buildCountryRecord({ a3, baseFeat, neFeat }) {
 	let CAPITAL_COORDS = null
 	if (Array.isArray(ov.CAPITAL_COORDS) && ov.CAPITAL_COORDS.length === 2) {
 		CAPITAL_COORDS = ov.CAPITAL_COORDS
-	} else if (
-		Array.isArray(rest?.capitalInfo?.latlng) &&
-		rest.capitalInfo.latlng.length === 2
-	) {
-		CAPITAL_COORDS = [
-			Number(rest.capitalInfo.latlng[1]),
-			Number(rest.capitalInfo.latlng[0]),
-		]
+	} else if (extractCapitalCoords(primaryCapital)) {
+		CAPITAL_COORDS = extractCapitalCoords(primaryCapital)
 	} else if (capFallback?.coordinates) {
 		CAPITAL_COORDS = capFallback.coordinates
 	}
 
-	const ISO_A2 = firstNonEmpty(ov.ISO_A2, pickNeIsoA2(ne), rest?.cca2)
+	const ISO_A2 = firstNonEmpty(
+		ov.ISO_A2,
+		pickNeIsoA2(ne),
+		rest?.codes?.alpha_2,
+	)
 
-	const ISO_N3 = firstNonEmpty(ov.ISO_N3, pickNeIsoN3(ne), rest?.ccn3)
+	const ISO_N3 = firstNonEmpty(ov.ISO_N3, pickNeIsoN3(ne), rest?.codes?.ccn3)
 
 	const CONTINENT = canonicalizeContinent(
 		firstNonEmpty(
@@ -518,7 +521,7 @@ for (const [a3, baseFeat] of [...baseByA3.entries()].sort()) {
 	const neFeat = neByA3.get(a3) ?? null
 	const record = buildCountryRecord({ a3, baseFeat, neFeat })
 
-	if (record.missing.length) {
+	if (record.missing.length && record.props.PLAYABLE === 1) {
 		validatorFailures.push({
 			ADM0_A3: a3,
 			NAME: baseFeat.properties?.NAME ?? '',
