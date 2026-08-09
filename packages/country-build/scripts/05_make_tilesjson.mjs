@@ -21,7 +21,7 @@ const tilejson = {
 	vector_layers: [
 		{
 			id: 'geolines',
-			description: 'original demotiles geolines with manual Russian names',
+			description: 'original demotiles geolines with localized names',
 			minzoom: 0,
 			maxzoom: 4,
 			fields: {

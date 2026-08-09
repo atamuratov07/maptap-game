@@ -44,6 +44,7 @@ rm -f \
     build/world_complete.mbtiles
 
 rm -rf "$TILES_DIR"
+mkdir -p "$TILES_DIR"
 
 # 1) Patch original geolines with localized labels
 ./tools/tile-join -f -o build/base_geolines_patched.mbtiles \

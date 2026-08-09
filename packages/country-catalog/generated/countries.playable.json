@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-08-09T11:04:13.237Z",
+  "generated_at": "2026-08-09T17:55:41.004Z",
   "playable_count": 195,
   "countries": [
     {
@@ -3899,8 +3899,8 @@
       "continent": "europe",
       "population": 66912637,
       "currency": "British pound",
-      "currency_ru": "экономика Великобритании",
-      "currency_uz_latn": "Buyuk Britaniya iqtisodiyoti",
+      "currency_ru": "фунт стерлингов",
+      "currency_uz_latn": "funt sterling",
       "flag_url": "https://flags.restcountries.com/v5/svg/gb.svg",
       "centroid_lng": -1.757812,
       "centroid_lat": 52.696361,

@@ -20,10 +20,7 @@ import pointOnFeature from '@turf/point-on-feature'
 import fs from 'node:fs'
 import shp from 'shpjs'
 import { canonicalizeContinent } from './lib/continent.mjs'
-import {
-	firstUzLatnLabel,
-	transliterateCyrillicToUzLatn,
-} from './lib/uz-latn.mjs'
+import { firstUzLatnLabel } from './lib/uz-latn.mjs'
 import { cleanWdLabel, fetchWdqsJson } from './lib/wdqs.mjs'
 import {
 	extractCapitalCoords,
@@ -691,10 +688,10 @@ writeCsv(
 writeCsv(
 	'build/geolines_join.csv',
 	['name', 'name_ru', 'name_uz_latn'],
-	Object.entries(overrides.geolines ?? {}).map(([name, nameRu]) => [
-		name,
-		nameRu,
-		transliterateCyrillicToUzLatn(nameRu),
+	Object.values(overrides.geolines ?? {}).map(geoline => [
+		geoline['en'],
+		geoline['ru'],
+		geoline['uz-latn'],
 	]),
 )
 
