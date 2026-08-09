@@ -20,7 +20,11 @@ import pointOnFeature from '@turf/point-on-feature'
 import fs from 'node:fs'
 import shp from 'shpjs'
 import { canonicalizeContinent } from './lib/continent.mjs'
-import { fetchWdqsJson } from './lib/wdqs.mjs'
+import {
+	firstUzLatnLabel,
+	transliterateCyrillicToUzLatn,
+} from './lib/uz-latn.mjs'
+import { cleanWdLabel, fetchWdqsJson } from './lib/wdqs.mjs'
 import {
 	extractCapitalCoords,
 	fetchRestcountriesJson,
@@ -33,6 +37,7 @@ const NE_COUNTRIES_ZIP = 'upstream/ne_110m_admin_0_countries.zip'
 const NE_PLACES_ZIP = 'upstream/ne_110m_populated_places.zip'
 const PLAYABLE_JSON = 'data/playable_states_195.json'
 const OVERRIDES_JSON = 'data/manual_overrides.json'
+const LOCALES = ['en', 'ru', 'uz']
 
 fs.mkdirSync('build', { recursive: true })
 
@@ -265,34 +270,65 @@ const restCountries = await fetchRestcountriesJson({
 	],
 })
 
-const wikidata = await fetchWdqsJson({
-	cacheKey: 'wdqs-country-capital-labels',
-	query: `
+const restByA3 = new Map()
+for (const row of restCountries) {
+	if (row?.codes?.alpha_3) restByA3.set(row.codes.alpha_3, row)
+}
+
+function buildLabelQuery(locale) {
+	return `
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>
 PREFIX bd: <http://www.bigdata.com/rdf#>
 PREFIX wikibase: <http://wikiba.se/ontology#>
 
 SELECT ?iso3 ?countryLabel ?capitalLabel WHERE {
   ?country wdt:P298 ?iso3 .
-  OPTIONAL { ?country wdt:P36 ?capital . }
-  SERVICE wikibase:label { bd:serviceParam wikibase:language "ru,en". }
-}
-`,
-})
+  OPTIONAL {
+    ?country wdt:P36 ?capital .
+  }
 
-const restByA3 = new Map()
-for (const row of restCountries) {
-	if (row?.codes?.alpha_3) restByA3.set(row.codes.alpha_3, row)
+  SERVICE wikibase:label {
+    bd:serviceParam wikibase:language "${locale}" .
+  }
+}
+`
+}
+
+const wikidata = []
+for (const locale of LOCALES) {
+	wikidata.push(
+		await fetchWdqsJson({
+			cacheKey: `wdqs-country-capital-labels-${locale}`,
+			query: buildLabelQuery(locale),
+		}),
+	)
 }
 
 const wdByA3 = new Map()
-for (const row of wikidata.results.bindings ?? []) {
-	const a3 = row.iso3?.value?.trim()
-	if (!a3 || wdByA3.has(a3)) continue
-	wdByA3.set(a3, {
-		NAME_RU: row.countryLabel?.value?.trim() ?? '',
-		CAPITAL_RU: row.capitalLabel?.value?.trim() ?? '',
-	})
+wikidata.forEach((localeRes, i) => {
+	const locale = LOCALES[i]
+
+	for (const row of localeRes.results.bindings ?? []) {
+		const a3 = row.iso3?.value?.trim()
+		if (!a3) continue
+		if (!wdByA3.has(a3)) {
+			wdByA3.set(a3, { countryLabel: {}, capitalLabel: {} })
+		}
+		const entry = wdByA3.get(a3)
+		entry.countryLabel[locale] = cleanWdLabel(row?.countryLabel?.value)
+		entry.capitalLabel[locale] = cleanWdLabel(row?.capitalLabel?.value)
+	}
+})
+
+for (const row of wdByA3.values()) {
+	row.countryLabel = {
+		ru: row.countryLabel?.ru || '',
+		uz: firstUzLatnLabel(row.countryLabel?.uz, row.countryLabel?.en),
+	}
+	row.capitalLabel = {
+		ru: row.capitalLabel?.ru || '',
+		uz: firstUzLatnLabel(row.capitalLabel?.uz, row.capitalLabel?.en),
+	}
 }
 
 const neByA3 = new Map()
@@ -402,8 +438,10 @@ function toSeedRecord(props) {
 		ADM0_A3: String(props.ADM0_A3),
 		NAME: String(props.NAME),
 		NAME_RU: String(props.NAME_RU),
+		NAME_UZ_LATN: String(props.NAME_UZ_LATN),
 		CAPITAL: String(props.CAPITAL),
 		CAPITAL_RU: String(props.CAPITAL_RU),
+		CAPITAL_UZ_LATN: String(props.CAPITAL_UZ_LATN),
 		CONTINENT: String(props.CONTINENT),
 		ISO_A2: String(props.ISO_A2),
 		ISO_N3: String(props.ISO_N3),
@@ -434,8 +472,15 @@ function buildCountryRecord({ a3, baseFeat, neFeat }) {
 
 	const NAME_RU = firstNonEmpty(
 		ov.NAME_RU,
-		wd.NAME_RU,
+		wd?.countryLabel?.['ru'],
 		rest?.names?.translations?.rus?.common,
+	)
+
+	const NAME_UZ_LATN = firstUzLatnLabel(
+		ov.NAME_UZ_LATN,
+		wd?.countryLabel?.['uz'],
+		rest?.names?.translations?.uzb?.common,
+		NAME,
 	)
 
 	const primaryCapital = pickPrimaryCapital(rest)
@@ -447,7 +492,12 @@ function buildCountryRecord({ a3, baseFeat, neFeat }) {
 		capFallback?.name,
 	)
 
-	const CAPITAL_RU = firstNonEmpty(ov.CAPITAL_RU, wd.CAPITAL_RU)
+	const CAPITAL_RU = firstNonEmpty(ov.CAPITAL_RU, wd?.capitalLabel?.['ru'])
+	const CAPITAL_UZ_LATN = firstUzLatnLabel(
+		ov.CAPITAL_UZ_LATN,
+		wd?.capitalLabel?.['uz'],
+		CAPITAL,
+	)
 
 	let CAPITAL_COORDS = null
 	if (Array.isArray(ov.CAPITAL_COORDS) && ov.CAPITAL_COORDS.length === 2) {
@@ -479,8 +529,10 @@ function buildCountryRecord({ a3, baseFeat, neFeat }) {
 	const props = {
 		NAME,
 		NAME_RU,
+		NAME_UZ_LATN,
 		CAPITAL,
 		CAPITAL_RU,
+		CAPITAL_UZ_LATN,
 		ABBREV,
 		ADM0_A3: a3,
 		ISO_A2,
@@ -494,8 +546,10 @@ function buildCountryRecord({ a3, baseFeat, neFeat }) {
 	for (const key of [
 		'NAME',
 		'NAME_RU',
+		'NAME_UZ_LATN',
 		'CAPITAL',
 		'CAPITAL_RU',
+		'CAPITAL_UZ_LATN',
 		'ADM0_A3',
 		'ISO_A2',
 		'ISO_N3',
@@ -521,7 +575,7 @@ for (const [a3, baseFeat] of [...baseByA3.entries()].sort()) {
 	const neFeat = neByA3.get(a3) ?? null
 	const record = buildCountryRecord({ a3, baseFeat, neFeat })
 
-	if (record.missing.length && record.props.PLAYABLE === 1) {
+	if (record.missing.length) {
 		validatorFailures.push({
 			ADM0_A3: a3,
 			NAME: baseFeat.properties?.NAME ?? '',
@@ -533,8 +587,10 @@ for (const [a3, baseFeat] of [...baseByA3.entries()].sort()) {
 		a3,
 		record.props.NAME,
 		record.props.NAME_RU,
+		record.props.NAME_UZ_LATN,
 		record.props.CAPITAL,
 		record.props.CAPITAL_RU,
+		record.props.CAPITAL_UZ_LATN,
 		record.props.ISO_A2,
 		record.props.ISO_N3,
 		record.props.CONTINENT,
@@ -619,8 +675,10 @@ writeCsv(
 		'ADM0_A3',
 		'NAME',
 		'NAME_RU',
+		'NAME_UZ_LATN',
 		'CAPITAL',
 		'CAPITAL_RU',
+		'CAPITAL_UZ_LATN',
 		'ISO_A2',
 		'ISO_N3',
 		'CONTINENT',
@@ -632,10 +690,11 @@ writeCsv(
 
 writeCsv(
 	'build/geolines_join.csv',
-	['name', 'name_ru'],
+	['name', 'name_ru', 'name_uz_latn'],
 	Object.entries(overrides.geolines ?? {}).map(([name, nameRu]) => [
 		name,
 		nameRu,
+		transliterateCyrillicToUzLatn(nameRu),
 	]),
 )
 

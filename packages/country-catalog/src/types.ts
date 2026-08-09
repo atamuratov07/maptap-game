@@ -8,14 +8,17 @@ export interface RegistryCountry {
 	id: CountryId
 	name: string
 	name_ru: string
+	name_uz_latn: string
 	capital: string
 	capital_ru: string
+	capital_uz_latn: string
 	continent: GameContinent
 	population: number
 	centroid_lng: number
 	centroid_lat: number
 	currency: string
 	currency_ru: string
+	currency_uz_latn: string
 	flag_url: string
 	playable: boolean
 	difficulty: GameDifficulty
@@ -41,14 +44,17 @@ export interface CountryInfo {
 	id: CountryId
 	name: string
 	nameRu: string
+	nameUzLatn: string
 	capital: string
 	capitalRu: string
+	capitalUzLatn: string
 	continent: GameContinent
 	population: number
 	centroidLng: number
 	centroidLat: number
 	currency: string
 	currencyRu: string
+	currencyUzLatn: string
 	playable: boolean
 	difficulty: GameDifficulty
 	independent: boolean
