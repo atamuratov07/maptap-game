@@ -8,6 +8,7 @@ import { JoinRoomForm } from '../join/JoinRoomForm'
 import { saveRoomSession } from '../session/sessionStorage'
 import type { RoomSession } from '../session/types'
 import type { CreateRoomRequest } from '@maptap/game-protocol'
+import { LanguageSwitcher } from '../../shared/i18n'
 
 export function HomePage(): JSX.Element {
 	const navigate = useNavigate()
@@ -59,6 +60,8 @@ export function HomePage(): JSX.Element {
 					<ButtonLink to='/' variant='nav' size='pill'>
 						<span aria-hidden='true'>&larr;</span>К режимам
 					</ButtonLink>
+
+					<LanguageSwitcher className='py-2.5 shadow-none text-slate-700 bg-white/85 border-slate-300' />
 				</div>
 
 				<div className='grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] [&>*:first-child]:order-1 [&>*:last-child]:order-2 lg:[&>*:first-child]:order-2 lg:[&>*:last-child]:order-1'>

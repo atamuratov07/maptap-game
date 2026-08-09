@@ -8,6 +8,7 @@ import { useMemo } from 'react'
 import { AlertMessage, Button, CopyButton } from '../../shared/ui'
 import { cn } from '../../shared/utils'
 import { GameConfigPanel } from './GameConfigPanel'
+import { LanguageSwitcher } from '../../shared/i18n'
 
 interface RoomLobbyScreenProps {
 	role: RoomMemberRole
@@ -118,7 +119,7 @@ export function RoomLobbyScreen({
 				canStartGame ? 'pb-24' : '',
 			)}
 		>
-			<header className='mx-auto w-full max-w-6xl text-center'>
+			<header className='relative mx-auto w-full max-w-6xl text-center'>
 				<p className='text-[11px] font-black uppercase tracking-[0.24em] text-amber-600'>
 					Лобби
 				</p>
@@ -148,6 +149,8 @@ export function RoomLobbyScreen({
 						onStartGame={onStartGame}
 					/>
 				) : null}
+
+				<LanguageSwitcher className='absolute top-0 right-0' />
 			</header>
 
 			<section

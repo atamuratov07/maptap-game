@@ -19,6 +19,8 @@ import {
 	QUESTION_COUNT_OPTIONS,
 	SCOPE_OPTIONS,
 } from '../core/config'
+import { LanguageSwitcher } from '../../shared/i18n'
+import { MoveLeftIcon } from 'lucide-react'
 
 export function SetupPage(): JSX.Element {
 	const navigate = useNavigate()
@@ -47,15 +49,16 @@ export function SetupPage(): JSX.Element {
 			<div className='mx-auto max-w-3xl'>
 				<div className='mb-6 flex flex-wrap items-center justify-between gap-3'>
 					<ButtonLink to='/' variant='nav' size='pill'>
-						<span aria-hidden='true'>&larr;</span>К режимам
+						<MoveLeftIcon size={16} className='stroke-3' />К режимам
 					</ButtonLink>
+					<LanguageSwitcher className='py-2.5 shadow-none text-slate-700 bg-white/85 border-slate-300' />
 				</div>
 
 				<SurfacePanel
 					width='xl'
 					className='border-white/60 bg-white/90 shadow-[0_28px_80px_rgba(15,23,42,0.12)] backdrop-blur sm:p-8'
 				>
-					<h1 className='mb-2 text-5xl font-black leading-none tracking-tight text-slate-950'>
+					<h1 className='mb-2 text-3xl sm:text-5xl font-black leading-none tracking-tight text-slate-950'>
 						Одиночная игра
 					</h1>
 					<p className='mb-6 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base'>

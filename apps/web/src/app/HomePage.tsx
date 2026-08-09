@@ -10,6 +10,7 @@ import {
 	UsersRoundIcon,
 	ZapIcon,
 } from 'lucide-react'
+import { LanguageSwitcher } from '../shared/i18n'
 
 export function HomePage(): JSX.Element {
 	return (
@@ -364,6 +365,11 @@ export function HomePage(): JSX.Element {
 					</div>
 				</div>
 			</section>
+
+			<LanguageSwitcher
+				tone='dark'
+				className='fixed z-100 top-5 sm:top-10 right-5 sm:right-10'
+			/>
 		</ScreenShell>
 	)
 }
