@@ -1,6 +1,7 @@
 import { Flag, LogOut } from 'lucide-react'
 import { Button, ButtonLink } from '../../shared/ui'
 import { QuestionTimer } from './QuestionTimer'
+import { useTranslation } from 'react-i18next'
 
 interface GameHeaderBarProps {
 	questionIndex: number
@@ -23,9 +24,13 @@ export function GameHeader({
 	questionResolvedAt,
 	onGiveUp,
 }: GameHeaderBarProps): JSX.Element {
+	const { t } = useTranslation()
 	const progressLabel = questionCount
-		? `Вопрос ${Math.min(questionIndex + 1, questionCount)} / ${questionCount}`
-		: 'Нет вопросов'
+		? t('singleplayer.questionProgress', {
+				current: Math.min(questionIndex + 1, questionCount),
+				total: questionCount,
+			})
+		: t('common.noQuestions')
 
 	return (
 		<header className='flex justify-center border-b border-slate-500/35 bg-slate-950/88  text-white backdrop-blur-md'>
@@ -38,7 +43,7 @@ export function GameHeader({
 				<div className='mx-auto grid items-end gap-1 grid-cols-[auto_1fr_auto] sm:gap-4'>
 					<ButtonLink
 						to='/singleplayer'
-						aria-label='Выйти'
+						aria-label={t('singleplayer.exit')}
 						variant='inverse'
 						size='sm'
 						className='min-h-10 px-3 text-slate-700 hover:text-slate-950 sm:px-3.5'
@@ -49,13 +54,15 @@ export function GameHeader({
 							size={20}
 							strokeWidth={2}
 						/>
-						<span className='hidden sm:inline'>Выйти</span>
+						<span className='hidden sm:inline'>
+							{t('singleplayer.exit')}
+						</span>
 					</ButtonLink>
 
 					<div className='flex min-w-0 justify-center'>
 						<div className='flex flex-col items-center justify-center gap-2 text-center'>
 							<span className='text-sm font-semibold text-slate-300'>
-								Найди:
+								{t('singleplayer.find')}
 							</span>
 							<span className='flex flex-wrap items-center justify-center gap-2 text-xl font-bold leading-tight sm:text-2xl'>
 								{targetName}
@@ -72,7 +79,7 @@ export function GameHeader({
 
 					<Button
 						type='button'
-						aria-label='Сдаться'
+						aria-label={t('singleplayer.giveUp')}
 						variant='soft'
 						size='sm'
 						className='min-h-10 bg-white/20 px-3 text-slate-50 hover:bg-white/30 disabled:opacity-55 sm:px-3.5'
@@ -85,7 +92,9 @@ export function GameHeader({
 							size={20}
 							strokeWidth={2}
 						/>
-						<span className='hidden sm:inline'>Сдаться</span>
+						<span className='hidden sm:inline'>
+							{t('singleplayer.giveUp')}
+						</span>
 					</Button>
 				</div>
 				<div className='absolute top-1 right-4 text-sm font-bold'>

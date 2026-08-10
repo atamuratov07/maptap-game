@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useCountdown } from '../hooks/useCountdown'
 
 const URGENT_COUNTDOWN_SECONDS = 5
@@ -43,6 +44,7 @@ function CountdownTimer({
 }: {
 	deadlineAt: number | null
 }): JSX.Element | null {
+	const { t } = useTranslation()
 	const secondsLeft = useCountdown(deadlineAt)
 	const isUrgent = secondsLeft <= URGENT_COUNTDOWN_SECONDS
 
@@ -61,7 +63,7 @@ function CountdownTimer({
 		>
 			<div>
 				<p className='text-[10px] font-black leading-none uppercase tracking-[0.18em] opacity-70'>
-					Время
+					{t('multiplayer.game.time')}
 				</p>
 				<p className='mt-1 h-4 text-sm font-black leading-4 text-inherit tabular-nums'>
 					<span
@@ -85,12 +87,14 @@ export function GameQuestionBar({
 	targetFlagUrl,
 	deadlineAt,
 }: RoomGameHeaderProps): JSX.Element {
+	const { t } = useTranslation()
+
 	return (
 		<section className='w-full border-t border-white/12 bg-slate-950/88 px-4 pt-3 pb-8 text-white backdrop-blur-md'>
 			<div className='grid w-full max-w-450 grid-cols-1 grid-rows-2 gap-x-3 md:grid-cols-3'>
 				<div className='col-start-1 row-start-1 row-span-1 justify-self-start align-center md:row-span-2'>
 					<QuestionBarChip
-						label='Раунд'
+						label={t('multiplayer.game.round')}
 						value={progressLabel}
 						className='col-start-1 row-start-1 row-span-1 justify-self-start align-center md:row-span-2'
 					/>

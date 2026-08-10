@@ -28,6 +28,7 @@ import {
 } from '@maptap/game-protocol'
 import { io, type Socket } from 'socket.io-client'
 import { toGatewayError } from './errors'
+import { i18n } from '../../shared/i18n/setup'
 
 type RoomSocket = Socket<ServerToClientEvents, ClientToServerEvents>
 type ClientEventName = keyof ClientToServerEvents
@@ -131,7 +132,7 @@ export function createSocketGateway(): SocketGateway {
 				cleanup()
 				reject(
 					toGatewayError(
-						new Error('Не удалось подключиться к игровому серверу.'),
+						new Error(i18n.t('gatewayErrors.transport_error')),
 					),
 				)
 			}, CONNECT_TIMEOUT_MS)

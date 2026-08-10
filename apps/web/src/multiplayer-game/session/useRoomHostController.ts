@@ -14,6 +14,7 @@ import {
 	type RoomRuntimeAdapter,
 	type RoomRuntimeState,
 } from './useRoomRuntime'
+import { i18n } from '../../shared/i18n/setup'
 
 type RoomHostControllerState = RoomRuntimeState<RoomHostView>
 type RoomHostAction = 'start' | 'return-lobby' | 'terminate-room'
@@ -76,13 +77,13 @@ export function useRoomHostController<TAction extends string>(
 		clearActionError()
 
 		if (roomCode.length !== 6) {
-			setEntryErrorMessage('Код комнаты должен состоять из 6 символов.')
+			setEntryErrorMessage(i18n.t('multiplayer.error.roomCodeLength'))
 			return
 		}
 
 		const storedSession = loadRoomSession(roomCode, 'host')
 		if (!storedSession) {
-			setEntryErrorMessage('Для этой комнаты нет сохранённой сессии хоста.')
+			setEntryErrorMessage(i18n.t('multiplayer.error.hostSessionMissing'))
 			return
 		}
 

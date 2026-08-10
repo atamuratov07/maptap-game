@@ -19,7 +19,7 @@ export function getCountryName(
 	switch (language) {
 		case 'ru':
 			return firstText(info.nameRu, info.name)
-		case 'uz-latn':
+		case 'uz-Latn':
 			return firstText(info.nameUzLatn, info.name, info.nameRu)
 		case 'en':
 			return firstText(info.name, info.nameRu)
@@ -33,7 +33,7 @@ export function getCountryCapital(
 	switch (language) {
 		case 'ru':
 			return firstText(info.capitalRu, info.capital)
-		case 'uz-latn':
+		case 'uz-Latn':
 			return firstText(info.capitalUzLatn, info.capital, info.capitalRu)
 		case 'en':
 			return firstText(info.capital, info.capitalRu)
@@ -47,7 +47,7 @@ export function getCountryCurrency(
 	switch (language) {
 		case 'ru':
 			return firstText(info.currencyRu, info.currency)
-		case 'uz-latn':
+		case 'uz-Latn':
 			return firstText(info.currencyUzLatn, info.currency, info.currencyRu)
 		case 'en':
 			return firstText(info.currency, info.currencyRu)

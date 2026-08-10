@@ -1,8 +1,8 @@
-export const APP_LANGUAGES = ['ru', 'en', 'uz-latn'] as const
+export const APP_LANGUAGES = ['ru', 'en', 'uz-Latn'] as const
 
 export type AppLanguage = (typeof APP_LANGUAGES)[number]
 
-export const DEFAULT_LANGUAGE: AppLanguage = 'ru'
+export const DEFAULT_LANGUAGE: AppLanguage = 'uz-Latn'
 export const LANGUAGE_STORAGE_KEY = 'maptap.language'
 
 export const APP_LANGUAGE_OPTIONS: Array<{
@@ -12,7 +12,7 @@ export const APP_LANGUAGE_OPTIONS: Array<{
 }> = [
 	{ value: 'ru', label: 'Русский', shortLabel: 'RU' },
 	{ value: 'en', label: 'English', shortLabel: 'EN' },
-	{ value: 'uz-latn', label: "O'zbekcha", shortLabel: 'UZ' },
+	{ value: 'uz-Latn', label: "O'zbekcha", shortLabel: 'UZ' },
 ]
 
 export function isAppLanguage(value: string): value is AppLanguage {
@@ -38,7 +38,7 @@ export function normalizeAppLanguage(
 	}
 
 	if (lowerValue === 'uz' || lowerValue.startsWith('uz-')) {
-		return 'uz-latn'
+		return 'uz-Latn'
 	}
 
 	return isAppLanguage(normalized) ? normalized : null
@@ -56,7 +56,7 @@ export function toFormattingLocale(language: AppLanguage): string {
 			return 'en-US'
 		case 'ru':
 			return 'ru-RU'
-		case 'uz-latn':
+		case 'uz-Latn':
 			return 'uz-latn-UZ'
 	}
 }

@@ -50,7 +50,7 @@ function localizedTextField(
 	fields: { en: string; ru: string; uzLatn: string },
 ): TextFieldLayoutValue {
 	const preferredFields = {
-		'uz-latn': [fields.uzLatn, fields.ru, fields.en],
+		'uz-Latn': [fields.uzLatn, fields.ru, fields.en],
 		en: [fields.en, fields.ru, fields.uzLatn],
 		ru: [fields.ru, fields.en, fields.uzLatn],
 	}[language]

@@ -9,17 +9,18 @@ import {
 import { cn } from '../../shared/utils'
 import type { CreateRoomRequest } from '@maptap/game-protocol'
 import type { RoomMode } from '@maptap/game-domain/multiplayer'
+import { useTranslation } from 'react-i18next'
 
 const ROOM_MODE_OPTIONS: Array<{
 	value: RoomMode
-	label: string
+	labelKey: string
 }> = [
 	{
-		label: 'Игра в классе',
+		labelKey: 'multiplayer.create.classroom',
 		value: 'classroom',
 	},
 	{
-		label: 'Игра в группе',
+		labelKey: 'multiplayer.create.group',
 		value: 'group',
 	},
 ] as const
@@ -37,6 +38,7 @@ export function CreateRoomForm({
 	submitError,
 	className,
 }: CreateRoomFormProps): JSX.Element {
+	const { t } = useTranslation()
 	const [hostName, setHostName] = useState('')
 	const [roomMode, setRoomMode] = useState<RoomMode>('group')
 	const trimmedHostName = hostName.trim()
@@ -63,13 +65,13 @@ export function CreateRoomForm({
 			onSubmit={handleSubmit}
 		>
 			<p className='text-[11px] font-black uppercase tracking-[0.24em] text-amber-600'>
-				Создание комнаты
+				{t('multiplayer.create.eyebrow')}
 			</p>
 			<h1 className='mt-3 text-4xl font-black tracking-tight text-slate-950'>
-				Новая комната
+				{t('multiplayer.create.title')}
 			</h1>
 
-			<Field label='Имя хоста' className='mt-6'>
+			<Field label={t('multiplayer.create.hostName')} className='mt-6'>
 				<TextInput
 					type='text'
 					value={hostName}
@@ -78,11 +80,11 @@ export function CreateRoomForm({
 					}}
 					minLength={1}
 					maxLength={20}
-					placeholder='Введите имя хоста'
+					placeholder={t('multiplayer.create.hostNamePlaceholder')}
 				/>
 			</Field>
 
-			<Field label='Режим комнаты'>
+			<Field label={t('multiplayer.create.roomMode')}>
 				<SelectControl
 					accent='amber'
 					className='rounded-lg border-slate-400 py-2 shadow-sm'
@@ -93,7 +95,7 @@ export function CreateRoomForm({
 				>
 					{ROOM_MODE_OPTIONS.map(option => (
 						<option key={option.value} value={option.value}>
-							{option.label}
+							{t(option.labelKey)}
 						</option>
 					))}
 				</SelectControl>
@@ -111,7 +113,9 @@ export function CreateRoomForm({
 				className='mt-6 px-5'
 				disabled={pending || trimmedHostName.length === 0}
 			>
-				{pending ? 'Создаём...' : 'Создать комнату'}
+				{pending
+					? t('multiplayer.create.submitting')
+					: t('multiplayer.create.submit')}
 			</Button>
 		</form>
 	)

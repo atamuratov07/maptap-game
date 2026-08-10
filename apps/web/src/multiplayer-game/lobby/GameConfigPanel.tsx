@@ -10,6 +10,8 @@ import {
 	saveRoomGameConfig,
 	SCOPE_OPTIONS,
 } from '../model/gameConfig'
+import { useTranslation } from 'react-i18next'
+import { getDifficultyLabel, getScopeLabel } from '../../shared/i18n'
 
 interface GameConfigPanelProps {
 	roomCode: string
@@ -44,6 +46,8 @@ export function GameConfigPanel({
 	requireQuestionDuration,
 	onStartGame,
 }: GameConfigPanelProps): JSX.Element {
+	const { t } = useTranslation()
+
 	const [config, setConfig] = useState<GameConfig>(() =>
 		loadRoomGameConfig(roomCode),
 	)
@@ -69,10 +73,10 @@ export function GameConfigPanel({
 		>
 			<div className='border-b border-slate-200/80 bg-linear-to-br from-white via-amber-50/80 to-teal-50/70 px-5 py-4 sm:px-6'>
 				<p className='text-[11px] font-black uppercase tracking-[0.22em] text-amber-700'>
-					Настройки игры
+					{t('multiplayer.config.title')}
 				</p>
 				<h2 className='mt-1 text-2xl font-black tracking-tight text-slate-950'>
-					Раунд на карте
+					{t('multiplayer.config.questions')}
 				</h2>
 			</div>
 
@@ -81,7 +85,7 @@ export function GameConfigPanel({
 					icon={
 						<ListChecks aria-hidden='true' size={17} strokeWidth={2.4} />
 					}
-					label='Вопросы'
+					label={t('multiplayer.config.questions')}
 				>
 					<SelectControl
 						value={config.questionCount}
@@ -103,7 +107,7 @@ export function GameConfigPanel({
 
 				<ConfigField
 					icon={<Timer aria-hidden='true' size={17} strokeWidth={2.4} />}
-					label='Таймер'
+					label={t('multiplayer.config.timer')}
 				>
 					<SelectControl
 						value={config.questionDurationMs}
@@ -122,12 +126,14 @@ export function GameConfigPanel({
 					>
 						{!requireQuestionDuration && (
 							<option key={'no-timer'} value={''}>
-								Без таймера
+								{t('multiplayer.config.withoutTimer')}
 							</option>
 						)}
 						{QUESTION_DURATION_MS_OPTIONS.map(option => (
 							<option key={option} value={option}>
-								{option / 1000} сек.
+								{t('multiplayer.config.seconds', {
+									count: option / 1000,
+								})}
 							</option>
 						))}
 					</SelectControl>
@@ -135,7 +141,7 @@ export function GameConfigPanel({
 
 				<ConfigField
 					icon={<Globe2 aria-hidden='true' size={17} strokeWidth={2.4} />}
-					label='Регион'
+					label={t('multiplayer.config.region')}
 				>
 					<SelectControl
 						value={config.scope}
@@ -149,7 +155,7 @@ export function GameConfigPanel({
 					>
 						{SCOPE_OPTIONS.map(option => (
 							<option key={option.value} value={option.value}>
-								{option.label}
+								{getScopeLabel(t, option.value)}
 							</option>
 						))}
 					</SelectControl>
@@ -157,7 +163,7 @@ export function GameConfigPanel({
 
 				<ConfigField
 					icon={<Gauge aria-hidden='true' size={17} strokeWidth={2.4} />}
-					label='Сложность'
+					label={t('multiplayer.config.difficulty')}
 				>
 					<SelectControl
 						value={config.difficulty}
@@ -172,7 +178,7 @@ export function GameConfigPanel({
 					>
 						{DIFFICULTY_OPTIONS.map(option => (
 							<option key={option.value} value={option.value}>
-								{option.label}
+								{getDifficultyLabel(t, option.value)}
 							</option>
 						))}
 					</SelectControl>

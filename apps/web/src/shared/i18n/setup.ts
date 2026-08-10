@@ -8,9 +8,9 @@ import {
 	normalizeAppLanguage,
 } from './locales'
 
-import en from './locales/en/translations.json'
-import ru from './locales/ru/translations.json'
-import uzLatn from './locales/uz-latn/translations.json'
+import en from './locales/en/translations'
+import ru from './locales/ru/translations'
+import uzLatn from './locales/uz-Latn/translations'
 
 if (!i18n.isInitialized) {
 	void i18n
@@ -25,7 +25,7 @@ if (!i18n.isInitialized) {
 				ru: {
 					translation: ru,
 				},
-				'uz-latn': {
+				'uz-Latn': {
 					translation: uzLatn,
 				},
 			},

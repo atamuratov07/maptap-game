@@ -15,6 +15,7 @@ import {
 	type RoomRuntimeAdapter,
 	type RoomRuntimeState,
 } from './useRoomRuntime'
+import { i18n } from '../../shared/i18n/setup'
 
 type RoomPlayerEntryState =
 	| {
@@ -166,7 +167,7 @@ export function useRoomPlayerController(
 			setEntryState({
 				status: 'error',
 				roomCode,
-				message: 'Код комнаты должен состоять из 6 символов.',
+				message: i18n.t('multiplayer.error.roomCodeLength'),
 			})
 			return
 		}

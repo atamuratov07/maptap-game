@@ -9,6 +9,7 @@ import { AlertMessage, Button, CopyButton } from '../../shared/ui'
 import { cn } from '../../shared/utils'
 import { GameConfigPanel } from './GameConfigPanel'
 import { LanguageSwitcher } from '../../shared/i18n'
+import { useTranslation } from 'react-i18next'
 
 interface RoomLobbyScreenProps {
 	role: RoomMemberRole
@@ -24,6 +25,8 @@ interface RoomLobbyScreenProps {
 }
 
 function InvitePanel({ roomCode }: { roomCode: string }): JSX.Element {
+	const { t } = useTranslation()
+
 	const inviteUrl = useMemo(() => {
 		if (typeof window === 'undefined') {
 			return `/multiplayer/room/${roomCode}`
@@ -37,12 +40,12 @@ function InvitePanel({ roomCode }: { roomCode: string }): JSX.Element {
 
 	return (
 		<section
-			aria-label='Приглашение в комнату'
+			aria-label={t('multiplayer.lobby.invite')}
 			className='mx-auto mt-6 flex w-full max-w-2xl flex-col items-center gap-4 rounded-[28px] border border-white/70 bg-white/90 px-5 py-4 shadow-[0_18px_54px_rgba(15,23,42,0.12)] backdrop-blur sm:flex-row sm:justify-between'
 		>
 			<div className='text-center sm:text-left'>
 				<p className='text-[10px] font-black uppercase tracking-[0.22em] text-slate-500'>
-					Код комнаты
+					{t('multiplayer.lobby.roomCode')}
 				</p>
 				<p className='mt-1 font-mono text-3xl font-black tracking-[0.2em] text-slate-950'>
 					{roomCode}
@@ -52,19 +55,19 @@ function InvitePanel({ roomCode }: { roomCode: string }): JSX.Element {
 			<div className='flex flex-wrap justify-center gap-2'>
 				<CopyButton
 					textToCopy={roomCode}
-					title='Скопировать код комнаты'
+					title={t('multiplayer.lobby.copyCode')}
 					is3d
 					className='min-h-11 border-slate-200 py-2.5'
 				>
-					Код
+					{t('multiplayer.lobby.copyCodeShort')}
 				</CopyButton>
 				<CopyButton
 					textToCopy={inviteUrl}
-					title='Скопировать ссылку на комнату'
+					title={t('multiplayer.lobby.copyLink')}
 					is3d
 					className='min-h-11 border-slate-200 py-2.5'
 				>
-					Ссылка
+					{t('multiplayer.lobby.copyLinkShort')}
 				</CopyButton>
 			</div>
 		</section>
@@ -108,6 +111,8 @@ export function RoomLobbyScreen({
 	onStartGame,
 	onTerminateRoom,
 }: RoomLobbyScreenProps): JSX.Element {
+	const { t } = useTranslation()
+
 	const isHost = role === 'host'
 	const canStartGame = isHost && Boolean(onStartGame)
 	const gameConfigFormId = `room-game-config-${roomCode}`
@@ -121,15 +126,17 @@ export function RoomLobbyScreen({
 		>
 			<header className='relative mx-auto w-full max-w-6xl text-center'>
 				<p className='text-[11px] font-black uppercase tracking-[0.24em] text-amber-600'>
-					Лобби
+					{t('multiplayer.lobby.title')}
 				</p>
 				<h1 className='mt-2 text-3xl font-black tracking-tight sm:text-4xl'>
-					{isHost ? 'Подготовьте игру' : 'Ждём начала'}
+					{isHost
+						? t('multiplayer.lobby.hostHeading')
+						: t('multiplayer.lobby.playerHeading')}
 				</h1>
 
 				{isReconnecting ? (
 					<AlertMessage className='mx-auto mt-5 max-w-xl'>
-						Переподключаемся к комнате...
+						{t('multiplayer.lobby.reconnecting')}
 					</AlertMessage>
 				) : null}
 
@@ -154,7 +161,7 @@ export function RoomLobbyScreen({
 			</header>
 
 			<section
-				aria-label='Участники комнаты'
+				aria-label={t('multiplayer.lobby.members')}
 				className='mx-auto flex w-full max-w-6xl items-start justify-center py-8'
 			>
 				<ul className='grid w-full max-w-6xl grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'>
@@ -175,13 +182,15 @@ export function RoomLobbyScreen({
 						onClick={onTerminateRoom}
 					>
 						<DoorClosed aria-hidden='true' size={16} strokeWidth={2.4} />
-						{terminatePending ? 'Закрываем...' : 'Закрыть комнату'}
+						{terminatePending
+							? t('multiplayer.lobby.closingRoom')
+							: t('multiplayer.lobby.closeRoom')}
 					</Button>
 				</footer>
 			) : !isHost ? (
 				<footer className='mx-auto flex w-full max-w-6xl justify-center pb-8'>
 					<p className='rounded-full border border-slate-200 bg-white/90 px-5 py-3 text-sm font-black text-slate-700 shadow-[0_14px_36px_rgba(15,23,42,0.14)]'>
-						Ждём, пока хост начнёт игру
+						{t('multiplayer.lobby.waitingForHost')}
 					</p>
 				</footer>
 			) : null}
@@ -202,7 +211,9 @@ export function RoomLobbyScreen({
 							strokeWidth={2.8}
 							fill='currentColor'
 						/>
-						{startPending ? 'Запускаем...' : 'Начать игру'}
+						{startPending
+							? t('multiplayer.lobby.startingGame')
+							: t('multiplayer.lobby.startGame')}
 					</Button>
 				</div>
 			) : null}
