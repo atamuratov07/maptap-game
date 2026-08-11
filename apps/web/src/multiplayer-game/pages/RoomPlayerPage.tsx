@@ -11,6 +11,7 @@ import { AnimatePresence } from 'motion/react'
 import { FloatingNotice } from '../../shared/ui/FloatingNotice'
 import { useEffect, useRef, useState } from 'react'
 import { CheckIcon, LoaderIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 function HostConnectionNotice({ hostConnected }: { hostConnected?: boolean }) {
 	const [notice, setNotice] = useState<'disconnected' | 'reconnected' | null>(
@@ -69,6 +70,7 @@ function HostConnectionNotice({ hostConnected }: { hostConnected?: boolean }) {
 }
 
 export function RoomPlayerPage(): JSX.Element {
+	const { t } = useTranslation()
 	const params = useParams<{ roomCode: string }>()
 	const roomCode = (params.roomCode ?? '').trim().toUpperCase()
 	const {
@@ -83,9 +85,9 @@ export function RoomPlayerPage(): JSX.Element {
 	if (state.status === 'connecting') {
 		return (
 			<RoomLoadingScreen
-				label='Комната'
-				title='Подключение'
-				message='Подключаемся к игре.'
+				label={t('multiplayer.room')}
+				title={t('multiplayer.loading.connecting')}
+				message={t('multiplayer.loading.connectingMessage')}
 			/>
 		)
 	}
@@ -124,9 +126,9 @@ export function RoomPlayerPage(): JSX.Element {
 	if (!room) {
 		return (
 			<RoomLoadingScreen
-				label='Комната'
-				title='Переподключение'
-				message='Возвращаем вас в игру.'
+				label={t('multiplayer.room')}
+				title={t('multiplayer.loading.reconnecting')}
+				message={t('multiplayer.loading.reconnectingMessage')}
 			/>
 		)
 	}

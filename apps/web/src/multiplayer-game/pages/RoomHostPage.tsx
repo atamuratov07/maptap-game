@@ -89,9 +89,9 @@ export function RoomHostPage(): JSX.Element {
 	if (!room) {
 		return (
 			<RoomLoadingScreen
-				label='Комната'
-				title='Переподключение'
-				message='Возвращаем вас в игру.'
+				label={t('multiplayer.room')}
+				title={t('multiplayer.loading.reconnecting')}
+				message={t('multiplayer.loading.reconnectingMessage')}
 			/>
 		)
 	}

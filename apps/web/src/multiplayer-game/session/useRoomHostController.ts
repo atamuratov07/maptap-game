@@ -94,9 +94,7 @@ export function useRoomHostController<TAction extends string>(
 				return
 			case 'rejected':
 				clearRoomSession(roomCode, 'host')
-				setEntryErrorMessage(
-					'Сохранённая сессия хоста истекла или недействительна.',
-				)
+				setEntryErrorMessage(i18n.t('multiplayer.error.hostSessionExpired'))
 				return
 			case 'error':
 			case 'aborted':

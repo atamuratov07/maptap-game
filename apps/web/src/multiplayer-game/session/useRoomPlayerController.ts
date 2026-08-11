@@ -189,7 +189,7 @@ export function useRoomPlayerController(
 				setEntryState({
 					status: 'error',
 					roomCode,
-					message: 'Комната не найдена.',
+					message: i18n.t('gatewayErrors.room_not_found'),
 				})
 				return
 			}
@@ -220,7 +220,7 @@ export function useRoomPlayerController(
 					clearRoomSession(roomCode, 'player')
 					showJoinScreen(
 						lookupResponse,
-						'Сохранённая сессия игрока истекла или недействительна.',
+						i18n.t('multiplayer.error.playerSessionExpired'),
 					)
 					return
 				case 'error':
