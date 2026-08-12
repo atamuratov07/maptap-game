@@ -11,6 +11,8 @@ import {
 import { GameQuestionBar } from './GameQuestionBar'
 import { RoomLeaderboardOverlay } from './LeaderboardOverlay'
 import { useGameMap } from './useGameMap'
+import { useTranslation } from 'react-i18next'
+import { getCountryName, useAppLanguage } from '../../../shared/i18n'
 
 interface CountryMapGameScreenProps {
 	game: ActiveGameParticipantView
@@ -27,6 +29,8 @@ export function CountryMapGameScreen({
 	submitPending,
 	onSubmitAnswer,
 }: CountryMapGameScreenProps): JSX.Element {
+	const { t } = useTranslation()
+	const language = useAppLanguage()
 	const { mapProps } = useGameMap({
 		game,
 		submitPending,
@@ -46,6 +50,9 @@ export function CountryMapGameScreen({
 			? evaluatedSubmission.isCorrect
 			: null
 	const targetInfo = getTargetCountryInfo(game)
+	const targetName = targetInfo
+		? getCountryName(targetInfo, language)
+		: t('multiplayer.game.countryFallback')
 
 	return (
 		<section className='flex h-full flex-col overflow-hidden bg-slate-950 text-white'>
@@ -56,9 +63,11 @@ export function CountryMapGameScreen({
 			<GameQuestionBar
 				progressLabel={`${currentRound.currentQuestionNumber} / ${currentRound.questionCount}`}
 				questionLabel={
-					game.phase === 'open' ? 'Найдите страну' : 'Правильный ответ'
+					game.phase === 'open'
+						? t('multiplayer.game.findCountry')
+						: t('multiplayer.game.correctAnswer')
 				}
-				targetName={targetInfo?.nameRu || targetInfo?.name || 'Страна'}
+				targetName={targetName}
 				targetFlagUrl={targetInfo?.flagUrl}
 				deadlineAt={game.phase === 'open' ? currentRound.deadlineAt : null}
 			/>

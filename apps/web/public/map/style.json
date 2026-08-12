@@ -341,33 +341,6 @@
 			"source": "world",
 			"maxzoom": 24,
 			"source-layer": "geolines"
-		},
-		{
-			"id": "geolines-label",
-			"type": "symbol",
-			"paint": {
-				"text-color": "#1077B0",
-				"text-halo-blur": 1,
-				"text-halo-color": "rgba(255, 255, 255, 1)",
-				"text-halo-width": 1
-			},
-			"filter": ["all", ["!=", "name", "International Date Line"]],
-			"layout": {
-				"text-font": ["Noto Sans Regular"],
-				"text-size": {
-					"stops": [
-						[2, 12],
-						[6, 16]
-					]
-				},
-				"text-field": "{name_ru}",
-				"visibility": "visible",
-				"symbol-placement": "line"
-			},
-			"source": "world",
-			"maxzoom": 24,
-			"minzoom": 1,
-			"source-layer": "geolines"
 		}
 	],
 	"bearing": 0,

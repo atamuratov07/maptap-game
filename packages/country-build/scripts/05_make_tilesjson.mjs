@@ -1,9 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import {
-	ensureDir,
-	parseTilesOutputOptions,
-} from './lib/output-paths.mjs'
+import { ensureDir, parseTilesOutputOptions } from './lib/output-paths.mjs'
 
 const { tilesDir, tilesUrlTemplate } = parseTilesOutputOptions()
 
@@ -24,12 +21,13 @@ const tilejson = {
 	vector_layers: [
 		{
 			id: 'geolines',
-			description: 'original demotiles geolines with manual Russian names',
+			description: 'original demotiles geolines with localized names',
 			minzoom: 0,
 			maxzoom: 4,
 			fields: {
 				name: 'String',
 				name_ru: 'String',
+				name_uz_latn: 'String',
 			},
 		},
 		{
@@ -41,8 +39,10 @@ const tilejson = {
 			fields: {
 				NAME: 'String',
 				NAME_RU: 'String',
+				NAME_UZ_LATN: 'String',
 				CAPITAL: 'String',
 				CAPITAL_RU: 'String',
+				CAPITAL_UZ_LATN: 'String',
 				ABBREV: 'String',
 				ADM0_A3: 'String',
 				ISO_A2: 'String',
@@ -60,8 +60,10 @@ const tilejson = {
 			fields: {
 				NAME: 'String',
 				NAME_RU: 'String',
+				NAME_UZ_LATN: 'String',
 				CAPITAL: 'String',
 				CAPITAL_RU: 'String',
+				CAPITAL_UZ_LATN: 'String',
 				ABBREV: 'String',
 				ADM0_A3: 'String',
 				ISO_A2: 'String',
@@ -79,8 +81,10 @@ const tilejson = {
 			fields: {
 				NAME: 'String',
 				NAME_RU: 'String',
+				NAME_UZ_LATN: 'String',
 				CAPITAL: 'String',
 				CAPITAL_RU: 'String',
+				CAPTIAL_UZ_LATN: 'String',
 				ABBREV: 'String',
 				ADM0_A3: 'String',
 				ISO_A2: 'String',

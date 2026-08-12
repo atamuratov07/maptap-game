@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface QuestionTimerProps {
 	isPlaying: boolean
@@ -11,6 +12,7 @@ export function QuestionTimer({
 	questionStartedAt,
 	questionResolvedAt,
 }: QuestionTimerProps): JSX.Element {
+	const { t } = useTranslation()
 	const [now, setNow] = useState(() => Date.now())
 
 	useEffect(() => {
@@ -36,5 +38,11 @@ export function QuestionTimer({
 		return Math.max(0, Math.floor((endTime - questionStartedAt) / 1000))
 	}, [isPlaying, now, questionResolvedAt, questionStartedAt])
 
-	return <span>Время: {elapsedSeconds}с</span>
+	return (
+		<span>
+			{t('singleplayer.elapsedTime', {
+				seconds: elapsedSeconds,
+			})}
+		</span>
+	)
 }

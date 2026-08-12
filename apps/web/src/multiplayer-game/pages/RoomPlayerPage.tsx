@@ -11,8 +11,10 @@ import { AnimatePresence } from 'motion/react'
 import { FloatingNotice } from '../../shared/ui/FloatingNotice'
 import { useEffect, useRef, useState } from 'react'
 import { CheckIcon, LoaderIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 function HostConnectionNotice({ hostConnected }: { hostConnected?: boolean }) {
+	const { t } = useTranslation()
 	const [notice, setNotice] = useState<'disconnected' | 'reconnected' | null>(
 		null,
 	)
@@ -44,7 +46,7 @@ function HostConnectionNotice({ hostConnected }: { hostConnected?: boolean }) {
 						className='flex gap-2 items-center'
 					>
 						<CheckIcon className='text-xl stroke-3' />
-						<p>Сессия хоста возоблена</p>
+						<p>{t('multiplayer.game.hostReconnected')}</p>
 					</FloatingNotice>
 				</AnimatePresence>
 			)}
@@ -57,9 +59,9 @@ function HostConnectionNotice({ hostConnected }: { hostConnected?: boolean }) {
 					>
 						<LoaderIcon className='animate-spin text-xl stroke-3' />
 						<p>
-							Хост отключился от игры
+							{t('multiplayer.game.hostDisconnectedTitle')}
 							<br />
-							Ожидаем переподключения
+							{t('multiplayer.game.hostDisconnectedSubtitle')}
 						</p>
 					</FloatingNotice>
 				</AnimatePresence>
@@ -69,6 +71,7 @@ function HostConnectionNotice({ hostConnected }: { hostConnected?: boolean }) {
 }
 
 export function RoomPlayerPage(): JSX.Element {
+	const { t } = useTranslation()
 	const params = useParams<{ roomCode: string }>()
 	const roomCode = (params.roomCode ?? '').trim().toUpperCase()
 	const {
@@ -83,9 +86,9 @@ export function RoomPlayerPage(): JSX.Element {
 	if (state.status === 'connecting') {
 		return (
 			<RoomLoadingScreen
-				label='Комната'
-				title='Подключение'
-				message='Подключаемся к игре.'
+				label={t('multiplayer.room')}
+				title={t('multiplayer.loading.connecting')}
+				message={t('multiplayer.loading.connectingMessage')}
 			/>
 		)
 	}
@@ -124,9 +127,9 @@ export function RoomPlayerPage(): JSX.Element {
 	if (!room) {
 		return (
 			<RoomLoadingScreen
-				label='Комната'
-				title='Переподключение'
-				message='Возвращаем вас в игру.'
+				label={t('multiplayer.room')}
+				title={t('multiplayer.loading.reconnecting')}
+				message={t('multiplayer.loading.reconnectingMessage')}
 			/>
 		)
 	}

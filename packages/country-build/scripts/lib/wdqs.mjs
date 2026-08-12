@@ -9,6 +9,7 @@ const WDQS_ENDPOINT = 'https://query.wikidata.org/sparql'
 const WDQS_MAX_RETRIES = 3
 const WDQS_USER_AGENT =
 	'MapTapCountryBuildBot/1.0 https://github.com/atamuratov07/maptap-game'
+const WIKIDATA_EMPTY_PATTERN = /^Q\d+$/
 
 function parseRetryAfterMs(rawValue) {
 	if (!rawValue) {
@@ -156,6 +157,11 @@ export async function fetchWdqsJson({
 	throw new Error(
 		`WDQS request "${cacheKey}" failed (${lastFailure.statusText}). No cached response exists at ${cachePath}. The first successful online run is required to seed the local WDQS cache.`,
 	)
+}
+
+export function cleanWdLabel(value) {
+	const trimmed = typeof value === 'string' ? value.trim() : ''
+	return trimmed && !WIKIDATA_EMPTY_PATTERN.test(trimmed) ? trimmed : ''
 }
 
 export { WDQS_USER_AGENT }

@@ -7,6 +7,7 @@ import type { RoomClosedEvent } from '@maptap/game-protocol'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { formatGatewayErrorMessage, toGatewayError } from '../api/errors'
 import type { RoomSession } from './types'
+import { i18n } from '../../shared/i18n/setup'
 
 export type RoomRuntimeState<TView> =
 	| {
@@ -256,8 +257,7 @@ export function useRoomRuntime<TView>({
 						setState({
 							status: 'error',
 							roomCode,
-							message:
-								'Сохранённая сессия комнаты истекла или недействительна.',
+							message: i18n.t('multiplayer.error.roomSessionExpired'),
 						})
 					}
 					return { kind: 'rejected' }
