@@ -4,9 +4,7 @@ const translations = {
 		language: 'Language',
 	},
 	common: {
-		back: 'Back',
 		home: 'Home',
-		openMode: 'Open mode',
 		retry: 'Try again',
 		unknown: 'Unknown',
 		noQuestions: 'No questions',
@@ -137,6 +135,9 @@ const translations = {
 			title: 'New multiplayer room',
 			hostName: 'Host name',
 			hostNamePlaceholder: 'Enter host name',
+			roomMode: 'Room mode',
+			classroom: 'Classroom',
+			group: 'Group',
 			submit: 'Create room',
 			submitting: 'Creating...',
 		},
@@ -179,6 +180,7 @@ const translations = {
 			seconds: '{{count}} sec.',
 			region: 'Region',
 			difficulty: 'Difficulty',
+			withoutTimer: 'No timer',
 		},
 		game: {
 			questionProgress: 'Question {{current}} of {{total}}',

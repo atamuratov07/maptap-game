@@ -14,6 +14,7 @@ import { CheckIcon, LoaderIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 function HostConnectionNotice({ hostConnected }: { hostConnected?: boolean }) {
+	const { t } = useTranslation()
 	const [notice, setNotice] = useState<'disconnected' | 'reconnected' | null>(
 		null,
 	)

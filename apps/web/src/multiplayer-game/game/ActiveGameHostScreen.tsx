@@ -129,6 +129,7 @@ function SubmissionMark({
 }: {
 	submission: HostParticipantStanding['submission']
 }): JSX.Element | null {
+	const { t } = useTranslation()
 	if (!submission) return null
 
 	const awardedScoreDisplay = `${submission.isCorrect || !submission.submittedAt ? '+' : '-'}${Math.abs(submission.scoreAwarded)}`
@@ -155,9 +156,17 @@ function SubmissionMark({
 					}`}
 				>
 					{submission.isCorrect ? (
-						<Check aria-label='Правильно' size={15} strokeWidth={3} />
+						<Check
+							aria-label={t('multiplayer.game.correctMark')}
+							size={15}
+							strokeWidth={3}
+						/>
 					) : (
-						<X aria-label='Неправильно' size={15} strokeWidth={3} />
+						<X
+							aria-label={t('multiplayer.game.incorrectMark')}
+							size={15}
+							strokeWidth={3}
+						/>
 					)}
 				</motion.span>
 			) : null}
@@ -235,7 +244,7 @@ export function ActiveGameHostScreen({
 		return (
 			<main className='grid h-full place-items-center bg-slate-950 px-5 py-8 text-white'>
 				<p className='text-sm font-semibold text-slate-300'>
-					{t('mutliplayer.game.finishing')}
+					{t('multiplayer.game.finishing')}
 				</p>
 			</main>
 		)
@@ -287,7 +296,10 @@ export function ActiveGameHostScreen({
 				{game.phase === 'open' ? (
 					<div className='mt-4 flex items-center justify-center gap-2 text-sm font-bold text-slate-500'>
 						<Users aria-hidden='true' size={16} />
-						{game.answeredCount} / {game.participantCount} ответили
+						{t('multiplayer.game.answeredProgress', {
+							answered: game.answeredCount,
+							total: game.participantCount,
+						})}
 					</div>
 				) : null}
 			</div>
@@ -309,7 +321,7 @@ export function ActiveGameHostScreen({
 							</div>
 
 							<div className='text-end'>
-								{t('multiplayer.game.score')}
+								{t('multiplayer.game.scoreColumn')}
 							</div>
 
 							<div className='text-center'>
