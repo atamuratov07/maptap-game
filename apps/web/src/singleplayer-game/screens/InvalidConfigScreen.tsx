@@ -8,7 +8,6 @@ export function InvalidConfigScreen(): JSX.Element {
 		<ScreenShell center className='px-5 py-8'>
 			<SurfacePanel>
 				<p className='text-[11px] font-black uppercase tracking-[0.22em] text-rose-700'>
-					Одиночная игра
 					{t('singleplayer.title')}
 				</p>
 				<h1 className='mt-3 text-3xl font-black tracking-tight text-slate-950'>

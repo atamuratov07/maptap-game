@@ -45,7 +45,7 @@ function HostConnectionNotice({ hostConnected }: { hostConnected?: boolean }) {
 						className='flex gap-2 items-center'
 					>
 						<CheckIcon className='text-xl stroke-3' />
-						<p>Сессия хоста возоблена</p>
+						<p>{t('multiplayer.game.hostReconnected')}</p>
 					</FloatingNotice>
 				</AnimatePresence>
 			)}
@@ -58,9 +58,9 @@ function HostConnectionNotice({ hostConnected }: { hostConnected?: boolean }) {
 					>
 						<LoaderIcon className='animate-spin text-xl stroke-3' />
 						<p>
-							Хост отключился от игры
+							{t('multiplayer.game.hostDisconnectedTitle')}
 							<br />
-							Ожидаем переподключения
+							{t('multiplayer.game.hostDisconnectedSubtitle')}
 						</p>
 					</FloatingNotice>
 				</AnimatePresence>

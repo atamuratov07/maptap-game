@@ -73,5 +73,5 @@ export function formatGatewayErrorMessage(error: unknown): string {
 			return i18n.t(`gatewayErrors.${gatewayError.code}`)
 	}
 
-	return 'Неизвестная ошибка'
+	return i18n.t('gatewayErrors.unknown')
 }

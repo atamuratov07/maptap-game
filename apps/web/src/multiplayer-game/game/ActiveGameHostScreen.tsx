@@ -12,6 +12,8 @@ import { Button } from '../../shared/ui'
 import { Check, HashIcon, LoaderIcon, Users, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { animate, type ValueTransition } from 'motion'
+import { getCountryName, useAppLanguage } from '../../shared/i18n'
+import { useTranslation } from 'react-i18next'
 
 const EASE = [0.22, 1, 0.36, 1] as const
 const ROW_LAYOUT_TRANSITION = {
@@ -226,12 +228,14 @@ export function ActiveGameHostScreen({
 	onAdvanceRound,
 	onRevealRound,
 }: ActiveGameHostScreenProps): JSX.Element {
+	const { t } = useTranslation()
+	const language = useAppLanguage()
 	const currentRound = getCurrentRound(game)
 	if (game.phase === 'completed' || !currentRound) {
 		return (
 			<main className='grid h-full place-items-center bg-slate-950 px-5 py-8 text-white'>
 				<p className='text-sm font-semibold text-slate-300'>
-					Завершаем игру...
+					{t('mutliplayer.game.finishing')}
 				</p>
 			</main>
 		)
@@ -241,13 +245,17 @@ export function ActiveGameHostScreen({
 	const standings = getHostStandings(game, members)
 	const showSubmission = game.phase !== 'open'
 	const targetCountry = getTargetCountryInfo(game)
-	const targetName = targetCountry?.nameRu || targetCountry?.name || 'Страна'
+	const targetName = targetCountry
+		? getCountryName(targetCountry, language)
+		: t('multiplayer.game.countryFallback')
 
 	return (
 		<div className='fixed inset-0 overflow-hidden min-h-150 bg-white'>
 			<AnimatePresence mode='wait'>
 				{isReconnecting ? (
-					<FloatingNotice>Переподключаемся к комнате...</FloatingNotice>
+					<FloatingNotice>
+						{t('multiplayer.lobby.reconnecting')}
+					</FloatingNotice>
 				) : null}
 			</AnimatePresence>
 
@@ -264,10 +272,15 @@ export function ActiveGameHostScreen({
 
 			<div className='fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl rounded-b-[26px] border border-white/70 bg-white/94 p-5 text-center shadow-[0_0_20px_rgba(15,23,42,0.2)]'>
 				<p className='text-[11px] font-black uppercase tracking-[0.22em] text-amber-700'>
-					Вопрос {game.currentQuestionNumber} из {game.questionCount}
+					{t('multiplayer.game.questionProgress', {
+						current: game.currentQuestionNumber,
+						total: game.questionCount,
+					})}
 				</p>
 				<h1 className='mt-1 text-2xl font-black tracking-tight text-balance text-slate-950 sm:text-3xl'>
-					{game.phase === 'open' ? 'Найдите: ' : 'Ответ: '}
+					{game.phase === 'open'
+						? t('multiplayer.game.findCountry')
+						: t('multiplayer.game.correctAnswer')}
 					{targetName}
 				</h1>
 
@@ -287,14 +300,22 @@ export function ActiveGameHostScreen({
 								<HashIcon className='size-4 stroke-4' />
 							</div>
 
-							<div className='ml-11 text-start text-lg'>Игрок</div>
+							<div className='ml-11 text-start text-lg'>
+								{t('multiplayer.game.playerColumn')}
+							</div>
 
-							<div className='text-end'>Правильных ответов</div>
+							<div className='text-end'>
+								{t('multiplayer.game.correctColumn')}
+							</div>
 
-							<div className='text-end'>Счет</div>
+							<div className='text-end'>
+								{t('multiplayer.game.score')}
+							</div>
 
 							<div className='text-center'>
-								{!showSubmission ? 'Ответил' : 'Ответ'}
+								{!showSubmission
+									? t('multiplayer.game.answeredColumn')
+									: t('multiplayer.game.answerColumn')}
 							</div>
 						</div>
 
@@ -323,7 +344,7 @@ export function ActiveGameHostScreen({
 							{revealPending ? (
 								<LoaderIcon className='animate-spin' />
 							) : (
-								<>Раскрыть ответ</>
+								<>{t('multiplayer.game.revealAnswer')}</>
 							)}
 						</Button>
 					) : (
@@ -337,9 +358,9 @@ export function ActiveGameHostScreen({
 							{advancePending ? (
 								<LoaderIcon className='animate-spin' />
 							) : isLastRound ? (
-								'Заверщить игру'
+								t('multiplayer.game.finishGame')
 							) : (
-								'Следующий раунд'
+								t('multiplayer.game.nextRound')
 							)}
 						</Button>
 					)}

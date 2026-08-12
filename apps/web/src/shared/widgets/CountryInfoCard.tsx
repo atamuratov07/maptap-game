@@ -76,7 +76,7 @@ function InfoRow({
 export function CountryInfoCard({ info }: { info: CountryInfo }): JSX.Element {
 	const { t } = useTranslation()
 	const language = useAppLanguage()
-	const unknownLabel = t('common.unkown')
+	const unknownLabel = t('common.unknown')
 
 	const displayName = textOrUnknown(
 		getCountryName(info, language),
