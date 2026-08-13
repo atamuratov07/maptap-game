@@ -1,10 +1,6 @@
-# Build from the repo ROOT, not from apps/server/ — npm workspaces need the
-# sibling packages/ folders visible in the build context:
-#   docker build -f apps/server/Dockerfile -t maptap-server .
-
 FROM node:24-alpine AS deps
 # Enable Corepack to manage pnpm natively
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable
 WORKDIR /app
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
