@@ -7,7 +7,7 @@
 	"module": "./dist/index.js",
 	"types": "./src/index.ts",
 	"scripts": {
-		"build": "tsup src/index.ts src/singleplayer/index.ts src/multiplayer/index.ts src/multiplayer/game/index.ts src/multiplayer/room/index.ts --format esm --dts --clean",
+		"build": "tsup",
 		"check": "tsc -p tsconfig.json --noEmit",
 		"test": "vitest run"
 	},

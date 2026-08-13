@@ -35,15 +35,6 @@ importers:
 
   apps/server:
     dependencies:
-      '@maptap/country-catalog':
-        specifier: workspace:*
-        version: link:../../packages/country-catalog
-      '@maptap/game-domain':
-        specifier: workspace:*
-        version: link:../../packages/game-domain
-      '@maptap/game-protocol':
-        specifier: workspace:*
-        version: link:../../packages/game-protocol
       express:
         specifier: ^5.2.1
         version: 5.2.1(supports-color@7.2.0)
@@ -54,6 +45,15 @@ importers:
         specifier: ^4.3.6
         version: 4.4.3
     devDependencies:
+      '@maptap/country-catalog':
+        specifier: workspace:*
+        version: link:../../packages/country-catalog
+      '@maptap/game-domain':
+        specifier: workspace:*
+        version: link:../../packages/game-domain
+      '@maptap/game-protocol':
+        specifier: workspace:*
+        version: link:../../packages/game-protocol
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6

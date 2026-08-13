@@ -6,7 +6,7 @@
 	"main": "./dist/index.js",
 	"scripts": {
 		"dev": "tsx watch --conditions=development src/index.ts",
-		"build": "tsup src/index.ts --format esm --out-dir dist --clean",
+		"build": "tsup",
 		"start": "NODE_ENV=production node dist/index.js",
 		"check": "tsc -p tsconfig.json --noEmit",
 		"test": "vitest run",
@@ -16,14 +16,14 @@
 		"test:coverage": "vitest run --coverage"
 	},
 	"dependencies": {
-		"@maptap/country-catalog": "workspace:*",
-		"@maptap/game-domain": "workspace:*",
-		"@maptap/game-protocol": "workspace:*",
 		"express": "^5.2.1",
 		"socket.io": "^4.8.3",
 		"zod": "^4.3.6"
 	},
 	"devDependencies": {
+		"@maptap/country-catalog": "workspace:*",
+		"@maptap/game-domain": "workspace:*",
+		"@maptap/game-protocol": "workspace:*",
 		"@types/express": "^5.0.6",
 		"@types/supertest": "^7.2.0",
 		"socket.io-client": "^4.8.3",
