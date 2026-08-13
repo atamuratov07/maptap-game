@@ -3,20 +3,49 @@
 	"version": "1.0.0",
 	"private": true,
 	"type": "module",
-	"main": "./src/index.ts",
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
 	"types": "./src/index.ts",
 	"scripts": {
+		"build": "tsup src/index.ts src/singleplayer/index.ts src/multiplayer/index.ts src/multiplayer/game/index.ts src/multiplayer/room/index.ts --format esm --dts --clean",
+		"check": "tsc -p tsconfig.json --noEmit",
 		"test": "vitest run"
 	},
 	"exports": {
-		".": "./src/index.ts",
-		"./singleplayer": "./src/singleplayer/index.ts",
-		"./multiplayer": "./src/multiplayer/index.ts",
-		"./multiplayer/game": "./src/multiplayer/game/index.ts",
-		"./multiplayer/room": "./src/multiplayer/room/index.ts"
+		".": {
+			"types": "./src/index.ts",
+			"development": "./src/index.ts",
+			"import": "./dist/index.js",
+			"default": "./dist/index.js"
+		},
+		"./singleplayer": {
+			"types": "./src/singleplayer/index.ts",
+			"development": "./src/singleplayer/index.ts",
+			"import": "./dist/singleplayer/index.js",
+			"default": "./dist/singleplayer/index.js"
+		},
+		"./multiplayer": {
+			"types": "./src/multiplayer/index.ts",
+			"development": "./src/multiplayer/index.ts",
+			"import": "./dist/multiplayer/index.js",
+			"default": "./dist/multiplayer/index.js"
+		},
+		"./multiplayer/game": {
+			"types": "./src/multiplayer/game/index.ts",
+			"development": "./src/multiplayer/game/index.ts",
+			"import": "./dist/multiplayer/game/index.js",
+			"default": "./dist/multiplayer/game/index.js"
+		},
+		"./multiplayer/room": {
+			"types": "./src/multiplayer/room/index.ts",
+			"development": "./src/multiplayer/room/index.ts",
+			"import": "./dist/multiplayer/room/index.js",
+			"default": "./dist/multiplayer/room/index.js"
+		}
 	},
 	"sideEffects": false,
 	"devDependencies": {
+		"tsup": "^8.5.1",
 		"vitest": "^4.1.10"
 	}
 }

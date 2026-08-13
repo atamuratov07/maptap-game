@@ -3,11 +3,11 @@
 	"version": "1.0.0",
 	"private": true,
 	"type": "module",
-	"main": "./src/index.ts",
+	"main": "./dist/index.js",
 	"scripts": {
-		"dev": "tsx watch src/index.ts",
-		"build": "tsc -p tsconfig.json --noEmit",
-		"start": "tsx src/index.ts",
+		"dev": "tsx watch --conditions=development src/index.ts",
+		"build": "tsup src/index.ts --format esm --out-dir dist --clean",
+		"start": "NODE_ENV=production node dist/index.js",
 		"check": "tsc -p tsconfig.json --noEmit",
 		"test": "vitest run",
 		"test:unit": "vitest run src",
@@ -28,6 +28,7 @@
 		"@types/supertest": "^7.2.0",
 		"socket.io-client": "^4.8.3",
 		"supertest": "^7.2.2",
+		"tsup": "^8.5.1",
 		"tsx": "^4.21.0",
 		"vitest": "^4.1.10"
 	}
