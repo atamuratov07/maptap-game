@@ -11,6 +11,6 @@
 	},
 	"sideEffects": false,
 	"dependencies": {
-		"@maptap/game-domain": "*"
+		"@maptap/game-domain": "workspace:*"
 	}
 }

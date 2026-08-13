@@ -16,9 +16,9 @@
 		"test:coverage": "vitest run --coverage"
 	},
 	"dependencies": {
-		"@maptap/country-catalog": "*",
-		"@maptap/game-domain": "*",
-		"@maptap/game-protocol": "*",
+		"@maptap/country-catalog": "workspace:*",
+		"@maptap/game-domain": "workspace:*",
+		"@maptap/game-protocol": "workspace:*",
 		"express": "^5.2.1",
 		"socket.io": "^4.8.3",
 		"zod": "^4.3.6"

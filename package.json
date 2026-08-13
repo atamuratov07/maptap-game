@@ -2,20 +2,17 @@
 	"name": "maptap",
 	"private": true,
 	"type": "module",
-	"workspaces": [
-		"apps/*",
-		"packages/*"
-	],
 	"scripts": {
-		"dev:web": "npm run dev -w @maptap/web",
-		"build:web": "npm run build -w @maptap/web",
-		"preview:web": "npm run preview -w @maptap/web",
-		"dev:server": "npm run dev -w @maptap/server",
-		"build:server": "npm run build -w @maptap/server",
+		"dev:web": "pnpm -F @maptap/web dev",
+		"build:web": "pnpm -F @maptap/web build",
+		"preview:web": "pnpm -F @maptap/web preview",
+		"dev:server": "pnpm -F @maptap/server dev",
+		"build:server": "pnpm -F @maptap/server build",
+		"build:game-domain": "pnpm -F @maptap/game-domain build",
 		"build:tippecanoe-image": "docker build -t tippecanoe:latest packages/country-build/docker",
-		"build:data": "npm run build:data -w @maptap/country-build",
-		"build:country-registry": "npm run build:registry -w @maptap/country-build -- --out-dir ../../packages/country-catalog/generated",
-		"build:map-assets": "npm run build:tiles -w @maptap/country-build -- --tiles-dir ../../packages/map-assets/dist/tiles --tiles-url-template /map/tiles/{z}/{x}/{y}.pbf",
+		"build:data": "pnpm -F @maptap/country-build build:data",
+		"build:country-registry": "pnpm -F @maptap/country-build build:registry --out-dir ../../packages/country-catalog/generated",
+		"build:map-assets": "pnpm -F @maptap/country-build build:tiles --tiles-dir ../../packages/map-assets/dist/tiles --tiles-url-template /map/tiles/{z}/{x}/{y}.pbf",
 		"lint": "eslint ."
 	},
 	"devDependencies": {
