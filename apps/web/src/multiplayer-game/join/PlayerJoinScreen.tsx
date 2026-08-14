@@ -71,7 +71,10 @@ export function PlayerJoinScreen({
 
 				<form
 					className='mt-8 rounded-[28px] border border-slate-200 bg-slate-50 p-5 sm:p-6'
-					onSubmit={() => void onJoin(playerName)}
+					onSubmit={e => {
+						e.preventDefault()
+						void onJoin(playerName)
+					}}
 				>
 					<Field label={t('multiplayer.join.playerName')}>
 						<TextInput
