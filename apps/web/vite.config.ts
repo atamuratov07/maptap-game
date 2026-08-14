@@ -39,4 +39,7 @@ function pbfHeaders(): Plugin {
 export default defineConfig({
 	plugins: [react(), tailwindcss(), pbfHeaders()],
 	base: '/',
+	optimizeDeps: {
+		exclude: ['maplibre-gl'],
+	},
 })

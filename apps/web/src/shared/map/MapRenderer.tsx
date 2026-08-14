@@ -33,6 +33,12 @@ import type { MapRendererProps } from './types'
 import { useTranslation } from 'react-i18next'
 import { useAppLanguage } from '../i18n'
 
+import { setWorkerUrl } from 'maplibre-gl'
+import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
+
+// Set worker URL for MapLibre v6
+setWorkerUrl(workerUrl)
+
 const MAP_STYLE_URL = '/map/style.json'
 
 const DEFAULT_MAP_CENTER: [number, number] = [8, 18]
