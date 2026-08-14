@@ -1,0 +1,21 @@
+services:
+   server:
+      build:
+         context: .
+         dockerfile: apps/server/Dockerfile
+      restart: unless-stopped
+      environment:
+         - NODE_ENV=production
+         - PORT=3001
+      expose:
+         - '3001'
+
+   nginx:
+      build:
+         context: .
+         dockerfile: apps/web/Dockerfile
+      restart: unless-stopped
+      ports:
+         - '80:80'
+      depends_on:
+         - server
