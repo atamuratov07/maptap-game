@@ -16,7 +16,9 @@ docs
 
 .env
 .env.*
-!.env.example
+**/.env
+**/.env.*
+!**/.env.example
 
 **/*.log
 .DS_Store
