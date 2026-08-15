@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /multiplayer/room/
+Disallow: /multiplayer/host/
+Disallow: /singleplayer/play
+Disallow: /socket.io/
+Disallow: /health
+
+Sitemap: https://georally.world/sitemap.xml
