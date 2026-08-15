@@ -1,5 +1,5 @@
-import type { ActiveGameParticipantView } from '@maptap/game-domain/multiplayer/game'
-import type { VisibleMemberInfo } from '@maptap/game-domain/multiplayer/room'
+import type { ActiveGameParticipantView } from '@georally/game-domain/multiplayer/game'
+import type { VisibleMemberInfo } from '@georally/game-domain/multiplayer/room'
 import { useMemo } from 'react'
 import { MapRenderer } from '../../../shared/map/MapRenderer'
 import { ScoreBanner } from '../../../shared/widgets/ScoreBanner'

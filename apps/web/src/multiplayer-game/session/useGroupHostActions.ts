@@ -1,4 +1,4 @@
-import type { RoomHostView } from '@maptap/game-domain/multiplayer'
+import type { RoomHostView } from '@georally/game-domain/multiplayer'
 import { useCallback } from 'react'
 import type { SocketGateway } from '../api/socketGateway'
 import type { RoomRuntimeState } from './useRoomRuntime'

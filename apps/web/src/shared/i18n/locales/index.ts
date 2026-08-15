@@ -3,7 +3,7 @@ export const APP_LANGUAGES = ['ru', 'en', 'uz-Latn'] as const
 export type AppLanguage = (typeof APP_LANGUAGES)[number]
 
 export const DEFAULT_LANGUAGE: AppLanguage = 'uz-Latn'
-export const LANGUAGE_STORAGE_KEY = 'maptap.language'
+export const LANGUAGE_STORAGE_KEY = 'georally.language'
 
 export const APP_LANGUAGE_OPTIONS: Array<{
 	value: AppLanguage

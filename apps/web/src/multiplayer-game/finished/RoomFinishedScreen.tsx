@@ -8,8 +8,8 @@ import {
 } from '../../shared/ui'
 import { getLeaderboardEntries } from '../model/gameSelectors'
 import { ResultsList } from './ResultsList'
-import type { RoomFinishedView } from '@maptap/game-domain/multiplayer'
-import type { GameLeaderboardEntry } from '@maptap/game-domain/multiplayer/game'
+import type { RoomFinishedView } from '@georally/game-domain/multiplayer'
+import type { GameLeaderboardEntry } from '@georally/game-domain/multiplayer/game'
 import { useTranslation } from 'react-i18next'
 
 interface RoomFinishedScreenCapabilities {

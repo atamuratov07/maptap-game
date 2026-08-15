@@ -1,5 +1,5 @@
-import type { CountryInfo } from '@maptap/country-catalog'
-import { countryCatalog } from '@maptap/country-catalog'
+import type { CountryInfo } from '@georally/country-catalog'
+import { countryCatalog } from '@georally/country-catalog'
 import type { DataDrivenPropertyValueSpecification } from 'maplibre-gl'
 import type {
 	CircleLayerSpecification,

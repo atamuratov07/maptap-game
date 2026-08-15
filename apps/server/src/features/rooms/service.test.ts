@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { playableCountryPool } from '@maptap/country-catalog'
+import { playableCountryPool } from '@georally/country-catalog'
 
 import { RoomsRepository } from './repository.js'
 import { RoomsService } from './service.js'
-import { DEFAULT_GAME_CONFIG } from '@maptap/game-domain/multiplayer'
-import type { RoomExpireTTLConfig } from '@maptap/game-domain/multiplayer/room'
+import { DEFAULT_GAME_CONFIG } from '@georally/game-domain/multiplayer'
+import type { RoomExpireTTLConfig } from '@georally/game-domain/multiplayer/room'
 
 function createService(
 	overrides: {

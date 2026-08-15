@@ -1,4 +1,4 @@
-import type { CountryInfo } from '@maptap/country-catalog'
+import type { CountryInfo } from '@georally/country-catalog'
 import { useTranslation } from 'react-i18next'
 import {
 	getCountryCapital,

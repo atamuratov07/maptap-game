@@ -16,7 +16,7 @@ COPY packages/game-domain packages/game-domain
 COPY packages/game-protocol packages/game-protocol
 COPY packages/country-catalog packages/country-catalog
 
-RUN pnpm --filter @maptap/web... build
+RUN pnpm --filter @georally/web... build
 
 FROM nginx:1.27-alpine AS runtime
 COPY --from=build /app/apps/web/dist /usr/share/nginx/html

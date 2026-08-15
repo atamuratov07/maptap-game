@@ -1,4 +1,4 @@
-import type { GameContinent } from '@maptap/game-domain'
+import type { GameContinent } from '@georally/game-domain'
 
 export interface ContinentViewPreset {
 	focusBounds: [[number, number], [number, number]]

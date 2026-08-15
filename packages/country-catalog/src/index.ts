@@ -2,7 +2,7 @@ import type {
 	CountryId,
 	CountryPool,
 	CountryPoolEntry,
-} from '@maptap/game-domain'
+} from '@georally/game-domain'
 import playableCountryRegistryJson from '../generated/countries.playable.json'
 import countryRegistryJson from '../generated/countries.registry.json'
 import type {

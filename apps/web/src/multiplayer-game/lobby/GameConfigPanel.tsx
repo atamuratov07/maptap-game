@@ -1,4 +1,4 @@
-import type { GameConfig } from '@maptap/game-domain/multiplayer'
+import type { GameConfig } from '@georally/game-domain/multiplayer'
 import { Gauge, Globe2, ListChecks, Timer } from 'lucide-react'
 import { useEffect, useState, type FormEvent } from 'react'
 import { SelectControl } from '../../shared/ui'

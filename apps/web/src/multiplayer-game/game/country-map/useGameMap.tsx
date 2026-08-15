@@ -1,4 +1,4 @@
-import type { GameParticipantView } from '@maptap/game-domain/multiplayer/game'
+import type { GameParticipantView } from '@georally/game-domain/multiplayer/game'
 import { useCallback, useMemo } from 'react'
 import type { MapHighlight, MapRendererProps } from '../../../shared/map/types'
 import { CountryInfoCard } from '../../../shared/widgets/CountryInfoCard'

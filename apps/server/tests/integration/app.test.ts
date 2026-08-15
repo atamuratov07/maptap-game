@@ -2,12 +2,12 @@ import request from 'supertest'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 import type { Server as HttpServer } from 'http'
 import { bootstrapServer, type RoomClientSocket } from '../setup'
-import { DEFAULT_GAME_CONFIG } from '@maptap/game-domain/multiplayer'
+import { DEFAULT_GAME_CONFIG } from '@georally/game-domain/multiplayer'
 import type {
 	HostRoomSnapshotEvent,
 	PlayerRoomSnapshotEvent,
 	RoomClosedEvent,
-} from '@maptap/game-protocol'
+} from '@georally/game-protocol'
 
 describe('multiplayer server integration', () => {
 	let httpServer: HttpServer,

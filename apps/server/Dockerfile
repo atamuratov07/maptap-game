@@ -16,11 +16,11 @@ COPY packages/game-domain ./packages/game-domain
 COPY packages/game-protocol ./packages/game-protocol
 COPY packages/country-catalog ./packages/country-catalog
 
-RUN pnpm --filter @maptap/server check
+RUN pnpm --filter @georally/server check
 RUN pnpm build
 
 # Extract & isolate apps/server into /prod/server (Prunes devDependencies automatically)
-RUN pnpm --filter=@maptap/server deploy --prod --legacy /prod/server
+RUN pnpm --filter=@georally/server deploy --prod --legacy /prod/server
 
 FROM node:24-alpine AS runtime
 WORKDIR /app

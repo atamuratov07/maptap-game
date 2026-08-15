@@ -7,7 +7,7 @@ import { CreateRoomForm } from '../create/CreateRoomForm'
 import { JoinRoomForm } from '../join/JoinRoomForm'
 import { saveRoomSession } from '../session/sessionStorage'
 import type { RoomSession } from '../session/types'
-import type { CreateRoomRequest } from '@maptap/game-protocol'
+import type { CreateRoomRequest } from '@georally/game-protocol'
 import { LanguageSwitcher } from '../../shared/i18n'
 import { useTranslation } from 'react-i18next'
 

@@ -25,7 +25,7 @@ import {
 	type SubmitAnswerRequest,
 	type SubmitAnswerResponse,
 	type TerminateRoomRequest,
-} from '@maptap/game-protocol'
+} from '@georally/game-protocol'
 import { io, type Socket } from 'socket.io-client'
 import { toGatewayError } from './errors'
 import { i18n } from '../../shared/i18n/setup'

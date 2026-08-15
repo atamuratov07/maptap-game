@@ -1,8 +1,8 @@
-import type { RoomClosedEvent } from '@maptap/game-protocol'
+import type { RoomClosedEvent } from '@georally/game-protocol'
 import type {
 	RoomView,
 	VisibleMemberInfo,
-} from '@maptap/game-domain/multiplayer/room'
+} from '@georally/game-domain/multiplayer/room'
 import { i18n } from '../../shared/i18n/setup'
 
 export function getViewerMember(room: RoomView): VisibleMemberInfo | null {

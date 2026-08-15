@@ -1,5 +1,5 @@
-import type { GameParticipantView } from '@maptap/game-domain/multiplayer/game'
-import type { VisibleMemberInfo } from '@maptap/game-domain/multiplayer/room'
+import type { GameParticipantView } from '@georally/game-domain/multiplayer/game'
+import type { VisibleMemberInfo } from '@georally/game-domain/multiplayer/room'
 import { CountryMapGameScreen } from './country-map/CountryMapGameScreen'
 import { getCurrentRound } from '../model/gameSelectors'
 import { AnimatePresence } from 'motion/react'

@@ -1,6 +1,6 @@
 import type { RoomSession } from './types'
 
-const STORAGE_KEY = 'maptap.multiplayer.sessions'
+const STORAGE_KEY = 'georally.multiplayer.sessions'
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000
 
 type RoomSessionsRecord = Record<string, RoomSession>

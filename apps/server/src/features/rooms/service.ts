@@ -1,4 +1,4 @@
-import { err, ok, type CountryPool, type Result } from '@maptap/game-domain'
+import { err, ok, type CountryPool, type Result } from '@georally/game-domain'
 import type {
 	CreateRoomResponse,
 	EmptyAckData,
@@ -9,7 +9,7 @@ import type {
 	RoomClosedEvent,
 	RoomProtocolError,
 	SubmitAnswerResponse,
-} from '@maptap/game-protocol'
+} from '@georally/game-protocol'
 
 import {
 	advanceActiveRoomGame,
@@ -18,13 +18,13 @@ import {
 	revealActiveRoomGameRound,
 	startRoomGame,
 	submitRoomGameAnswer,
-} from '@maptap/game-domain/multiplayer'
+} from '@georally/game-domain/multiplayer'
 import {
 	applyGameCommand,
 	getAnsweredParticipantCount,
 	getGameParticipantCount,
 	type GameConfig,
-} from '@maptap/game-domain/multiplayer/game'
+} from '@georally/game-domain/multiplayer/game'
 import {
 	applyRoomCommand,
 	createRoom,
@@ -42,7 +42,7 @@ import {
 	getRoomExpireDueAt,
 	type RoomExpireTTLConfig,
 	getRoomOccupancy,
-} from '@maptap/game-domain/multiplayer/room'
+} from '@georally/game-domain/multiplayer/room'
 import {
 	createGameId,
 	createMemberId,

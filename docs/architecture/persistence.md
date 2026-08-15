@@ -1,6 +1,6 @@
 # Persistence model
 
-MapTap currently has no database. There are two persistence layers, both non-durable across restarts.
+GeoRally currently has no database. There are two persistence layers, both non-durable across restarts.
 
 ## Browser persistence
 

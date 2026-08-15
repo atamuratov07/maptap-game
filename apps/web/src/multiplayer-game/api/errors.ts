@@ -1,4 +1,4 @@
-import type { RoomProtocolError } from '@maptap/game-protocol'
+import type { RoomProtocolError } from '@georally/game-protocol'
 import { i18n } from '../../shared/i18n/setup'
 
 export type GatewayError =

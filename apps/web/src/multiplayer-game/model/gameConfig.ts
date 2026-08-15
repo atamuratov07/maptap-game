@@ -1,8 +1,8 @@
-import type { GameDifficulty, GameScope } from '@maptap/game-domain'
+import type { GameDifficulty, GameScope } from '@georally/game-domain'
 import {
 	DEFAULT_GAME_CONFIG,
 	type GameConfig,
-} from '@maptap/game-domain/multiplayer'
+} from '@georally/game-domain/multiplayer'
 
 export const QUESTION_COUNT_OPTIONS = [5, 10, 15, 20] as const
 export const QUESTION_DURATION_MS_OPTIONS = [
@@ -25,7 +25,7 @@ export const SCOPE_OPTIONS: Array<{
 	{ value: 'oceania' },
 ]
 
-const CONFIG_STORAGE_PREFIX = 'maptap.multiplayer.gameConfig'
+const CONFIG_STORAGE_PREFIX = 'georally.multiplayer.gameConfig'
 
 function getConfigStorageKey(roomCode: string): string {
 	return `${CONFIG_STORAGE_PREFIX}.${roomCode.trim().toUpperCase()}`

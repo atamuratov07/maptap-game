@@ -1,5 +1,5 @@
 {
-	"name": "@maptap/country-build",
+	"name": "@georally/country-build",
 	"private": true,
 	"type": "commonjs",
 	"scripts": {

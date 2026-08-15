@@ -1,5 +1,5 @@
-import { normalizeCountryId } from '@maptap/country-catalog'
-import type { GameContinent, GameScope } from '@maptap/game-domain'
+import { normalizeCountryId } from '@georally/country-catalog'
+import type { GameContinent, GameScope } from '@georally/game-domain'
 import { Globe, Map as MapIcon } from 'lucide-react'
 import type { FilterSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'

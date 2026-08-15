@@ -3,7 +3,7 @@
 The full source tree, excluding large checked-in map assets under `apps/web/public/map/**`.
 
 ```text
-maptap/
+georally-game/
 |-- apps/
 |   |-- server/
 |   |   |-- package.json

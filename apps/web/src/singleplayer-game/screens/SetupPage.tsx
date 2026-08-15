@@ -1,7 +1,7 @@
 import {
 	DEFAULT_GAME_CONFIG,
 	type GameConfig,
-} from '@maptap/game-domain/singleplayer'
+} from '@georally/game-domain/singleplayer'
 import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {

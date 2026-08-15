@@ -1,6 +1,6 @@
 import { randomBytes, randomInt, randomUUID } from 'node:crypto'
 
-import type { RoomCode } from '@maptap/game-domain/multiplayer/room'
+import type { RoomCode } from '@georally/game-domain/multiplayer/room'
 
 import type { MemberSessionToken } from './types.js'
 

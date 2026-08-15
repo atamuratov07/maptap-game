@@ -1,4 +1,4 @@
-import { playableCountryPool } from '@maptap/country-catalog'
+import { playableCountryPool } from '@georally/country-catalog'
 
 import { parseEnv } from '../src/config/env'
 import { createApp } from '../src/app'
@@ -13,7 +13,7 @@ import {
 	GAME_NAMESPACE,
 	type ClientToServerEvents,
 	type ServerToClientEvents,
-} from '@maptap/game-protocol'
+} from '@georally/game-protocol'
 
 export type RoomClientSocket = ClientSocket<
 	ServerToClientEvents,

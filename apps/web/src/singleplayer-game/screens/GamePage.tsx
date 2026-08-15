@@ -3,7 +3,7 @@ import {
 	getQuestionCount,
 	getScore,
 	type GameConfig,
-} from '@maptap/game-domain/singleplayer'
+} from '@georally/game-domain/singleplayer'
 import { useMemo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Button, ButtonLink, ScreenShell, SurfacePanel } from '../../shared/ui'

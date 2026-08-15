@@ -6,8 +6,8 @@ export default defineConfig({
 	outDir: 'dist',
 	clean: true,
 	noExternal: [
-		'@maptap/country-catalog',
-		'@maptap/game-domain',
-		'@maptap/game-protocol',
+		'@georally/country-catalog',
+		'@georally/game-domain',
+		'@georally/game-protocol',
 	],
 })

@@ -1,5 +1,5 @@
 {
-	"name": "@maptap/server",
+	"name": "@georally/server",
 	"version": "1.0.0",
 	"private": true,
 	"type": "module",
@@ -21,9 +21,9 @@
 		"zod": "^4.3.6"
 	},
 	"devDependencies": {
-		"@maptap/country-catalog": "workspace:*",
-		"@maptap/game-domain": "workspace:*",
-		"@maptap/game-protocol": "workspace:*",
+		"@georally/country-catalog": "workspace:*",
+		"@georally/game-domain": "workspace:*",
+		"@georally/game-protocol": "workspace:*",
 		"@types/express": "^5.0.6",
 		"@types/supertest": "^7.2.0",
 		"socket.io-client": "^4.8.3",

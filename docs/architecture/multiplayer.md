@@ -138,7 +138,7 @@ The room stores membership, host identity, connection state, and game history. T
 
 ## Protocol boundary
 
-`@maptap/game-protocol` is the typed contract between browser and server. Runtime payload validation is done with zod request schemas in `requests.ts`, while event names and typed callbacks live in `events.ts`.
+`@georally/game-protocol` is the typed contract between browser and server. Runtime payload validation is done with zod request schemas in `requests.ts`, while event names and typed callbacks live in `events.ts`.
 
 **Client → server events:**
 

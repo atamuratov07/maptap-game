@@ -1,4 +1,4 @@
-import type { CountryInfo } from '@maptap/country-catalog'
+import type { CountryInfo } from '@georally/country-catalog'
 import type { AppLanguage } from './locales'
 
 function firstText(...values: Array<string | null | undefined>): string {

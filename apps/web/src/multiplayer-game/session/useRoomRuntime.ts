@@ -2,8 +2,8 @@ import type {
 	MemberId,
 	RoomCode,
 	RoomId,
-} from '@maptap/game-domain/multiplayer/room'
-import type { RoomClosedEvent } from '@maptap/game-protocol'
+} from '@georally/game-domain/multiplayer/room'
+import type { RoomClosedEvent } from '@georally/game-protocol'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { formatGatewayErrorMessage, toGatewayError } from '../api/errors'
 import type { RoomSession } from './types'

@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { GAME_DIFFICULTIES, GAME_SCOPES } from '@maptap/game-domain'
+import { GAME_DIFFICULTIES, GAME_SCOPES } from '@georally/game-domain'
 
 export const difficultySchema = z.enum(GAME_DIFFICULTIES)
 export const scopeSchema = z.enum(GAME_SCOPES)

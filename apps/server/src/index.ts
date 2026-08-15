@@ -1,4 +1,4 @@
-import { playableCountryPool } from '@maptap/country-catalog'
+import { playableCountryPool } from '@georally/country-catalog'
 
 import { createApp } from './app.js'
 import { parseEnv } from './config/env.js'

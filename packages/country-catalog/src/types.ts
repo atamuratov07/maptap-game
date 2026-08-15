@@ -2,7 +2,7 @@ import type {
 	CountryId,
 	GameContinent,
 	GameDifficulty,
-} from '@maptap/game-domain'
+} from '@georally/game-domain'
 
 export interface RegistryCountry {
 	id: CountryId

@@ -2,12 +2,12 @@ import type {
 	MemberId,
 	RoomId,
 	RoomMemberRole,
-} from '@maptap/game-domain/multiplayer/room'
+} from '@georally/game-domain/multiplayer/room'
 import type {
 	ClientToServerEvents,
 	InterServerEvents,
 	ServerToClientEvents,
-} from '@maptap/game-protocol'
+} from '@georally/game-protocol'
 import type { Namespace, Socket } from 'socket.io'
 
 export type MemberSessionToken = string

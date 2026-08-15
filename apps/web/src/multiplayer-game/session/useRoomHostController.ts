@@ -1,4 +1,7 @@
-import type { GameConfig, RoomHostView } from '@maptap/game-domain/multiplayer'
+import type {
+	GameConfig,
+	RoomHostView,
+} from '@georally/game-domain/multiplayer'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { createSocketGateway, type SocketGateway } from '../api/socketGateway'
 import { clearRoomGameConfig } from '../model/gameConfig'

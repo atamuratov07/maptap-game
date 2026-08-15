@@ -1,13 +1,13 @@
-import type { RoomClosedEvent } from '@maptap/game-protocol'
+import type { RoomClosedEvent } from '@georally/game-protocol'
 
-import type { MemberId } from '@maptap/game-domain/multiplayer'
+import type { MemberId } from '@georally/game-domain/multiplayer'
 import {
 	isRoomInGroupMode,
 	toClassroomHostRoomView,
 	toGroupHostRoomView,
 	toPlayerRoomView,
 	type RoomId,
-} from '@maptap/game-domain/multiplayer/room'
+} from '@georally/game-domain/multiplayer/room'
 import type { RoomsRepository } from './repository.js'
 import type { GameNamespace } from './types.js'
 

@@ -8,7 +8,7 @@ import {
 const WDQS_ENDPOINT = 'https://query.wikidata.org/sparql'
 const WDQS_MAX_RETRIES = 3
 const WDQS_USER_AGENT =
-	'MapTapCountryBuildBot/1.0 https://github.com/atamuratov07/maptap-game'
+	'GeoRallyCountryBuildBot/1.0 https://github.com/atamuratov07/georally-game'
 const WIKIDATA_EMPTY_PATTERN = /^Q\d+$/
 
 function parseRetryAfterMs(rawValue) {

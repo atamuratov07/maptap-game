@@ -1,12 +1,12 @@
 import { createServer as createHttpServer } from 'node:http'
 
 import type { Express } from 'express'
-import { GAME_NAMESPACE } from '@maptap/game-protocol'
+import { GAME_NAMESPACE } from '@georally/game-protocol'
 import type {
 	ClientToServerEvents,
 	InterServerEvents,
 	ServerToClientEvents,
-} from '@maptap/game-protocol'
+} from '@georally/game-protocol'
 import { Server as SocketIOServer } from 'socket.io'
 
 import type { GameNamespace, GameSocketData } from './features/rooms/types.js'

@@ -1,4 +1,4 @@
-import { countryCatalog, type CountryInfo } from '@maptap/country-catalog'
+import { countryCatalog, type CountryInfo } from '@georally/country-catalog'
 import type {
 	ActiveGameHostView,
 	GameHostSubmissionView,
@@ -6,8 +6,8 @@ import type {
 	GameParticipantView,
 	GameResult,
 	GameView,
-} from '@maptap/game-domain/multiplayer/game'
-import type { VisibleMemberInfo } from '@maptap/game-domain/multiplayer/room'
+} from '@georally/game-domain/multiplayer/game'
+import type { VisibleMemberInfo } from '@georally/game-domain/multiplayer/room'
 import { getMemberName } from './roomSelectors'
 
 export interface CurrentRoundView {

@@ -1,4 +1,4 @@
-import type { GameDifficulty, GameScope } from '@maptap/game-domain'
+import type { GameDifficulty, GameScope } from '@georally/game-domain'
 import type { TFunction } from 'i18next'
 
 export function getDifficultyLabel(

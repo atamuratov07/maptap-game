@@ -1,4 +1,4 @@
-import type { AckCallback, RoomProtocolError } from '@maptap/game-protocol'
+import type { AckCallback, RoomProtocolError } from '@georally/game-protocol'
 import {
 	advanceRoundRequestSchema,
 	createRoomRequestSchema,
@@ -11,10 +11,10 @@ import {
 	startGameRequestSchema,
 	submitAnswerRequestSchema,
 	terminateRoomRequestSchema,
-} from '@maptap/game-protocol'
+} from '@georally/game-protocol'
 import type { ZodType } from 'zod'
 
-import type { RoomMemberRole } from '@maptap/game-domain/multiplayer/room'
+import type { RoomMemberRole } from '@georally/game-domain/multiplayer/room'
 import type { RoomsService } from './service.js'
 import type { GameNamespace, GameSocket } from './types.js'
 

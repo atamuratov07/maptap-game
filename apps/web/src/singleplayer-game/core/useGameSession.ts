@@ -2,20 +2,19 @@ import {
 	countryCatalog,
 	playableCountryPool,
 	type GameData,
-} from '@maptap/country-catalog'
-import type { SessionPreparationError } from '@maptap/game-domain'
+} from '@georally/country-catalog'
+import type { SessionPreparationError } from '@georally/game-domain'
 import {
 	createIdleGameState,
 	prepareGameSession,
 	reduceGameState,
 	type GameConfig,
 	type GameState,
-} from '@maptap/game-domain/singleplayer'
+} from '@georally/game-domain/singleplayer'
 import { useCallback, useEffect, useReducer, useState } from 'react'
 
 export type GameLoadErrorCode =
-	| SessionPreparationError['code']
-	| 'no_playable_countries'
+	SessionPreparationError['code'] | 'no_playable_countries'
 
 interface UseGameSessionResult {
 	gameData: GameData | null
@@ -42,31 +41,28 @@ export function useGameSession(config: GameConfig): UseGameSessionResult {
 		createIdleGameState(config),
 	)
 
-	const prepareAndStartGame = useCallback(
-		(nextConfig: GameConfig) => {
-			if (!gameData) {
-				setEligibleIds([])
-				setLoadErrorCode('no_playable_countries')
-				return
-			}
+	const prepareAndStartGame = useCallback((nextConfig: GameConfig) => {
+		if (!gameData) {
+			setEligibleIds([])
+			setLoadErrorCode('no_playable_countries')
+			return
+		}
 
-			const result = prepareGameSession(playableCountryPool, nextConfig)
-			if (!result.ok) {
-				setEligibleIds([])
-				setLoadErrorCode(result.error.code)
-				return
-			}
+		const result = prepareGameSession(playableCountryPool, nextConfig)
+		if (!result.ok) {
+			setEligibleIds([])
+			setLoadErrorCode(result.error.code)
+			return
+		}
 
-			setLoadErrorCode(null)
-			setEligibleIds(result.value.eligibleIds)
-			dispatchEngineState({
-				type: 'START',
-				session: result.value,
-				now: Date.now(),
-			})
-		},
-		[],
-	)
+		setLoadErrorCode(null)
+		setEligibleIds(result.value.eligibleIds)
+		dispatchEngineState({
+			type: 'START',
+			session: result.value,
+			now: Date.now(),
+		})
+	}, [])
 
 	useEffect(() => {
 		prepareAndStartGame(config)

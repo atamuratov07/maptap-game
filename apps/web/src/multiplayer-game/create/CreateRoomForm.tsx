@@ -7,8 +7,8 @@ import {
 	TextInput,
 } from '../../shared/ui'
 import { cn } from '../../shared/utils'
-import type { CreateRoomRequest } from '@maptap/game-protocol'
-import type { RoomMode } from '@maptap/game-domain/multiplayer'
+import type { CreateRoomRequest } from '@georally/game-protocol'
+import type { RoomMode } from '@georally/game-domain/multiplayer'
 import { useTranslation } from 'react-i18next'
 
 const ROOM_MODE_OPTIONS: Array<{

@@ -1,6 +1,6 @@
-# MapTap
+# GeoRally
 
-MapTap is an interactive educational geography game. A player sees a country prompt, finds it on a real map, gets immediate feedback, and repeats short rounds until the country, flag, capital, currency, and region stick. It's built as an npm-workspaces monorepo with a React client, an Express + Socket.IO realtime server, and a set of framework-free shared packages that hold the actual game rules.
+GeoRally is an interactive educational geography game. A player sees a country prompt, finds it on a real map, gets immediate feedback, and repeats short rounds until the country, flag, capital, currency, and region stick. It's built as an npm-workspaces monorepo with a React client, an Express + Socket.IO realtime server, and a set of framework-free shared packages that hold the actual game rules.
 
 > **Status:** actively developed, heading toward classroom use.
 
@@ -39,7 +39,7 @@ MapTap is an interactive educational geography game. A player sees a country pro
 ## Monorepo layout
 
 ```text
-maptap/
+georally-game/
 ├── apps/
 │   ├── web/       # React + Vite client (singleplayer + multiplayer UI)
 │   └── server/    # Express + Socket.IO realtime server (multiplayer only)
@@ -59,8 +59,8 @@ The full annotated source tree lives in [`docs/architecture/source-tree.md`](doc
 **Prerequisites:** Node.js (LTS) and npm 7+ (for workspaces support).
 
 ```bash
-git clone https://github.com/atamuratov07/maptap-game.git
-cd maptap-game
+git clone https://github.com/atamuratov07/georally-game.git
+cd georally-game
 npm install
 ```
 
@@ -98,23 +98,23 @@ npm run build:map-assets            # write tiles into packages/map-assets/dist/
 
 ## Architecture
 
-MapTap's architecture is documented in depth under [`docs/architecture/`](docs/architecture/README.md), so this README stays skimmable. The short version:
+GeoRally's architecture is documented in depth under [`docs/architecture/`](docs/architecture/README.md), so this README stays skimmable. The short version:
 
 ```mermaid
 graph LR
     subgraph Apps
-        WEB["@maptap/web<br/>React + Vite client"]
-        SERVER["@maptap/server<br/>Express + Socket.IO server"]
+        WEB["@georally/web<br/>React + Vite client"]
+        SERVER["@georally/server<br/>Express + Socket.IO server"]
     end
 
     subgraph SharedPackages
-        DOMAIN["@maptap/game-domain<br/>pure game rules and state machines"]
-        PROTOCOL["@maptap/game-protocol<br/>socket event names, ack types, zod schemas"]
-        CATALOG["@maptap/country-catalog<br/>generated playable country metadata"]
+        DOMAIN["@georally/game-domain<br/>pure game rules and state machines"]
+        PROTOCOL["@georally/game-protocol<br/>socket event names, ack types, zod schemas"]
+        CATALOG["@georally/country-catalog<br/>generated playable country metadata"]
     end
 
     subgraph BuildPackages
-        BUILD["@maptap/country-build<br/>offline data + tiles pipeline"]
+        BUILD["@georally/country-build<br/>offline data + tiles pipeline"]
         ASSETS["map-assets<br/>generated map tile storage"]
     end
 
@@ -146,12 +146,12 @@ All run from the repo root:
 
 | Script                           | What it does                                                                                             |
 | -------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `npm run dev:web`                | Vite dev server for `@maptap/web`                                                                        |
+| `npm run dev:web`                | Vite dev server for `@georally/web`                                                                      |
 | `npm run build:web`              | Production build of the web client (`tsc -b && vite build`)                                              |
-| `npm run preview:web`            | Preview the production build of `@maptap/web`                                                            |
-| `npm run dev:server`             | Dev mode for the `@maptap/server` Socket.IO server (`tsx watch`)                                         |
+| `npm run preview:web`            | Preview the production build of `@georally/web`                                                          |
+| `npm run dev:server`             | Dev mode for the `@georally/server` Socket.IO server (`tsx watch`)                                       |
 | `npm run build:server`           | Type-check the server (`tsc --noEmit`)                                                                   |
-| `npm run build:data`             | Runs `@maptap/country-build`'s data build step                                                           |
+| `npm run build:data`             | Runs `@georally/country-build`'s data build step                                                         |
 | `npm run build:country-registry` | Generates `packages/country-catalog/generated/*`                                                         |
 | `npm run build:map-assets`       | Generates tiles into `packages/map-assets/dist/public/map/tiles`, served at `/map/tiles/{z}/{x}/{y}.pbf` |
 | `npm run lint`                   | ESLint across the repo                                                                                   |

@@ -1,4 +1,4 @@
-import type { CountryInfo } from '@maptap/country-catalog'
+import type { CountryInfo } from '@georally/country-catalog'
 import {
 	getAttemptsLeft,
 	getIsCorrect,
@@ -12,7 +12,7 @@ import {
 	getWrongPicks,
 	isPickAllowed,
 	type GameState,
-} from '@maptap/game-domain/singleplayer'
+} from '@georally/game-domain/singleplayer'
 import { useEffect, useMemo, useRef } from 'react'
 import { MapRenderer } from '../../shared/map/MapRenderer'
 import type { MapHighlightTone, MapRendererProps } from '../../shared/map/types'

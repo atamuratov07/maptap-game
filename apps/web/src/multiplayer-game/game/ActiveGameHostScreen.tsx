@@ -1,5 +1,5 @@
-import type { GameHostView } from '@maptap/game-domain/multiplayer/game'
-import type { VisibleMemberInfo } from '@maptap/game-domain/multiplayer/room'
+import type { GameHostView } from '@georally/game-domain/multiplayer/game'
+import type { VisibleMemberInfo } from '@georally/game-domain/multiplayer/room'
 import { AnimatePresence, motion } from 'motion/react'
 import { FloatingNotice } from '../../shared/ui/FloatingNotice'
 import {

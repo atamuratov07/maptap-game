@@ -1,4 +1,4 @@
-import type { GameScope } from '@maptap/game-domain'
+import type { GameScope } from '@georally/game-domain'
 import type { ReactNode } from 'react'
 
 export type MapHighlightTone = 'correct' | 'wrong' | 'selected'

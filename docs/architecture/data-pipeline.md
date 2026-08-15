@@ -1,6 +1,6 @@
 # Data & asset pipeline
 
-`@maptap/country-build` is an offline preparation package. It is not part of the normal web/server runtime, but it explains where the local country catalog and map files come from. It's invoked through root-level scripts: `npm run build:data`, `npm run build:country-registry`, `npm run build:map-assets`, and `npm run backfill:country-uz-latn`.
+`@georally/country-build` is an offline preparation package. It is not part of the normal web/server runtime, but it explains where the local country catalog and map files come from. It's invoked through root-level scripts: `npm run build:data`, `npm run build:country-registry`, `npm run build:map-assets`, and `npm run backfill:country-uz-latn`.
 
 ```mermaid
 graph TD
@@ -34,8 +34,8 @@ graph TD
 
 ## Invocation
 
-| Root script                      | Wraps                                                                                   | Produces                                              |
-| -------------------------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| `npm run build:data`             | `@maptap/country-build`'s `build:data` script (`node scripts/03_build_data.mjs`)        | intermediate data used by the tile and registry steps |
-| `npm run build:country-registry` | `@maptap/country-build`'s `build:registry` script (`bash scripts/06_build_registry.sh`) | `packages/country-catalog/generated/*.json`           |
-| `npm run build:map-assets`       | `@maptap/country-build`'s `build:tiles` script (`bash scripts/04_build_tiles.sh`)       | `packages/map-assets/dist/public/map/tiles/**`        |
+| Root script                      | Wraps                                                                                     | Produces                                              |
+| -------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| `npm run build:data`             | `@georally/country-build`'s `build:data` script (`node scripts/03_build_data.mjs`)        | intermediate data used by the tile and registry steps |
+| `npm run build:country-registry` | `@georally/country-build`'s `build:registry` script (`bash scripts/06_build_registry.sh`) | `packages/country-catalog/generated/*.json`           |
+| `npm run build:map-assets`       | `@georally/country-build`'s `build:tiles` script (`bash scripts/04_build_tiles.sh`)       | `packages/map-assets/dist/public/map/tiles/**`        |

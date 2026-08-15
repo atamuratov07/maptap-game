@@ -1,5 +1,5 @@
-import type { RoomPlayerView } from '@maptap/game-domain/multiplayer'
-import type { LookupRoomFoundResponse } from '@maptap/game-protocol'
+import type { RoomPlayerView } from '@georally/game-domain/multiplayer'
+import type { LookupRoomFoundResponse } from '@georally/game-protocol'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { formatGatewayErrorMessage } from '../api/errors'
 import { createSocketGateway } from '../api/socketGateway'
