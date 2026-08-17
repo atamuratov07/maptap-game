@@ -1,6 +1,8 @@
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig, type Plugin } from 'vite'
+import fs from 'fs'
+import { resolve } from 'path'
 
 function pbfHeaders(): Plugin {
 	const isTilePbf = (urlPath: string) =>
@@ -35,11 +37,32 @@ function pbfHeaders(): Plugin {
 	}
 }
 
+const getLocaleInputs = () => {
+	const localesDir = resolve(__dirname, 'locales')
+	const files = fs.readdirSync(localesDir)
+	const inputs: Record<string, string> = {}
+
+	files.forEach(file => {
+		if (file.endsWith('.html')) {
+			const name = file.replace('.html', '')
+			inputs[name] = resolve(localesDir, file)
+		}
+	})
+
+	inputs['main'] = resolve(__dirname, 'index.html')
+	return inputs
+}
+
 // https://vite.dev/config/
 export default defineConfig({
 	plugins: [react(), tailwindcss(), pbfHeaders()],
 	base: '/',
 	optimizeDeps: {
 		exclude: ['maplibre-gl'],
+	},
+	build: {
+		rollupOptions: {
+			input: getLocaleInputs(),
+		},
 	},
 })

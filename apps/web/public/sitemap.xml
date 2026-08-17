@@ -1,17 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 	<url>
-		<loc>https://georally.world/</loc>
+        <loc>https://georally.world/en/</loc>
 		<changefreq>weekly</changefreq>
 		<priority>1.0</priority>
 	</url>
 	<url>
-		<loc>https://georally.world/multiplayer</loc>
+        <loc>https://georally.world/multiplayer/en/</loc>
 		<changefreq>monthly</changefreq>
 		<priority>0.8</priority>
 	</url>
 	<url>
-		<loc>https://georally.world/singleplayer</loc>
+        <loc>https://georally.world/singleplayer/en/</loc>
+		<changefreq>monthly</changefreq>
+		<priority>0.6</priority>
+	</url>
+	<url>
+        <loc>https://georally.world/ru/</loc>
+		<changefreq>weekly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<url>
+        <loc>https://georally.world/ru/multiplayer</loc>
+		<changefreq>monthly</changefreq>
+		<priority>0.8</priority>
+	</url>
+	<url>
+        <loc>https://georally.world/ru/singleplayer</loc>
+		<changefreq>monthly</changefreq>
+		<priority>0.6</priority>
+	</url>
+	<url>
+        <loc>https://georally.world/uz/</loc>
+		<changefreq>weekly</changefreq>
+		<priority>1.0</priority>
+	</url>
+	<url>
+        <loc>https://georally.world/uz/multiplayer</loc>
+		<changefreq>monthly</changefreq>
+		<priority>0.8</priority>
+	</url>
+	<url>
+        <loc>https://georally.world/uz/singleplayer</loc>
 		<changefreq>monthly</changefreq>
 		<priority>0.6</priority>
 	</url>

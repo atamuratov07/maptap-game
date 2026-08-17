@@ -1,8 +1,17 @@
 User-agent: *
 Allow: /
-Disallow: /multiplayer/room/
-Disallow: /multiplayer/host/
-Disallow: /singleplayer/play
+Disallow: /en/multiplayer/room/
+Disallow: /en/multiplayer/host/
+Disallow: /en/singleplayer/play
+
+Disallow: /ru/multiplayer/room/
+Disallow: /ru/multiplayer/host/
+Disallow: /ru/singleplayer/play
+
+Disallow: /uz/multiplayer/room/
+Disallow: /uz/multiplayer/host/
+Disallow: /uz/singleplayer/play
+
 Disallow: /socket.io/
 Disallow: /health
 
