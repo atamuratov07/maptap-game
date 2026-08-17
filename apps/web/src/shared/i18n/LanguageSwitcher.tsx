@@ -1,10 +1,11 @@
 import { useTranslation } from 'react-i18next'
 import { APP_LANGUAGE_OPTIONS, type AppLanguage } from './locales'
-import { useAppLanguage } from './useAppLanguage'
 import { cn } from '../utils'
 import { GlobeIcon } from 'lucide-react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { toLocaleSegment } from './locale-segment'
+import { useLocation } from 'react-router-dom'
+import { fromLocaleSegment } from './locale-segment'
+import { useCurrentLocale } from '../../app/LocaleContext'
+import { useLocalizedNavigate } from '../../app/useLocalizedNavigate'
 
 interface LanguageSwitcherProps {
 	className?: string
@@ -16,16 +17,16 @@ export function LanguageSwitcher({
 	tone = 'light',
 }: LanguageSwitcherProps): JSX.Element {
 	const { t } = useTranslation()
-	const language = useAppLanguage()
-	const navigate = useNavigate()
+	const language = useCurrentLocale()
+	const navigate = useLocalizedNavigate()
 	const location = useLocation()
 	const isDark = tone === 'dark'
 
 	const handleChange = (next: AppLanguage) => {
-		const localeSegment = toLocaleSegment(next)
-		const segements = location.pathname.split('/').filter(Boolean)
-		const localizedPath = [localeSegment, ...segements].join('/')
-		navigate('/' + localizedPath + location.search, {
+		const segments = location.pathname.split('/').filter(Boolean)
+		const rest = fromLocaleSegment(segments[0]) ? segments.slice(1) : segments
+		navigate('/' + rest.join('/') + location.search, {
+			locale: next,
 			replace: true,
 		})
 	}

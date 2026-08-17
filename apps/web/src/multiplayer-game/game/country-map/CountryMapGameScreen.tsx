@@ -12,7 +12,8 @@ import { GameQuestionBar } from './GameQuestionBar'
 import { RoomLeaderboardOverlay } from './LeaderboardOverlay'
 import { useGameMap } from './useGameMap'
 import { useTranslation } from 'react-i18next'
-import { getCountryName, useAppLanguage } from '../../../shared/i18n'
+import { getCountryName } from '../../../shared/i18n'
+import { useCurrentLocale } from '../../../app/LocaleContext'
 
 interface CountryMapGameScreenProps {
 	game: ActiveGameParticipantView
@@ -30,7 +31,7 @@ export function CountryMapGameScreen({
 	onSubmitAnswer,
 }: CountryMapGameScreenProps): JSX.Element {
 	const { t } = useTranslation()
-	const language = useAppLanguage()
+	const language = useCurrentLocale()
 	const { mapProps } = useGameMap({
 		game,
 		submitPending,

@@ -12,9 +12,10 @@ import { Button } from '../../shared/ui'
 import { Check, HashIcon, LoaderIcon, Users, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { animate, type ValueTransition } from 'motion'
-import { getCountryName, useAppLanguage } from '../../shared/i18n'
+import { getCountryName } from '../../shared/i18n'
 import { useTranslation } from 'react-i18next'
 import { cn } from '../../shared/utils'
+import { useCurrentLocale } from '../../app/LocaleContext'
 
 const EASE = [0.22, 1, 0.36, 1] as const
 const ROW_LAYOUT_TRANSITION = {
@@ -250,7 +251,7 @@ export function ActiveGameHostScreen({
 	onRevealRound,
 }: ActiveGameHostScreenProps): JSX.Element {
 	const { t } = useTranslation()
-	const language = useAppLanguage()
+	const language = useCurrentLocale()
 	const currentRound = getCurrentRound(game)
 	if (game.phase === 'completed' || !currentRound) {
 		return (

@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { LocalizedLink } from './LocalizedLink'
+import { LanguageSwitcher } from '../shared/i18n'
 
 export function HomePage(): JSX.Element {
 	const { t } = useTranslation()
@@ -35,6 +36,7 @@ export function HomePage(): JSX.Element {
 				<div className='relative z-10 h-full mx-auto max-w-5xl'>
 					{/* Logo/Brand */}
 					<div className='mb-4 sm:mb-8 flex items-end gap-3  animate-fade-in'>
+						{' '}
 						<img src={logo} alt={t('app.name')} className='h-10 w-10' />
 						<h2 className='text-2xl sm:text-3xl font-black tracking-tight text-white drop-shadow-lg'>
 							{t('app.name')}
@@ -337,6 +339,11 @@ export function HomePage(): JSX.Element {
 					</div>
 				</div>
 			</section>
+
+			<LanguageSwitcher
+				tone='dark'
+				className='fixed z-100 top-5 sm:top-10 right-5 sm:right-10'
+			/>
 		</ScreenShell>
 	)
 }

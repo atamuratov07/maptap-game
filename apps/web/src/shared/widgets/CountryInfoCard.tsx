@@ -5,8 +5,8 @@ import {
 	getCountryCurrency,
 	getCountryName,
 	toFormattingLocale,
-	useAppLanguage,
 } from '../i18n'
+import { useCurrentLocale } from '../../app/LocaleContext'
 
 function textOrUnknown(value: string, unknownLabel: string): string {
 	const normalized = value.trim()
@@ -75,7 +75,7 @@ function InfoRow({
 
 export function CountryInfoCard({ info }: { info: CountryInfo }): JSX.Element {
 	const { t } = useTranslation()
-	const language = useAppLanguage()
+	const language = useCurrentLocale()
 	const unknownLabel = t('common.unknown')
 
 	const displayName = textOrUnknown(

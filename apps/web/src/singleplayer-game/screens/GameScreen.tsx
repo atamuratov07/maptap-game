@@ -22,7 +22,8 @@ import { Button } from '../../shared/ui'
 import { GameHeader } from '../components/GameHeader'
 import { Hearts } from '../components/Hearts'
 import { useTranslation } from 'react-i18next'
-import { getCountryName, useAppLanguage } from '../../shared/i18n'
+import { getCountryName } from '../../shared/i18n'
+import { useCurrentLocale } from '../../app/LocaleContext'
 
 interface GameScreenProps {
 	state: GameState
@@ -42,7 +43,7 @@ export function GameScreen({
 	onNext,
 }: GameScreenProps): JSX.Element {
 	const { t } = useTranslation()
-	const language = useAppLanguage()
+	const language = useCurrentLocale()
 	const targetId = getTargetId(state)
 	const targetInfo = targetId ? countriesInfo.get(targetId) : undefined
 	const revealedId = getRevealedId(state)

@@ -31,10 +31,10 @@ import {
 } from './map-styles'
 import type { MapRendererProps } from './types'
 import { useTranslation } from 'react-i18next'
-import { useAppLanguage } from '../i18n'
 
 import { setWorkerUrl } from 'maplibre-gl'
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
+import { useCurrentLocale } from '../../app/LocaleContext'
 
 // Set worker URL for MapLibre v6
 setWorkerUrl(workerUrl)
@@ -95,7 +95,7 @@ function MapRendererInner({
 	resetViewKey = null,
 }: MapRendererProps): JSX.Element {
 	const { t } = useTranslation()
-	const language = useAppLanguage()
+	const language = useCurrentLocale()
 	const mapRef = useRef<MapRef | null>(null)
 
 	const [isLoaded, setIsLoaded] = useState(false)

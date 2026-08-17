@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { ButtonLink, ScreenShell } from '../../shared/ui'
 import { formatGatewayErrorMessage } from '../api/errors'
 import { createSocketGateway } from '../api/socketGateway'
@@ -10,10 +9,11 @@ import type { RoomSession } from '../session/types'
 import type { CreateRoomRequest } from '@georally/game-protocol'
 import { LanguageSwitcher } from '../../shared/i18n'
 import { useTranslation } from 'react-i18next'
+import { useLocalizedNavigate } from '../../app/useLocalizedNavigate'
 
 export function HomePage(): JSX.Element {
 	const { t } = useTranslation()
-	const navigate = useNavigate()
+	const navigate = useLocalizedNavigate()
 	const gateway = useMemo(() => createSocketGateway(), [])
 	const [createError, setCreateError] = useState<string | null>(null)
 	const [isCreating, setIsCreating] = useState(false)

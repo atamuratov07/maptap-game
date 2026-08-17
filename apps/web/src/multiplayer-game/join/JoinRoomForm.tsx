@@ -1,8 +1,8 @@
 import { useState, type FormEvent, type JSX } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { Button, Field, TextInput } from '../../shared/ui'
 import { cn } from '../../shared/utils'
 import { useTranslation } from 'react-i18next'
+import { useLocalizedNavigate } from '../../app/useLocalizedNavigate'
 
 export function JoinRoomForm({
 	className,
@@ -10,7 +10,7 @@ export function JoinRoomForm({
 	className?: string
 }): JSX.Element {
 	const { t } = useTranslation()
-	const navigate = useNavigate()
+	const navigate = useLocalizedNavigate()
 	const [roomCode, setRoomCode] = useState('')
 
 	function handleSubmit(event: FormEvent<HTMLFormElement>) {

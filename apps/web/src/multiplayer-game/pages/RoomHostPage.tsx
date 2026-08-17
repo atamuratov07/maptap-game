@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { RoomFinishedScreen } from '../finished/RoomFinishedScreen'
 import { RoomLobbyScreen } from '../lobby/RoomLobbyScreen'
 import { RoomClosedScreen } from '../screens/RoomClosedScreen'
@@ -11,11 +11,12 @@ import { useGroupHostActions } from '../session/useGroupHostActions'
 import { ActiveGameHostScreen } from '../game/ActiveGameHostScreen'
 import { useClassroomHostActions } from '../session/useClassroomHostActions'
 import { useTranslation } from 'react-i18next'
+import { useLocalizedNavigate } from '../../app/useLocalizedNavigate'
 
 export function RoomHostPage(): JSX.Element {
 	const { t } = useTranslation()
 	const params = useParams<{ roomCode: string }>()
-	const navigate = useNavigate()
+	const navigate = useLocalizedNavigate()
 	const roomCode = (params.roomCode ?? '').trim().toUpperCase()
 	const {
 		state,

@@ -54,7 +54,7 @@ function LocalizedRoutes({
 	rest: { pathname: string; search: string; hash: string }
 }): JSX.Element | null {
 	const { i18n } = useTranslation()
-	const segemnt = toLocaleSegment(locale)
+	const segment = toLocaleSegment(locale)
 
 	useEffect(() => {
 		if (i18n.language !== locale) {
@@ -65,7 +65,7 @@ function LocalizedRoutes({
 	const routerElement = useRoutes(
 		[
 			...appRoutes,
-			{ path: '*', element: <Navigate to={`/${segemnt}`} replace /> },
+			{ path: '*', element: <Navigate to={`/${segment}`} replace /> },
 		],
 		rest,
 	)

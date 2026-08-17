@@ -5,7 +5,7 @@ import {
 	type GameConfig,
 } from '@georally/game-domain/singleplayer'
 import { useMemo } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { Button, ButtonLink, ScreenShell, SurfacePanel } from '../../shared/ui'
 import { GameResultModal } from '../components/GameResultModal'
 import { parseGameConfig } from '../core/config'
@@ -13,6 +13,7 @@ import { useGameSession, type GameLoadErrorCode } from '../core/useGameSession'
 import { GameScreen } from './GameScreen'
 import { InvalidConfigScreen } from './InvalidConfigScreen'
 import { useTranslation } from 'react-i18next'
+import { useLocalizedNavigate } from '../../app/useLocalizedNavigate'
 
 function getLoadErrorKey(errorCode: GameLoadErrorCode | null): string {
 	if (errorCode === 'no_playable_countries') {
@@ -45,7 +46,7 @@ export function GamePage(): JSX.Element {
 
 function GameContent({ config }: { config: GameConfig }): JSX.Element {
 	const { t } = useTranslation()
-	const navigate = useNavigate()
+	const navigate = useLocalizedNavigate()
 	const {
 		gameData,
 		loadErrorCode,
