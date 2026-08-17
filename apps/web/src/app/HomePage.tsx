@@ -1,5 +1,4 @@
 import logo from '../assets/logo.png'
-import { Link } from 'react-router-dom'
 import { ScreenShell } from '../shared/ui'
 import {
 	EyeIcon,
@@ -10,8 +9,8 @@ import {
 	UsersRoundIcon,
 	ZapIcon,
 } from 'lucide-react'
-import { LanguageSwitcher } from '../shared/i18n'
 import { useTranslation } from 'react-i18next'
+import { LocalizedLink } from './LocalizedLink'
 
 export function HomePage(): JSX.Element {
 	const { t } = useTranslation()
@@ -68,7 +67,7 @@ export function HomePage(): JSX.Element {
 
 					{/* CTA Buttons - Primary */}
 					<div className='flex flex-col gap-4 sm:flex-row sm:items-center'>
-						<Link
+						<LocalizedLink
 							to='/singleplayer'
 							className='group relative inline-flex items-center justify-center px-8 py-4 font-black uppercase tracking-wider text-slate-950 transition-all duration-300 transform hover:scale-105 active:scale-95 rounded-2xl bg-gradient-to-br from-amber-300 via-amber-400 to-amber-500 shadow-xl hover:shadow-2xl'
 						>
@@ -76,9 +75,9 @@ export function HomePage(): JSX.Element {
 								{t('landing.ctaSolo')}
 							</span>
 							<div className='absolute inset-0 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
-						</Link>
+						</LocalizedLink>
 
-						<Link
+						<LocalizedLink
 							to='/multiplayer'
 							className='group relative inline-flex items-center justify-center px-8 py-4 font-black uppercase tracking-wider text-white transition-all duration-300 transform hover:scale-105 active:scale-95 rounded-2xl bg-gradient-to-br from-cyan-500 via-cyan-600 to-purple-600 shadow-xl hover:shadow-2xl'
 						>
@@ -86,7 +85,7 @@ export function HomePage(): JSX.Element {
 								{t('landing.ctaMultiplayer')}
 							</span>
 							<div className='absolute inset-0 rounded-2xl bg-gradient-to-br from-cyan-600 to-purple-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
-						</Link>
+						</LocalizedLink>
 					</div>
 				</div>
 			</section>
@@ -159,7 +158,7 @@ export function HomePage(): JSX.Element {
 
 					<div className='grid gap-8 lg:grid-cols-2'>
 						{/* Solo Card */}
-						<Link
+						<LocalizedLink
 							to='/singleplayer'
 							className='group relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500/30 to-orange-600/30 border-2 border-amber-400/50 p-12 backdrop-blur-sm transition-all duration-300 hover:border-amber-300 hover:shadow-2xl hover:shadow-amber-500/20 active:scale-95'
 						>
@@ -193,10 +192,10 @@ export function HomePage(): JSX.Element {
 									<MoveRightIcon className='w-5 transition-all ml-2 group-hover:ml-4' />
 								</div>
 							</div>
-						</Link>
+						</LocalizedLink>
 
 						{/* Multiplayer Card */}
-						<Link
+						<LocalizedLink
 							to='/multiplayer'
 							className='group relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-500/30 to-purple-600/30 border-2 border-cyan-400/50 p-12 backdrop-blur-sm transition-all duration-300 hover:border-cyan-300 hover:shadow-2xl hover:shadow-cyan-500/20 active:scale-95'
 						>
@@ -230,7 +229,7 @@ export function HomePage(): JSX.Element {
 									<MoveRightIcon className='w-5 transition-all ml-2 group-hover:ml-4' />
 								</div>
 							</div>
-						</Link>
+						</LocalizedLink>
 					</div>
 				</div>
 			</section>
@@ -323,26 +322,21 @@ export function HomePage(): JSX.Element {
 					</p>
 
 					<div className='flex flex-col gap-4 sm:flex-row sm:justify-center sm:items-center'>
-						<Link
+						<LocalizedLink
 							to='/singleplayer'
 							className='inline-block px-8 py-4 font-black uppercase tracking-wider text-slate-950 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95'
 						>
 							{t('landing.footerCtaSolo')}
-						</Link>
-						<Link
+						</LocalizedLink>
+						<LocalizedLink
 							to='/multiplayer'
 							className='inline-block px-8 py-4 font-black uppercase tracking-wider text-white rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95'
 						>
 							{t('landing.footerCtaMulti')}
-						</Link>
+						</LocalizedLink>
 					</div>
 				</div>
 			</section>
-
-			<LanguageSwitcher
-				tone='dark'
-				className='fixed z-100 top-5 sm:top-10 right-5 sm:right-10'
-			/>
 		</ScreenShell>
 	)
 }

@@ -14,6 +14,5 @@ createRoot(document.getElementById('root')!).render(
 				<App />
 			</BrowserRouter>
 		</I18nDocumentSync>
-		,
 	</StrictMode>,
 )

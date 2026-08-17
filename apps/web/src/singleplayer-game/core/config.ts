@@ -81,14 +81,3 @@ export function parseGameConfig(
 		},
 	}
 }
-
-export function buildGamePath(config: GameConfig): string {
-	const searchParams = new URLSearchParams({
-		questionCount: String(config.questionCount),
-		attempts: String(config.attemptsPerQuestion),
-		scope: config.scope,
-		difficulty: config.difficulty,
-	})
-
-	return `/singleplayer/play?${searchParams.toString()}`
-}

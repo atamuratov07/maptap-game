@@ -35,8 +35,7 @@ if (!i18n.isInitialized) {
 				escapeValue: false,
 			},
 			detection: {
-				order: ['querystring', 'localStorage', 'navigator', 'htmlTag'],
-				lookupQuerystring: 'lang',
+				order: ['localStorage', 'navigator', 'htmlTag'],
 				lookupLocalStorage: LANGUAGE_STORAGE_KEY,
 				caches: ['localStorage'],
 				convertDetectedLanguage: language =>

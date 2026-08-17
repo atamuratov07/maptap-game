@@ -3,6 +3,8 @@ import { APP_LANGUAGE_OPTIONS, type AppLanguage } from './locales'
 import { useAppLanguage } from './useAppLanguage'
 import { cn } from '../utils'
 import { GlobeIcon } from 'lucide-react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { toLocaleSegment } from './locale-segment'
 
 interface LanguageSwitcherProps {
 	className?: string
@@ -13,9 +15,20 @@ export function LanguageSwitcher({
 	className,
 	tone = 'light',
 }: LanguageSwitcherProps): JSX.Element {
-	const { i18n, t } = useTranslation()
+	const { t } = useTranslation()
 	const language = useAppLanguage()
+	const navigate = useNavigate()
+	const location = useLocation()
 	const isDark = tone === 'dark'
+
+	const handleChange = (next: AppLanguage) => {
+		const localeSegment = toLocaleSegment(next)
+		const segements = location.pathname.split('/').filter(Boolean)
+		const localizedPath = [localeSegment, ...segements].join('/')
+		navigate('/' + localizedPath + location.search, {
+			replace: true,
+		})
+	}
 
 	return (
 		<label
@@ -37,7 +50,7 @@ export function LanguageSwitcher({
 				)}
 				value={language}
 				onChange={event => {
-					void i18n.changeLanguage(event.target.value as AppLanguage)
+					handleChange(event.target.value as AppLanguage)
 				}}
 			>
 				{APP_LANGUAGE_OPTIONS.map(option => (

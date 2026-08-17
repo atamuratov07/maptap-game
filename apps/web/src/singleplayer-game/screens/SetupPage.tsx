@@ -3,7 +3,7 @@ import {
 	type GameConfig,
 } from '@georally/game-domain/singleplayer'
 import { useCallback, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { createSearchParams, useNavigate } from 'react-router-dom'
 import {
 	Button,
 	ButtonLink,
@@ -14,7 +14,6 @@ import {
 } from '../../shared/ui'
 import {
 	ATTEMPTS_PER_QUESTION_OPTIONS,
-	buildGamePath,
 	DIFFICULTY_OPTIONS,
 	QUESTION_COUNT_OPTIONS,
 	SCOPE_OPTIONS,
@@ -26,10 +25,13 @@ import {
 } from '../../shared/i18n'
 import { MoveLeftIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useCurrentLocale } from '../../app/LocaleContext'
+import { toLocaleSegment } from '../../shared/i18n/locale-segment'
 
 export function SetupPage(): JSX.Element {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
+	const locale = useCurrentLocale()
 	const [config, setConfig] = useState<GameConfig>(DEFAULT_GAME_CONFIG)
 
 	const updateConfig = useCallback((patch: Partial<GameConfig>) => {
@@ -40,8 +42,17 @@ export function SetupPage(): JSX.Element {
 	}, [])
 
 	const handleStart = useCallback(() => {
-		navigate(buildGamePath(config))
-	}, [config, navigate])
+		const localeSegment = toLocaleSegment(locale)
+		navigate({
+			pathname: `/${localeSegment}/singleplayer/play`,
+			search: `?${createSearchParams({
+				questionCount: String(config.questionCount),
+				attempts: String(config.attemptsPerQuestion),
+				scope: config.scope,
+				difficulty: config.difficulty,
+			})}`,
+		})
+	}, [config, navigate, locale])
 
 	const scopeLabel = getScopeLabel(t, config.scope)
 	const difficultyLabel =
