@@ -6,12 +6,12 @@
 		<priority>1.0</priority>
 	</url>
 	<url>
-        <loc>https://georally.world/multiplayer/en/</loc>
+        <loc>https://georally.world/en/multiplayer/</loc>
 		<changefreq>monthly</changefreq>
 		<priority>0.8</priority>
 	</url>
 	<url>
-        <loc>https://georally.world/singleplayer/en/</loc>
+        <loc>https://georally.world/en/singleplayer/</loc>
 		<changefreq>monthly</changefreq>
 		<priority>0.6</priority>
 	</url>
