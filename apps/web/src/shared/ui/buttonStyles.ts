@@ -53,7 +53,7 @@ export function getButtonClassName({
 	is3d = false,
 	className,
 }: {
-	variant: ButtonVariant | 'none'
+	variant?: ButtonVariant | 'none'
 	size?: ButtonSize
 	is3d?: boolean
 	className?: string
