@@ -28,11 +28,11 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3001
 
-RUN addgroup -S maptap && adduser -S maptap -G maptap
+RUN addgroup -S georally && adduser -S georally -G georally
 
-COPY --from=build --chown=maptap:maptap /prod/server .
+COPY --from=build --chown=georally:georally /prod/server .
 
-USER maptap
+USER georally
 
 EXPOSE 3001
 
