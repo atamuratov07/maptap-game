@@ -34,6 +34,7 @@
 
 	body {
 		font-family: var(--app-font-sans);
+		font-display: swap;
 		color: var(--app-color-text);
 		background:
 			radial-gradient(

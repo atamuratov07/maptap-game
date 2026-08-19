@@ -80,9 +80,9 @@ export function GameHeader({
 					<Button
 						type='button'
 						aria-label={t('singleplayer.giveUp')}
-						variant='soft'
+						variant='none'
 						size='sm'
-						className='min-h-10 bg-white/20 px-3 text-slate-50 hover:bg-white/30 disabled:opacity-55 sm:px-3.5'
+						className='min-h-10 px-3 text-slate-50 bg-gray-700 hover:bg-gray-600 disabled:opacity-55 sm:px-3.5'
 						onClick={onGiveUp}
 						disabled={!isPlaying}
 					>

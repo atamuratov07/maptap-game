@@ -1,4 +1,10 @@
+import { HeartIcon } from 'lucide-react'
+import { motion } from 'motion/react'
 import { useTranslation } from 'react-i18next'
+
+const SHAKE_ANIMATION = {
+	x: [0, -4, 4, -3, 3, 0],
+}
 
 interface HeartsProps {
 	attemptsLeft: number
@@ -14,20 +20,26 @@ export function Hearts({
 
 	return (
 		<div
-			className='flex items-center gap-2 rounded-full bg-slate-900/78 px-3.5 py-2 shadow-xl backdrop-blur'
+			className='flex items-center gap-2 px-4 py-2'
 			aria-label={t('singleplayer.attemptsLeft', {
 				count: safeAttempts,
 			})}
 		>
 			{Array.from({ length: maxAttempts }, (_, index) => {
-				const isFilled = index < safeAttempts
+				const isFilled = index >= maxAttempts - safeAttempts
 				return (
-					<span
-						key={`heart-${index + 1}`}
-						className={`text-[28px] leading-none ${isFilled ? 'text-rose-400' : 'text-slate-400'}`}
+					<motion.div
+						key={index}
+						animate={!isFilled ? SHAKE_ANIMATION : undefined}
+						transition={{
+							duration: 0.35,
+							ease: 'easeInOut',
+						}}
 					>
-						{isFilled ? '\u2665' : '\u2661'}
-					</span>
+						<HeartIcon
+							className={`size-8 stroke-3 ${isFilled ? 'fill-rose-400 stroke-rose-300 drop-shadow-[0_0_1px_rgba(251,113,133,1)]' : 'fill-slate-300 stroke-slate-200'}`}
+						/>
+					</motion.div>
 				)
 			})}
 		</div>

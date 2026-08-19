@@ -479,7 +479,11 @@ function MapRendererInner({
 				interactiveLayerIds={INTERACTIVE_LAYER_IDS}
 				onError={handleError}
 			>
-				<NavigationControl showCompass={false} position='top-left' />
+				<NavigationControl
+					showCompass={false}
+					position='top-left'
+					style={{ marginTop: 130 }}
+				/>
 
 				<Layer {...dimLayer} beforeId={LABELS_BOTTOM_LAYER_ID} />
 				<Layer {...highlightLayer} beforeId={LABELS_BOTTOM_LAYER_ID} />
@@ -515,7 +519,7 @@ function MapRendererInner({
 				) : null}
 			</Map>
 
-			<div className='absolute top-3.5 left-3.5 z-10 flex flex-col gap-2'>
+			<div className='absolute top-3.5 left-2 z-10 flex flex-col gap-2'>
 				<IconButton
 					type='button'
 					aria-label={t('map.projection.flat')}

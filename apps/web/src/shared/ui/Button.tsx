@@ -8,7 +8,7 @@ import {
 import { LocalizedLink } from '../../app/LocalizedLink'
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-	variant?: ButtonVariant
+	variant?: ButtonVariant | 'none'
 	size?: ButtonSize
 	is3d?: boolean
 }
@@ -34,7 +34,7 @@ export function Button({
 }
 
 export interface ButtonLinkProps extends LinkProps {
-	variant?: ButtonVariant
+	variant?: ButtonVariant | 'none'
 	size?: ButtonSize
 	is3d?: boolean
 }

@@ -54,6 +54,7 @@ export function GameResultModal({
 					<Button
 						type='button'
 						variant='teal'
+						is3d
 						size='sm'
 						className='hover:-translate-y-0.5'
 						onClick={onTryAgain}
@@ -63,6 +64,7 @@ export function GameResultModal({
 					<Button
 						type='button'
 						variant='soft'
+						is3d
 						size='sm'
 						className='hover:-translate-y-0.5'
 						onClick={onHome}
