@@ -5,13 +5,15 @@ import { I18nDocumentSync } from '../shared/i18n'
 import App from './App.tsx'
 import '@fontsource-variable/rubik'
 import './globals.css'
-import { StrictMode } from 'react'
+import { StrictMode, Suspense } from 'react'
 
 createRoot(document.getElementById('root')!).render(
 	<StrictMode>
 		<I18nDocumentSync>
 			<BrowserRouter>
-				<App />
+				<Suspense>
+					<App />
+				</Suspense>
 			</BrowserRouter>
 		</I18nDocumentSync>
 	</StrictMode>,

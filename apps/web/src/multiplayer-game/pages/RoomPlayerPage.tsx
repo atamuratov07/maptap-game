@@ -1,17 +1,25 @@
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+
+import { useRoomPlayerController } from '../session/useRoomPlayerController'
 import { RoomFinishedScreen } from '../finished/RoomFinishedScreen'
-import { ActiveGameParticipantScreen } from '../game/ActiveGameParticipantScreen'
 import { PlayerJoinScreen } from '../join/PlayerJoinScreen'
 import { RoomLobbyScreen } from '../lobby/RoomLobbyScreen'
 import { RoomClosedScreen } from '../screens/RoomClosedScreen'
 import { RoomErrorScreen } from '../screens/RoomErrorScreen'
 import { RoomLoadingScreen } from '../screens/RoomLoadingScreen'
-import { useRoomPlayerController } from '../session/useRoomPlayerController'
+
 import { AnimatePresence } from 'motion/react'
 import { FloatingNotice } from '../../shared/ui/FloatingNotice'
-import { useEffect, useRef, useState } from 'react'
 import { CheckIcon, LoaderIcon } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
+
+const loadParticipantScreen = () =>
+	import('../game/ActiveGameParticipantScreen').then(module => ({
+		default: module.ActiveGameParticipantScreen,
+	}))
+
+const ActiveGameParticipantScreen = lazy(loadParticipantScreen)
 
 function HostConnectionNotice({ hostConnected }: { hostConnected?: boolean }) {
 	const { t } = useTranslation()
@@ -70,7 +78,7 @@ function HostConnectionNotice({ hostConnected }: { hostConnected?: boolean }) {
 	)
 }
 
-export function RoomPlayerPage(): JSX.Element {
+export default function RoomPlayerPage(): JSX.Element {
 	const { t } = useTranslation()
 	const params = useParams<{ roomCode: string }>()
 	const roomCode = (params.roomCode ?? '').trim().toUpperCase()
@@ -82,6 +90,14 @@ export function RoomPlayerPage(): JSX.Element {
 		submitAnswer,
 		retry,
 	} = useRoomPlayerController(roomCode)
+
+	useEffect(() => {
+		if (state.status !== 'ready' || state.room.phase !== 'lobby') {
+			return
+		}
+
+		void loadParticipantScreen()
+	}, [state])
 
 	if (state.status === 'connecting') {
 		return (
@@ -174,19 +190,28 @@ export function RoomPlayerPage(): JSX.Element {
 			</>
 		)
 	}
+	const gameLoadingFallback = (
+		<RoomLoadingScreen
+			label={t('multiplayer.room')}
+			title={t('multiplayer.loading.starting')}
+			message={t('multiplayer.loading.startingMessage')}
+		/>
+	)
 
 	return (
 		<div className='fixed inset-0 overflow-hidden bg-slate-950'>
 			{renderHostConnectionStatus}
 
-			<ActiveGameParticipantScreen
-				game={room.activeGame}
-				members={room.members}
-				submitPending={actionPending === 'submit'}
-				actionErrorMessage={actionErrorMessage}
-				isReconnecting={isReconnecting}
-				onSubmitAnswer={submitAnswer}
-			/>
+			<Suspense fallback={gameLoadingFallback}>
+				<ActiveGameParticipantScreen
+					game={room.activeGame}
+					members={room.members}
+					submitPending={actionPending === 'submit'}
+					actionErrorMessage={actionErrorMessage}
+					isReconnecting={isReconnecting}
+					onSubmitAnswer={submitAnswer}
+				/>
+			</Suspense>
 		</div>
 	)
 }

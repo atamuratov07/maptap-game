@@ -2,7 +2,7 @@ import {
 	DEFAULT_GAME_CONFIG,
 	type GameConfig,
 } from '@georally/game-domain/singleplayer'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { createSearchParams } from 'react-router-dom'
 import {
 	Button,
@@ -27,10 +27,21 @@ import { MoveLeftIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useLocalizedNavigate } from '../../app/useLocalizedNavigate'
 
-export function SetupPage(): JSX.Element {
+const prefetchGame = () => {
+	import('./GamePage')
+}
+
+export default function SetupPage(): JSX.Element {
 	const { t } = useTranslation()
 	const navigate = useLocalizedNavigate()
 	const [config, setConfig] = useState<GameConfig>(DEFAULT_GAME_CONFIG)
+
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			prefetchGame()
+		}, 500)
+		return () => clearTimeout(timer)
+	}, [])
 
 	const updateConfig = useCallback((patch: Partial<GameConfig>) => {
 		setConfig(currentConfig => ({
@@ -189,6 +200,7 @@ export function SetupPage(): JSX.Element {
 							variant='teal'
 							is3d
 							className='w-full sm:w-auto'
+							onMouseEnter={prefetchGame}
 							onClick={handleStart}
 						>
 							{t('singleplayer.start')}

@@ -11,7 +11,7 @@ import { LanguageSwitcher } from '../../shared/i18n'
 import { useTranslation } from 'react-i18next'
 import { useLocalizedNavigate } from '../../app/useLocalizedNavigate'
 
-export function HomePage(): JSX.Element {
+export default function HomePage(): JSX.Element {
 	const { t } = useTranslation()
 	const navigate = useLocalizedNavigate()
 	const gateway = useMemo(() => createSocketGateway(), [])

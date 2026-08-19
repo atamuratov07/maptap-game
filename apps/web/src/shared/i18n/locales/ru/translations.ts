@@ -124,6 +124,8 @@ const translations = {
 		loading: {
 			connecting: 'Подключение',
 			connectingMessage: 'Подключаемся к игре.',
+			starting: 'Запуск игры...',
+			startingMessage: 'Загрузка карты и игровых ресурсов...',
 			reconnecting: 'Переподключение',
 			reconnectingMessage: 'Возвращаем вас в игру.',
 			closed: 'Комната закрыта',

@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next'
 import { LocalizedLink } from './LocalizedLink'
 import { LanguageSwitcher } from '../shared/i18n'
 
-export function HomePage(): JSX.Element {
+export default function HomePage(): JSX.Element {
 	const { t } = useTranslation()
 
 	return (

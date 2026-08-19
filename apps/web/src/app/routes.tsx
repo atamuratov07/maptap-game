@@ -1,5 +1,5 @@
 import type { RouteObject } from 'react-router-dom'
-import { HomePage } from './HomePage'
+import HomePage from './HomePage'
 import {
 	SingleplayerGamePage,
 	SingleplayerSetupPage,
