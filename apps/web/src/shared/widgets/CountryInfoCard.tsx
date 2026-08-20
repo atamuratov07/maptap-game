@@ -118,12 +118,12 @@ export function CountryInfoCard({ info }: { info: CountryInfo }): JSX.Element {
 
 	return (
 		<article className='w-70 overflow-hidden rounded-3xl bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(241,245,249,0.96))] text-slate-950 shadow-[0_22px_48px_rgba(15,23,42,0.16)] backdrop-blur'>
-			<div className='relative h-40 overflow-hidden bg-slate-300'>
+			<div className='relative h-auto overflow-hidden bg-slate-300'>
 				{info.flagUrl ? (
 					<img
 						src={info.flagUrl}
 						alt={t('countryInfo.flagAlt', { country: displayName })}
-						className='h-full w-full object-cover'
+						className='h-full w-full object-contain'
 					/>
 				) : (
 					<div className='h-full w-full bg-slate-200' />

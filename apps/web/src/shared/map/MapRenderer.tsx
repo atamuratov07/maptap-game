@@ -1,6 +1,6 @@
 import { normalizeCountryId } from '@georally/country-catalog'
 import type { GameContinent, GameScope } from '@georally/game-domain'
-import { Globe, Map as MapIcon } from 'lucide-react'
+import { Globe, Info, Map as MapIcon } from 'lucide-react'
 import type { FilterSpecification } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -89,7 +89,8 @@ function MapRendererInner({
 	scope,
 	highlights = [],
 	markers = [],
-	popup = null,
+	revealTarget = null,
+	popupElement = null,
 	disabled = false,
 	className,
 	resetViewKey = null,
@@ -102,7 +103,8 @@ function MapRendererInner({
 	const [hasFailure, setHasFailure] = useState(false)
 	const [mapProjection, setMapProjection] =
 		useState<ProjectionSpecification>(MERCATOR_PROJECTION)
-	const [isPopupVisible, setIsPopupVisible] = useState(false)
+	const [isRevealSettled, setIsRevealSettled] = useState(false)
+	const [isCardHidden, setIsCardHidden] = useState(false)
 	const [continentMinZoom, setContinentMinZoom] = useState<number | undefined>(
 		undefined,
 	)
@@ -197,23 +199,18 @@ function MapRendererInner({
 	// Popup ================================================
 
 	useEffect(() => {
-		if (!popup) {
-			setIsPopupVisible(false)
-			return
-		}
-
-		if (!isLoaded) {
-			setIsPopupVisible(false)
+		if (!revealTarget || !isLoaded) {
+			setIsRevealSettled(false)
 			return
 		}
 
 		const map = mapRef.current?.getMap()
 		if (!map) {
-			setIsPopupVisible(true)
+			setIsRevealSettled(true)
 			return
 		}
 
-		setIsPopupVisible(false)
+		setIsRevealSettled(false)
 		let handled = false
 		const finalizePopup = () => {
 			if (handled) {
@@ -221,7 +218,7 @@ function MapRendererInner({
 			}
 
 			handled = true
-			setIsPopupVisible(true)
+			setIsRevealSettled(true)
 		}
 
 		const handleMoveEnd = () => {
@@ -237,7 +234,7 @@ function MapRendererInner({
 
 		map.easeTo({
 			essential: true,
-			center: [popup.longitude, popup.latitude],
+			center: [revealTarget.longitude, revealTarget.latitude],
 			zoom: Math.max(map.getZoom(), REVEALED_MAP_ZOOM),
 			offset: REVEALED_FLY_OFFSET,
 			duration: REVEALED_FLY_DURATION_MS,
@@ -248,7 +245,11 @@ function MapRendererInner({
 			clearTimeout(popupRevealTimer)
 			map.off('moveend', handleMoveEnd)
 		}
-	}, [isLoaded, popup])
+	}, [isLoaded, revealTarget])
+
+	useEffect(() => {
+		setIsCardHidden(false)
+	}, [revealTarget?.countryId])
 
 	// Layers ================================================
 
@@ -281,11 +282,11 @@ function MapRendererInner({
 				.filter(highlight => highlight.tone !== 'selected')
 				.map(highlight => highlight.countryId),
 		)
-		if (popup?.countryId) {
-			ids.add(popup.countryId)
+		if (revealTarget?.countryId) {
+			ids.add(revealTarget.countryId)
 		}
 		return [...ids]
-	}, [highlights, popup?.countryId])
+	}, [highlights, revealTarget?.countryId])
 
 	const labelFilter = useMemo<FilterSpecification>(() => {
 		if (!labelIds.length) {
@@ -401,7 +402,7 @@ function MapRendererInner({
 			}
 
 			clearHover()
-			setIsPopupVisible(false)
+			setIsRevealSettled(false)
 
 			if (activePreset) {
 				const camera = map.cameraForBounds(activePreset.focusBounds, {
@@ -504,20 +505,48 @@ function MapRendererInner({
 					</Marker>
 				))}
 
-				{popup && isPopupVisible ? (
+				{revealTarget && popupElement && isRevealSettled ? (
 					<Popup
-						longitude={popup.longitude}
-						latitude={popup.latitude}
+						longitude={revealTarget.longitude}
+						latitude={revealTarget.latitude}
 						offset={REVEALED_POPUP_OFFSET}
 						className='revealed-popup'
 						maxWidth='none'
 						closeOnClick={false}
 						closeButton={false}
 					>
-						<div>{popup.element}</div>
+						<div
+							className={`transition-all duration-200 ease-out ${
+								isCardHidden
+									? 'pointer-events-none scale-95 opacity-0'
+									: 'scale-100 opacity-100'
+							}`}
+						>
+							{popupElement}
+						</div>
 					</Popup>
 				) : null}
 			</Map>
+
+			{popupElement && isRevealSettled ? (
+				<div className='absolute top-17 right-2 z-10'>
+					<IconButton
+						type='button'
+						aria-label={
+							isCardHidden ? t('map.info.show') : t('map.info.hide')
+						}
+						title={isCardHidden ? t('map.info.show') : t('map.info.hide')}
+						aria-pressed={!isCardHidden}
+						onClick={() => setIsCardHidden(hidden => !hidden)}
+						className='relative'
+					>
+						{!isCardHidden ? (
+							<span className='absolute top-1/2  left-1/2 -translate-1/2 rotate-45 block w-8 h-0.5 rounded-full bg-white' />
+						) : null}
+						<Info aria-hidden='true' size={24} strokeWidth={2} />
+					</IconButton>
+				</div>
+			) : null}
 
 			<div className='absolute top-3.5 left-2 z-10 flex flex-col gap-2'>
 				<IconButton

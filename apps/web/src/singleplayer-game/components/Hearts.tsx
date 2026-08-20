@@ -20,7 +20,7 @@ export function Hearts({
 
 	return (
 		<div
-			className='flex items-center gap-2 px-4 py-2'
+			className='flex items-center gap-1 sm:gap-2'
 			aria-label={t('singleplayer.attemptsLeft', {
 				count: safeAttempts,
 			})}
@@ -37,7 +37,7 @@ export function Hearts({
 						}}
 					>
 						<HeartIcon
-							className={`size-8 stroke-3 ${isFilled ? 'fill-rose-400 stroke-rose-300 drop-shadow-[0_0_1px_rgba(251,113,133,1)]' : 'fill-slate-300 stroke-slate-200'}`}
+							className={`size-6 sm:size-8 stroke-3 ${isFilled ? 'fill-rose-400 stroke-rose-300 drop-shadow-[0_0_1px_rgba(251,113,133,1)]' : 'fill-slate-300 stroke-slate-200'}`}
 						/>
 					</motion.div>
 				)

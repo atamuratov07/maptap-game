@@ -70,7 +70,7 @@ export function GameHeader({
 									<img
 										src={targetFlagUrl}
 										alt=''
-										className='h-5 w-7 rounded-[3px] border border-slate-100/80 object-cover'
+										className='w-7 rounded-[3px] border border-slate-100/80 object-cover'
 									/>
 								) : null}
 							</span>

@@ -182,6 +182,7 @@ export default function RoomHostPage(): JSX.Element {
 					<ActiveGameParticipantScreen
 						game={room.activeGame}
 						members={room.members}
+						showCountryInfo={false}
 						submitPending={actionPending === 'submit'}
 						actionErrorMessage={actionErrorMessage}
 						isReconnecting={isReconnecting}

@@ -306,6 +306,10 @@ const translations = {
 			flat: 'Yassi xarita',
 			globe: 'Globus',
 		},
+		info: {
+			show: "Davlat haqida ma'lumotni ko'rsatish",
+			hide: "Davlat haqida ma'lumotni yashirish",
+		},
 	},
 } as const
 

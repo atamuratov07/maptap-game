@@ -18,6 +18,7 @@ import { useCurrentLocale } from '../../../app/LocaleContext'
 interface CountryMapGameScreenProps {
 	game: ActiveGameParticipantView
 	members: VisibleMemberInfo[]
+	showCountryInfo: boolean
 	submitPending: boolean
 	currentRound: CurrentRoundView
 	onSubmitAnswer: (countryId: string) => Promise<void>
@@ -27,6 +28,7 @@ export function CountryMapGameScreen({
 	game,
 	currentRound,
 	members,
+	showCountryInfo,
 	submitPending,
 	onSubmitAnswer,
 }: CountryMapGameScreenProps): JSX.Element {
@@ -36,6 +38,7 @@ export function CountryMapGameScreen({
 		game,
 		submitPending,
 		onSubmitAnswer,
+		showCountryInfo,
 	})
 	const leaderboardEntries = useMemo(
 		() => getLeaderboardEntries(game, members, 5),

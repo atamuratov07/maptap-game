@@ -57,23 +57,19 @@ export function GameScreen({
 	const isCorrect = getIsCorrect(state)
 	const previousScoreRef = useRef(totalScore)
 
-	const popup = useMemo<MapRendererProps['popup']>(() => {
-		if (!revealedId) {
-			return null
-		}
+	const revealedInfo = revealedId ? countriesInfo.get(revealedId) : undefined
 
-		const info = countriesInfo.get(revealedId)
-		if (!info) {
+	const revealTarget = useMemo<MapRendererProps['revealTarget']>(() => {
+		if (!revealedId || !revealedInfo) {
 			return null
 		}
 
 		return {
 			countryId: revealedId,
-			longitude: info.centroidLng,
-			latitude: info.centroidLat,
-			element: <CountryInfoCard info={info} />,
+			longitude: revealedInfo.centroidLng,
+			latitude: revealedInfo.centroidLat,
 		}
-	}, [countriesInfo, revealedId])
+	}, [revealedInfo, revealedId])
 
 	const interactiveIds = useMemo<ReadonlySet<string>>(
 		() => new Set(eligibleIds),
@@ -104,7 +100,10 @@ export function GameScreen({
 		interactiveIds,
 		scope: state.config.scope,
 		highlights: highlights,
-		popup,
+		revealTarget,
+		popupElement: revealedInfo ? (
+			<CountryInfoCard info={revealedInfo} />
+		) : null,
 		disabled: !canPick,
 		resetViewKey:
 			state.phase === 'playing'
@@ -149,7 +148,7 @@ export function GameScreen({
 				/>
 
 				{showHearts ? (
-					<div className='absolute right-5 top-3 z-20'>
+					<div className='absolute right-4 top-4 z-20'>
 						<Hearts
 							attemptsLeft={attemptsLeft}
 							maxAttempts={state.config.attemptsPerQuestion}

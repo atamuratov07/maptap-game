@@ -306,6 +306,10 @@ const translations = {
 			flat: 'Flat map',
 			globe: 'Globe',
 		},
+		info: {
+			show: 'Show country info',
+			hide: 'Hide country info',
+		},
 	},
 } as const
 

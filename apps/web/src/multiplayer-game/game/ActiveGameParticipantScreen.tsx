@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 interface ActiveGameParticipantScreenProps {
 	game: GameParticipantView
 	members: VisibleMemberInfo[]
+	showCountryInfo: boolean
 	submitPending: boolean
 	actionErrorMessage: string | null
 	isReconnecting: boolean
@@ -18,6 +19,7 @@ interface ActiveGameParticipantScreenProps {
 export function ActiveGameParticipantScreen({
 	game,
 	members,
+	showCountryInfo,
 	submitPending,
 	actionErrorMessage,
 	isReconnecting,
@@ -61,6 +63,7 @@ export function ActiveGameParticipantScreen({
 				game={game}
 				currentRound={currentRound}
 				members={members}
+				showCountryInfo={showCountryInfo}
 				submitPending={submitPending}
 				onSubmitAnswer={onSubmitAnswer}
 			/>

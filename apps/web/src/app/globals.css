@@ -151,6 +151,11 @@
 	--button-3d-glow: rgba(79, 70, 229, 0.45);
 }
 
+.button-3d-sky {
+	--button-3d-edge: #075985;
+	--button-3d-glow: rgba(14, 165, 233, 0.26);
+}
+
 .button-3d-danger {
 	--button-3d-edge: #991b1b;
 	--button-3d-glow: rgba(220, 38, 38, 0.24);

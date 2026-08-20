@@ -307,6 +307,10 @@ const translations = {
 			globe: 'Глобус',
 		},
 	},
+	info: {
+		show: 'Показать информацию о стране',
+		hide: 'Скрыть информацию о стране',
+	},
 } as const
 
 export default translations

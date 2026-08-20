@@ -206,6 +206,7 @@ export default function RoomPlayerPage(): JSX.Element {
 				<ActiveGameParticipantScreen
 					game={room.activeGame}
 					members={room.members}
+					showCountryInfo={room.roomMode === 'classroom'}
 					submitPending={actionPending === 'submit'}
 					actionErrorMessage={actionErrorMessage}
 					isReconnecting={isReconnecting}

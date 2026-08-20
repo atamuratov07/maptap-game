@@ -23,12 +23,12 @@ export interface MapRendererProps {
 	resetViewKey?: string | number | null
 	highlights?: readonly MapHighlight[]
 	markers?: readonly MapMarker[]
-	popup?: null | {
+	revealTarget?: null | {
 		countryId: string
 		longitude: number
 		latitude: number
-		element: ReactNode
 	}
+	popupElement?: ReactNode | null
 	disabled?: boolean
 	className?: string
 }

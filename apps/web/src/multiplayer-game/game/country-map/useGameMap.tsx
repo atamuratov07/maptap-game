@@ -14,6 +14,7 @@ const noopPick = () => undefined
 
 interface UseRoomGameMapArgs {
 	game: GameParticipantView
+	showCountryInfo: boolean
 	submitPending: boolean
 	onSubmitAnswer: (countryId: string) => void
 }
@@ -25,6 +26,7 @@ interface UseRoomGameMapResult {
 export function useGameMap({
 	game,
 	submitPending,
+	showCountryInfo,
 	onSubmitAnswer,
 }: UseRoomGameMapArgs): UseRoomGameMapResult {
 	const eligibleCountryIdsKey = game.eligibleCountryIds.join('|')
@@ -124,20 +126,24 @@ export function useGameMap({
 			scope: game.scope,
 			highlights,
 			markers: EMPTY_MARKERS,
-			popup: correctCountryInfo
+			revealTarget: correctCountryInfo
 				? {
 						countryId: correctCountryInfo.id,
 						longitude: correctCountryInfo.centroidLng,
 						latitude: correctCountryInfo.centroidLat,
-						element: <CountryInfoCard info={correctCountryInfo} />,
 					}
 				: null,
+			popupElement:
+				correctCountryInfo && showCountryInfo ? (
+					<CountryInfoCard info={correctCountryInfo} />
+				) : null,
 			disabled: true,
 			resetViewKey,
 		}
 	}, [
 		correctCountryId,
 		correctCountryInfo,
+		showCountryInfo,
 		game.scope,
 		handlePick,
 		isCompleted,
