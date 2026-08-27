@@ -16,6 +16,8 @@ import {
 	type RoomRuntimeState,
 } from './useRoomRuntime'
 import { i18n } from '../../shared/i18n/setup'
+import { trackRoomJoined } from '../../shared/analytics/track'
+import { useMultiplayerGameAnalytics } from '../../shared/analytics/useMultiplayerGameAnalytics'
 
 type RoomPlayerEntryState =
 	| {
@@ -84,6 +86,11 @@ export function useRoomPlayerController(
 		useActionStatus<RoomPlayerAction>()
 
 	const [runtimeStarted, setRuntimeStarted] = useState(false)
+	useMultiplayerGameAnalytics(
+		runtimeStarted && runtime.state.status === 'ready'
+			? runtime.state.room
+			: null,
+	)
 	const state = runtimeStarted ? runtime.state : entryState
 
 	const entryRunIdRef = useRef(0)
@@ -122,6 +129,7 @@ export function useRoomPlayerController(
 				}
 
 				runtime.acceptSession(session, response.snapshot)
+				trackRoomJoined(response.snapshot.roomMode)
 				saveRoomSession(session)
 				setRuntimeStarted(true)
 			})

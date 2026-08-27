@@ -10,6 +10,7 @@ import type { CreateRoomRequest } from '@georally/game-protocol'
 import { LanguageSwitcher } from '../../shared/i18n'
 import { useTranslation } from 'react-i18next'
 import { useLocalizedNavigate } from '../../app/useLocalizedNavigate'
+import { trackRoomCreated } from '../../shared/analytics/track'
 
 export default function HomePage(): JSX.Element {
 	const { t } = useTranslation()
@@ -45,6 +46,7 @@ export default function HomePage(): JSX.Element {
 				}
 
 				saveRoomSession(storedSession)
+				trackRoomCreated(values.roomMode)
 				navigate(`/multiplayer/host/${response.roomCode}`)
 			} catch (error) {
 				setCreateError(formatGatewayErrorMessage(error))

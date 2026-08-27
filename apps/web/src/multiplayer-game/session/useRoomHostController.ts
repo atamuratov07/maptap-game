@@ -18,6 +18,8 @@ import {
 	type RoomRuntimeState,
 } from './useRoomRuntime'
 import { i18n } from '../../shared/i18n/setup'
+import { trackMultiplayerGameStart } from '../../shared/analytics/track'
+import { useMultiplayerGameAnalytics } from '../../shared/analytics/useMultiplayerGameAnalytics'
 
 type RoomHostControllerState = RoomRuntimeState<RoomHostView>
 type RoomHostAction = 'start' | 'return-lobby' | 'terminate-room'
@@ -75,6 +77,8 @@ export function useRoomHostController<TAction extends string>(
 		return runtime.state
 	}, [entryErrorMessage, roomCode, runtime.state])
 
+	useMultiplayerGameAnalytics(state.status === 'ready' ? state.room : null)
+
 	const bootstrap = useCallback(async () => {
 		setEntryErrorMessage(null)
 		clearActionError()
@@ -111,11 +115,21 @@ export function useRoomHostController<TAction extends string>(
 				return
 			}
 
+			const { roomMode, connectedMemberCount } = runtime.state.room
+
 			await runAction('start', async () => {
 				await gateway.startGame({ gameConfig })
+				trackMultiplayerGameStart({
+					roomMode,
+					difficulty: gameConfig.difficulty,
+					scope: gameConfig.scope,
+					questionCount: gameConfig.questionCount,
+					questionDurationMs: gameConfig.questionDurationMs,
+					memberCountAtStart: connectedMemberCount,
+				})
 			})
 		},
-		[gateway, runAction, runtime.state.status],
+		[gateway, runAction, runtime.state],
 	)
 
 	const returnToLobby = useCallback(async () => {

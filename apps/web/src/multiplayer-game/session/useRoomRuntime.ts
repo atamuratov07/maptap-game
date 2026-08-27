@@ -2,12 +2,15 @@ import type {
 	MemberId,
 	RoomCode,
 	RoomId,
+	RoomMode,
+	RoomPhase,
 } from '@georally/game-domain/multiplayer/room'
 import type { RoomClosedEvent } from '@georally/game-protocol'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { formatGatewayErrorMessage, toGatewayError } from '../api/errors'
 import type { RoomSession } from './types'
 import { i18n } from '../../shared/i18n/setup'
+import { trackRoomClosed } from '../../shared/analytics/track'
 
 export type RoomRuntimeState<TView> =
 	| {
@@ -84,7 +87,13 @@ function isRejectedSessionError(error: unknown): boolean {
 	)
 }
 
-export function useRoomRuntime<TView>({
+type RoomAnalyticsFields = {
+	roomMode: RoomMode
+	phase: RoomPhase
+	connectedMemberCount: number
+}
+
+export function useRoomRuntime<TView extends RoomAnalyticsFields>({
 	roomCode,
 	adapter,
 }: UseRoomRuntimeOptions<TView>): UseRoomRuntimeResult<TView> {
@@ -171,6 +180,14 @@ export function useRoomRuntime<TView>({
 					if (payload.roomId !== session.roomId) {
 						return
 					}
+
+					trackRoomClosed({
+						reason: payload.reason,
+						roomMode: roomRef.current?.roomMode,
+						role: session.role === 'host' ? 'host' : 'player',
+						phaseAtClose: roomRef.current?.phase,
+						memberCountAtClose: roomRef.current?.connectedMemberCount,
+					})
 
 					stopConnection()
 					setState({

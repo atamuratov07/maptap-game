@@ -12,6 +12,7 @@ import {
 	type GameState,
 } from '@georally/game-domain/singleplayer'
 import { useCallback, useEffect, useReducer, useState } from 'react'
+import { useSingleplayerGameAnalytics } from '../../shared/analytics/useSingleplayerGameAnalytics'
 
 export type GameLoadErrorCode =
 	SessionPreparationError['code'] | 'no_playable_countries'
@@ -40,6 +41,8 @@ export function useGameSession(config: GameConfig): UseGameSessionResult {
 		reduceGameState,
 		createIdleGameState(config),
 	)
+
+	useSingleplayerGameAnalytics(engineState, config)
 
 	const prepareAndStartGame = useCallback((nextConfig: GameConfig) => {
 		if (!gameData) {
