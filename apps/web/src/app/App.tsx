@@ -1,31 +1,10 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
-import {
-	MultiplayerHomePage,
-	MultiplayerRoomHostPage,
-	MultiplayerRoomPlayerPage,
-} from '../multiplayer-game'
-import {
-	SingleplayerGamePage,
-	SingleplayerSetupPage,
-} from '../singleplayer-game'
-import { HomePage } from './HomePage'
+import { Route, Routes } from 'react-router-dom'
+import { LocaleGate } from './LocaleGate'
 
 export default function App(): JSX.Element {
 	return (
 		<Routes>
-			<Route path='/' element={<HomePage />} />
-			<Route path='/singleplayer' element={<SingleplayerSetupPage />} />
-			<Route path='/singleplayer/play' element={<SingleplayerGamePage />} />
-			<Route path='/multiplayer' element={<MultiplayerHomePage />} />
-			<Route
-				path='/multiplayer/room/:roomCode'
-				element={<MultiplayerRoomPlayerPage />}
-			/>
-			<Route
-				path='/multiplayer/host/:roomCode'
-				element={<MultiplayerRoomHostPage />}
-			/>
-			<Route path='*' element={<Navigate to='/' replace />} />
+			<Route path='*' element={<LocaleGate />} />
 		</Routes>
 	)
 }

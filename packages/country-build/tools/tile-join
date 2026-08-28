@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
-HOST_DIR="$(cygpath -w "$PWD")"
-MSYS2_ARG_CONV_EXCL='*' docker run --rm -v "$HOST_DIR":/data -w /data tippecanoe:latest tile-join "$@"
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+
+if command -v cygpath >/dev/null 2>&1; then
+    HOST_DIR="$(cygpath -w "$REPO_ROOT")"
+else
+    HOST_DIR="$REPO_ROOT"
+fi
+
+MSYS2_ARG_CONV_EXCL='*' docker run --rm -v "$HOST_DIR":/data -w /data/packages/country-build tippecanoe:latest tile-join "$@"

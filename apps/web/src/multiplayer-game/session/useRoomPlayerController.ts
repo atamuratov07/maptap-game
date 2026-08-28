@@ -1,5 +1,5 @@
-import type { RoomPlayerView } from '@maptap/game-domain/multiplayer-next'
-import type { LookupRoomFoundResponse } from '@maptap/game-protocol'
+import type { RoomPlayerView } from '@georally/game-domain/multiplayer'
+import type { LookupRoomFoundResponse } from '@georally/game-protocol'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { formatGatewayErrorMessage } from '../api/errors'
 import { createSocketGateway } from '../api/socketGateway'
@@ -15,6 +15,9 @@ import {
 	type RoomRuntimeAdapter,
 	type RoomRuntimeState,
 } from './useRoomRuntime'
+import { i18n } from '../../shared/i18n/setup'
+import { trackRoomJoined } from '../../shared/analytics/track'
+import { useMultiplayerGameAnalytics } from '../../shared/analytics/useMultiplayerGameAnalytics'
 
 type RoomPlayerEntryState =
 	| {
@@ -35,8 +38,8 @@ type RoomPlayerEntryState =
 	  }
 
 type RoomPlayerControllerState =
-	| RoomPlayerEntryState
-	| RoomRuntimeState<RoomPlayerView>
+	RoomPlayerEntryState | RoomRuntimeState<RoomPlayerView>
+
 type RoomPlayerAction = 'join' | 'submit'
 
 interface UseRoomPlayerControllerResult {
@@ -52,7 +55,6 @@ export function useRoomPlayerController(
 	roomCode: string,
 ): UseRoomPlayerControllerResult {
 	const gateway = useMemo(() => createSocketGateway(), [])
-	const entryRunIdRef = useRef(0)
 
 	const playerConnectionPort = useMemo(
 		(): RoomRuntimeAdapter<RoomPlayerView> => ({
@@ -60,7 +62,12 @@ export function useRoomPlayerController(
 				gateway.resumePlayerRoom({
 					memberSessionToken: session.memberSessionToken,
 				}),
-			subscribe: handlers => gateway.subscribePlayerRoom(handlers),
+			subscribe: ({ onRoomClosed, onRoomSnapshot, onSocketDisconnect }) =>
+				gateway.subscribePlayerRoom({
+					onRoomSnapshot,
+					onRoomClosed,
+					onSocketDisconnect,
+				}),
 			close: () => gateway.disconnect(),
 		}),
 		[gateway],
@@ -79,12 +86,14 @@ export function useRoomPlayerController(
 		useActionStatus<RoomPlayerAction>()
 
 	const [runtimeStarted, setRuntimeStarted] = useState(false)
+	useMultiplayerGameAnalytics(
+		runtimeStarted && runtime.state.status === 'ready'
+			? runtime.state.room
+			: null,
+	)
 	const state = runtimeStarted ? runtime.state : entryState
 
-	const cleanupController = useCallback(() => {
-		entryRunIdRef.current++
-		runtime.disconnect()
-	}, [runtime.disconnect])
+	const entryRunIdRef = useRef(0)
 
 	const beginEntryRun = useCallback(() => {
 		return ++entryRunIdRef.current
@@ -93,6 +102,11 @@ export function useRoomPlayerController(
 	const isActiveEntryRun = useCallback((runId: number) => {
 		return entryRunIdRef.current === runId
 	}, [])
+
+	const cleanupController = useCallback(() => {
+		entryRunIdRef.current++
+		runtime.disconnect()
+	}, [runtime.disconnect])
 
 	const joinRoom = useCallback(
 		async (playerName: string) => {
@@ -115,6 +129,7 @@ export function useRoomPlayerController(
 				}
 
 				runtime.acceptSession(session, response.snapshot)
+				trackRoomJoined(response.snapshot.roomMode)
 				saveRoomSession(session)
 				setRuntimeStarted(true)
 			})
@@ -160,7 +175,7 @@ export function useRoomPlayerController(
 			setEntryState({
 				status: 'error',
 				roomCode,
-				message: 'Код комнаты должен состоять из 6 символов.',
+				message: i18n.t('multiplayer.error.roomCodeLength'),
 			})
 			return
 		}
@@ -182,7 +197,7 @@ export function useRoomPlayerController(
 				setEntryState({
 					status: 'error',
 					roomCode,
-					message: 'Комната не найдена.',
+					message: i18n.t('gatewayErrors.room_not_found'),
 				})
 				return
 			}
@@ -213,7 +228,7 @@ export function useRoomPlayerController(
 					clearRoomSession(roomCode, 'player')
 					showJoinScreen(
 						lookupResponse,
-						'Сохранённая сессия игрока истекла или недействительна.',
+						i18n.t('multiplayer.error.playerSessionExpired'),
 					)
 					return
 				case 'error':

@@ -1,43 +1,49 @@
-import type { CountryInfo } from '@maptap/country-catalog'
+import type { CountryInfo } from '@georally/country-catalog'
+import { useTranslation } from 'react-i18next'
+import {
+	getCountryCapital,
+	getCountryCurrency,
+	getCountryName,
+	toFormattingLocale,
+} from '../i18n'
+import { useCurrentLocale } from '../../app/LocaleContext'
 
-const CONTINENT_LABELS: Record<CountryInfo['continent'], string> = {
-	africa: 'Африка',
-	asia: 'Азия',
-	europe: 'Европа',
-	'north-america': 'Северная Америка',
-	oceania: 'Океания',
-	'south-america': 'Южная Америка',
-}
-
-function textOrUnknown(value: string): string {
+function textOrUnknown(value: string, unknownLabel: string): string {
 	const normalized = value.trim()
-	return normalized ? normalized : 'Неизвестно'
+	return normalized ? normalized : unknownLabel
 }
 
-function populationLabel(value: number): string {
+function populationLabel(
+	value: number,
+	locale: string,
+	unknownLabel: string,
+): string {
 	if (!Number.isFinite(value) || value <= 0) {
-		return 'Неизвестно'
+		return unknownLabel
 	}
 
-	return value.toLocaleString('ru-RU')
+	return value.toLocaleString(locale)
 }
 
-const TAG_STYLES: Record<
-	string,
-	{
-		className: string
-	}
-> = {
-	Независимое: {
+type CountryTagTone = 'independent' | 'unMember'
+
+const TAG_STYLES: Record<CountryTagTone, { className: string }> = {
+	independent: {
 		className: 'border-emerald-200 bg-emerald-50/90 text-emerald-800',
 	},
-	'Член ООН': {
+	unMember: {
 		className: 'border-sky-200 bg-sky-50/90 text-sky-800',
 	},
 }
 
-function Tag({ label }: { label: string }): JSX.Element {
-	const styles = TAG_STYLES[label]
+function Tag({
+	label,
+	tone,
+}: {
+	label: string
+	tone: CountryTagTone
+}): JSX.Element {
+	const styles = TAG_STYLES[tone]
 
 	return (
 		<span
@@ -68,24 +74,56 @@ function InfoRow({
 }
 
 export function CountryInfoCard({ info }: { info: CountryInfo }): JSX.Element {
-	const displayName = textOrUnknown(info.nameRu || info.name)
-	const displayCapital = textOrUnknown(info.capitalRu || info.capital)
-	const displayCurrency = textOrUnknown(info.currencyRu || info.currency)
-	const displayPopulation = populationLabel(info.population)
-	const continentLabel = CONTINENT_LABELS[info.continent]
+	const { t } = useTranslation()
+	const language = useCurrentLocale()
+	const unknownLabel = t('common.unknown')
+
+	const displayName = textOrUnknown(
+		getCountryName(info, language),
+		unknownLabel,
+	)
+	const displayCapital = textOrUnknown(
+		getCountryCapital(info, language),
+		unknownLabel,
+	)
+	const displayCurrency = textOrUnknown(
+		getCountryCurrency(info, language),
+		unknownLabel,
+	)
+	const displayPopulation = populationLabel(
+		info.population,
+		toFormattingLocale(language),
+		unknownLabel,
+	)
+
+	const continentLabel = t(`countryInfo.continent.${info.continent}`)
+
 	const tags = [
-		info.independent ? 'Независимое' : null,
-		info.unMember ? 'Член ООН' : null,
-	].filter((value): value is string => value !== null)
+		info.independent
+			? {
+					tone: 'independent',
+					label: t('countryInfo.tags.independent'),
+				}
+			: null,
+		info.unMember
+			? {
+					tone: 'unMember',
+					label: t('countryInfo.tags.unMember'),
+				}
+			: null,
+	].filter(
+		(value): value is { tone: CountryTagTone; label: string } =>
+			value !== null,
+	)
 
 	return (
 		<article className='w-70 overflow-hidden rounded-3xl bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(241,245,249,0.96))] text-slate-950 shadow-[0_22px_48px_rgba(15,23,42,0.16)] backdrop-blur'>
-			<div className='relative h-40 overflow-hidden bg-slate-300'>
+			<div className='relative h-auto overflow-hidden bg-slate-300'>
 				{info.flagUrl ? (
 					<img
 						src={info.flagUrl}
-						alt={`Флаг страны ${displayName}`}
-						className='h-full w-full object-cover'
+						alt={t('countryInfo.flagAlt', { country: displayName })}
+						className='h-full w-full object-contain'
 					/>
 				) : (
 					<div className='h-full w-full bg-slate-200' />
@@ -112,12 +150,18 @@ export function CountryInfoCard({ info }: { info: CountryInfo }): JSX.Element {
 				{tags.length > 0 ? (
 					<div className='flex flex-wrap gap-1.5 pb-2'>
 						{tags.map(tag => (
-							<Tag key={tag} label={tag} />
+							<Tag key={tag.tone} tone={tag.tone} label={tag.label} />
 						))}
 					</div>
 				) : null}
-				<InfoRow label='Население' value={displayPopulation} />
-				<InfoRow label='Валюта' value={displayCurrency} />
+				<InfoRow
+					label={t('countryInfo.population')}
+					value={displayPopulation}
+				/>
+				<InfoRow
+					label={t('countryInfo.currency')}
+					value={displayCurrency}
+				/>
 			</div>
 		</article>
 	)

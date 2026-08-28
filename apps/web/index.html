@@ -1,14 +1,98 @@
 ﻿<!doctype html>
-<html lang="ru">
+<html lang="en">
 	<head>
+		<!-- Google tag (gtag.js) -->
+		<script
+			async
+			src="https://www.googletagmanager.com/gtag/js?id=G-8N0ST19DZ9"
+		></script>
+		<script>
+			window.dataLayer = window.dataLayer || []
+			function gtag() {
+				dataLayer.push(arguments)
+			}
+			gtag('js', new Date())
+
+			gtag('config', 'G-8N0ST19DZ9')
+		</script>
 		<meta charset="UTF-8" />
-		<!-- <link rel="icon" type="image/svg+xml" href="/vite.svg" /> -->
+		<link rel="icon" type="image/png" href="/favicon.png" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>MapTap - Демо версия проекта Г.Дамира</title>
+
+		<!-- Primary Meta Tags -->
+		<title>GeoRally | Free Real-Time Geography & World Map Game</title>
+		<meta
+			name="title"
+			content="GeoRally | Free Real-Time Geography & World Map Game"
+		/>
+		<meta
+			name="description"
+			content="Play GeoRally, a free real-time interactive geography game for classrooms and friends. Host live multiplayer world map quiz rounds or practice solo."
+		/>
+		<meta name="robots" content="index, follow, max-image-preview:large" />
+		<link rel="canonical" href="https://georally.world/en/" />
+
+		<!-- Hreflang Localization -->
+		<link rel="alternate" hreflang="en" href="https://georally.world/en/" />
+		<link rel="alternate" hreflang="ru" href="https://georally.world/ru/" />
+		<link rel="alternate" hreflang="uz" href="https://georally.world/uz/" />
+		<link
+			rel="alternate"
+			hreflang="x-default"
+			href="https://georally.world/en/"
+		/>
+
+		<!-- Open Graph / Facebook -->
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content="https://georally.world/en/" />
+		<meta property="og:site_name" content="GeoRally" />
+		<meta property="og:locale" content="en_US" />
+		<meta property="og:locale:alternate" content="ru_RU" />
+		<meta property="og:locale:alternate" content="uz_UZ" />
+		<meta
+			property="og:title"
+			content="GeoRally | Free Real-Time Geography & World Map Game"
+		/>
+		<meta
+			property="og:description"
+			content="Play GeoRally, a free real-time interactive geography game for classrooms and friends. Host live multiplayer world map quiz rounds or practice solo."
+		/>
+		<meta property="og:image" content="https://georally.world/favicon.png" />
+
+		<!-- Twitter Card -->
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:url" content="https://georally.world/en/" />
+		<meta
+			name="twitter:title"
+			content="GeoRally | Free Real-Time Geography & World Map Game"
+		/>
+		<meta
+			name="twitter:description"
+			content="Play GeoRally, a free real-time interactive geography game for classrooms and friends."
+		/>
+		<meta name="twitter:image" content="https://georally.world/favicon.png" />
+
+		<script type="application/ld+json">
+			{
+				"@context": "https://schema.org",
+				"@type": "WebApplication",
+				"name": "GeoRally",
+				"url": "https://georally.world/en/",
+				"applicationCategory": "GameApplication",
+				"genre": "Geography, Trivia, Educational Game",
+				"operatingSystem": "All",
+				"inLanguage": "en",
+				"offers": {
+					"@type": "Offer",
+					"price": "0",
+					"priceCurrency": "USD"
+				},
+				"description": "Free interactive real-time geography learning and world map quiz game for classrooms and multiplayer groups."
+			}
+		</script>
 	</head>
 	<body>
 		<div id="root"></div>
 		<script type="module" src="/src/app/main.tsx"></script>
 	</body>
 </html>
-

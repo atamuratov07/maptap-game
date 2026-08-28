@@ -1,4 +1,4 @@
-import type { GameProtocolError } from './errors'
+import type { RoomProtocolError } from './errors'
 
 export interface EmptyAckData {}
 
@@ -9,7 +9,7 @@ export interface AckSuccess<T> {
 
 export interface AckFailure {
 	ok: false
-	error: GameProtocolError
+	error: RoomProtocolError
 }
 
 export type Ack<T> = AckSuccess<T> | AckFailure

@@ -1,8 +1,8 @@
-import type { GameContinent } from "@maptap/game-domain";
+import type { GameContinent } from '@georally/game-domain'
 
 export interface ContinentViewPreset {
 	focusBounds: [[number, number], [number, number]]
-	maxBounds: [[number, number], [number, number]]
+	maxBounds: [number, number, number, number]
 	padding: { top: number; right: number; bottom: number; left: number }
 }
 
@@ -17,10 +17,7 @@ export const CONTINENT_VIEW_PRESETS: Record<
 			[-25, -38],
 			[60, 38],
 		],
-		maxBounds: [
-			[-35, -42],
-			[65, 42],
-		],
+		maxBounds: [-35, -42, 65, 42],
 		padding: DEFAULT_PADDING,
 	},
 	asia: {
@@ -28,10 +25,7 @@ export const CONTINENT_VIEW_PRESETS: Record<
 			[25, -10],
 			[180, 78],
 		],
-		maxBounds: [
-			[15, -15],
-			[185, 80],
-		],
+		maxBounds: [15, -15, 185, 80],
 		padding: DEFAULT_PADDING,
 	},
 	europe: {
@@ -39,10 +33,7 @@ export const CONTINENT_VIEW_PRESETS: Record<
 			[-25, 34],
 			[45, 72],
 		],
-		maxBounds: [
-			[-30, 30],
-			[50, 75],
-		],
+		maxBounds: [-30, 30, 50, 75],
 		padding: DEFAULT_PADDING,
 	},
 	'north-america': {
@@ -50,10 +41,7 @@ export const CONTINENT_VIEW_PRESETS: Record<
 			[-170, 5],
 			[-50, 84],
 		],
-		maxBounds: [
-			[-178, 0],
-			[-45, 86],
-		],
+		maxBounds: [-178, 0, -45, 86],
 		padding: DEFAULT_PADDING,
 	},
 	'south-america': {
@@ -61,10 +49,7 @@ export const CONTINENT_VIEW_PRESETS: Record<
 			[-95, -60],
 			[-30, 15],
 		],
-		maxBounds: [
-			[-100, -62],
-			[-25, 18],
-		],
+		maxBounds: [-100, -62, -25, 18],
 		padding: DEFAULT_PADDING,
 	},
 	oceania: {
@@ -72,10 +57,7 @@ export const CONTINENT_VIEW_PRESETS: Record<
 			[110, -50],
 			[240, 15],
 		],
-		maxBounds: [
-			[100, -55],
-			[245, 20],
-		],
+		maxBounds: [100, -55, 245, 20],
 		padding: DEFAULT_PADDING,
 	},
 }

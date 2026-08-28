@@ -1,9 +1,9 @@
 import {
 	DEFAULT_GAME_CONFIG,
 	type GameConfig,
-} from '@maptap/game-domain/singleplayer'
-import { useCallback, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+} from '@georally/game-domain/singleplayer'
+import { useCallback, useEffect, useState } from 'react'
+import { createSearchParams } from 'react-router-dom'
 import {
 	Button,
 	ButtonLink,
@@ -14,15 +14,34 @@ import {
 } from '../../shared/ui'
 import {
 	ATTEMPTS_PER_QUESTION_OPTIONS,
-	buildGamePath,
 	DIFFICULTY_OPTIONS,
 	QUESTION_COUNT_OPTIONS,
 	SCOPE_OPTIONS,
 } from '../core/config'
+import {
+	getDifficultyLabel,
+	getScopeLabel,
+	LanguageSwitcher,
+} from '../../shared/i18n'
+import { MoveLeftIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { useLocalizedNavigate } from '../../app/useLocalizedNavigate'
 
-export function SetupPage(): JSX.Element {
-	const navigate = useNavigate()
+const prefetchGame = () => {
+	import('./GamePage')
+}
+
+export default function SetupPage(): JSX.Element {
+	const { t } = useTranslation()
+	const navigate = useLocalizedNavigate()
 	const [config, setConfig] = useState<GameConfig>(DEFAULT_GAME_CONFIG)
+
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			prefetchGame()
+		}, 500)
+		return () => clearTimeout(timer)
+	}, [])
 
 	const updateConfig = useCallback((patch: Partial<GameConfig>) => {
 		setConfig(currentConfig => ({
@@ -32,43 +51,45 @@ export function SetupPage(): JSX.Element {
 	}, [])
 
 	const handleStart = useCallback(() => {
-		navigate(buildGamePath(config))
+		navigate({
+			pathname: '/singleplayer/play',
+			search: `?${createSearchParams({
+				questionCount: String(config.questionCount),
+				attempts: String(config.attemptsPerQuestion),
+				scope: config.scope,
+				difficulty: config.difficulty,
+			})}`,
+		})
 	}, [config, navigate])
 
-	const scopeLabel =
-		SCOPE_OPTIONS.find(option => option.value === config.scope)?.label ??
-		config.scope
+	const scopeLabel = getScopeLabel(t, config.scope)
 	const difficultyLabel =
-		DIFFICULTY_OPTIONS.find(option => option.value === config.difficulty)
-			?.label ?? config.difficulty
+		getDifficultyLabel(t, config.difficulty) ?? config.difficulty
 
 	return (
-		<ScreenShell className='sm:px-8'>
+		<ScreenShell className='px-5 py-8 sm:px-8'>
 			<div className='mx-auto max-w-3xl'>
 				<div className='mb-6 flex flex-wrap items-center justify-between gap-3'>
-					<ButtonLink
-						to='/'
-						variant='nav'
-						size='pill'
-					>
-						<span aria-hidden='true'>&larr;</span>
-						К режимам
+					<ButtonLink to='/' variant='nav' size='pill'>
+						<MoveLeftIcon size={16} className='stroke-3' />
+						{t('singleplayer.toModes')}
 					</ButtonLink>
+					<LanguageSwitcher className='py-2.5 shadow-none text-slate-700 bg-white/85 border-slate-300' />
 				</div>
 
 				<SurfacePanel
 					width='xl'
 					className='border-white/60 bg-white/90 shadow-[0_28px_80px_rgba(15,23,42,0.12)] backdrop-blur sm:p-8'
 				>
-					<h1 className='mb-2 text-5xl font-black leading-none tracking-tight text-slate-950'>
-						Одиночная игра
+					<h1 className='mb-2 text-3xl sm:text-5xl font-black leading-none tracking-tight text-slate-950'>
+						{t('singleplayer.title')}
 					</h1>
 					<p className='mb-6 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base'>
-						Выберите настройки и начните игру.
+						{t('singleplayer.setupDescription')}
 					</p>
 
 					<div className='grid gap-4 sm:grid-cols-2'>
-						<Field label='Количество вопросов'>
+						<Field label={t('singleplayer.fields.questionCount')}>
 							<SelectControl
 								accent='teal'
 								className='rounded-lg border-slate-400 py-2 shadow-sm'
@@ -87,7 +108,7 @@ export function SetupPage(): JSX.Element {
 							</SelectControl>
 						</Field>
 
-						<Field label='Попыток на вопрос'>
+						<Field label={t('singleplayer.fields.attemptsPerQuestion')}>
 							<SelectControl
 								accent='teal'
 								className='rounded-lg border-slate-400 py-2 shadow-sm'
@@ -106,7 +127,7 @@ export function SetupPage(): JSX.Element {
 							</SelectControl>
 						</Field>
 
-						<Field label='Область карты'>
+						<Field label={t('singleplayer.fields.scope')}>
 							<SelectControl
 								accent='teal'
 								className='rounded-lg border-slate-400 py-2 shadow-sm'
@@ -119,13 +140,13 @@ export function SetupPage(): JSX.Element {
 							>
 								{SCOPE_OPTIONS.map(option => (
 									<option key={option.value} value={option.value}>
-										{option.label}
+										{getScopeLabel(t, option.value)}
 									</option>
 								))}
 							</SelectControl>
 						</Field>
 
-						<Field label='Предел сложности'>
+						<Field label={t('singleplayer.fields.difficulty')}>
 							<SelectControl
 								accent='teal'
 								className='rounded-lg border-slate-400 py-2 shadow-sm'
@@ -139,7 +160,7 @@ export function SetupPage(): JSX.Element {
 							>
 								{DIFFICULTY_OPTIONS.map(option => (
 									<option key={option.value} value={option.value}>
-										{option.label}
+										{getDifficultyLabel(t, option.value)}
 									</option>
 								))}
 							</SelectControl>
@@ -152,13 +173,17 @@ export function SetupPage(): JSX.Element {
 								<strong className='text-slate-900'>
 									{config.questionCount}
 								</strong>{' '}
-								вопросов
+								{t('singleplayer.summary.questions', {
+									count: config.questionCount,
+								}).replace(`${config.questionCount} `, '')}
 							</span>
 							<span>
 								<strong className='text-slate-900'>
 									{config.attemptsPerQuestion}
 								</strong>{' '}
-								попыток
+								{t('singleplayer.summary.attempts', {
+									count: config.attemptsPerQuestion,
+								}).replace(`${config.attemptsPerQuestion} `, '')}
 							</span>
 							<span className='capitalize'>
 								<strong className='text-slate-900'>{scopeLabel}</strong>
@@ -175,9 +200,10 @@ export function SetupPage(): JSX.Element {
 							variant='teal'
 							is3d
 							className='w-full sm:w-auto'
+							onMouseEnter={prefetchGame}
 							onClick={handleStart}
 						>
-							Начать игру
+							{t('singleplayer.start')}
 						</Button>
 					</div>
 				</SurfacePanel>

@@ -1,68 +1,39 @@
-export { applyRoomCommand, type RoomCommand } from './commands'
 export {
-	createGameRoom,
-	normalizePlayerName,
-	type CreateRoomInput,
-} from './factory'
-export { calculateAnswerScore } from './score'
+	assertNever,
+	type CommandError,
+	type DomainError,
+	type SessionPreparationError,
+} from './errors'
 export {
-	getActiveRound,
-	getAnsweredPlayerCount,
-	getConnectedPlayerCount,
-	getCurrentQuestionId,
-	getCurrentQuestionIndex,
-	getCurrentQuestionNumber,
-	getLeaderboard,
-	getPlayer,
-	getPlayers,
-	getPlayerSubmission,
-	getQuestionCount,
-	hasPlayerSubmitted,
-} from './selectors'
-export { prepareGameSession } from './session'
-export { applyRoomTransition, type RoomTransition } from './transitions'
+	advanceActiveRoomGameRound,
+	revealActiveRoomGameRound,
+	advanceActiveRoomGame,
+	getNextActiveRoomGameAdvanceAt,
+	startRoomGame,
+	submitRoomGameAnswer,
+	type StartRoomGameInput,
+} from './orchestration'
+
+export {
+	createRoom,
+	toGroupHostRoomView,
+	toClassroomHostRoomView,
+	toPlayerRoomView,
+	type MemberId,
+	type ClassroomHostRoomView,
+	type GroupHostRoomView,
+	type RoomPlayerView,
+	type RoomState,
+	type RoomView,
+	type RoomHostView,
+	type RoomFinishedView,
+	type RoomMode,
+} from './room/index'
+
 export {
 	DEFAULT_GAME_CONFIG,
-	ROOM_PHASES,
-	type ActiveRoundGameState,
-	type CompletedGameRoundState,
-	type EvaluatedGameSubmission,
+	prepareGameSession,
+	type GameCommand,
 	type GameConfig,
-	type GamePlayerState,
 	type GameSession,
-	type LeaderboardRoundGameState as LeaderboardGRoundGameState,
-	type LockedGameSubmission,
-	type OpenRoundGameState,
-	type PlayerId,
-	type PlayerRole,
-	type RevealedRoundGameState,
-	type RoomCode,
-	type RoomFinishedState,
-	type RoomId,
-	type RoomLeaderboardEntry,
-	type RoomLeaderboardState,
-	type RoomLobbyState,
-	type RoomPhase,
-	type RoomQuestionOpenState,
-	type RoomQuestionRevealedState,
-	type RoomState,
-} from './types'
-export {
-	toHostRoomView,
-	toPlayerRoomView,
-	type EvaluatedViewerSubmissionState,
-	type HostSubmissionView,
-	type LeaderboardRoundHostView,
-	type LeaderboardRoundPlayerView,
-	type OpenRoundHostView,
-	type OpenRoundPlayerView,
-	type RevealedRoundHostView,
-	type RevealedRoundPlayerView,
-	type RoomHostView,
-	type RoomPlayerView,
-	type RoomView,
-	type RoundHostView,
-	type RoundPlayerView,
-	type ViewerSubmissionState,
-	type VisiblePlayerInfo,
-} from './visibility'
+} from './game/index'

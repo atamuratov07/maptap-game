@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Button, SurfacePanel } from '../../shared/ui'
 
 interface GameResultModalProps {
@@ -17,6 +18,8 @@ export function GameResultModal({
 	onTryAgain,
 	onHome,
 }: GameResultModalProps): JSX.Element | null {
+	const { t } = useTranslation()
+
 	if (!open) {
 		return null
 	}
@@ -32,7 +35,7 @@ export function GameResultModal({
 				className='max-w-105 rounded-[20px] bg-white text-center shadow-[0_24px_54px_rgba(15,23,42,0.24)]'
 			>
 				<h2 className='m-0 text-2xl font-bold text-slate-900'>
-					Сессия завершена
+					{t('singleplayer.sessionComplete')}
 				</h2>
 
 				<div className='my-4'>
@@ -40,7 +43,10 @@ export function GameResultModal({
 						{score}
 					</p>
 					<p className='mt-1 text-sm text-slate-700'>
-						Правильных ответов: {correctCount} / {totalCount}
+						{t('singleplayer.correctAnswers', {
+							correct: correctCount,
+							total: totalCount,
+						})}
 					</p>
 				</div>
 
@@ -48,20 +54,22 @@ export function GameResultModal({
 					<Button
 						type='button'
 						variant='teal'
+						is3d
 						size='sm'
 						className='hover:-translate-y-0.5'
 						onClick={onTryAgain}
 					>
-						Сыграть ещё раз
+						{t('singleplayer.playAgain')}
 					</Button>
 					<Button
 						type='button'
 						variant='soft'
+						is3d
 						size='sm'
 						className='hover:-translate-y-0.5'
 						onClick={onHome}
 					>
-						На главную
+						{t('common.home')}
 					</Button>
 				</div>
 			</SurfacePanel>

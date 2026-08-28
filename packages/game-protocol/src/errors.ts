@@ -1,7 +1,7 @@
 import type {
 	CommandError,
 	SessionPreparationError,
-} from '@maptap/game-domain/multiplayer-next'
+} from '@georally/game-domain/multiplayer'
 
 export type TransportError =
 	| { code: 'invalid_payload' }
@@ -11,7 +11,5 @@ export type TransportError =
 	| { code: 'room_closed' }
 	| { code: 'internal_error' }
 
-export type GameProtocolError =
-	| TransportError
-	| CommandError
-	| SessionPreparationError
+export type RoomProtocolError =
+	TransportError | CommandError | SessionPreparationError

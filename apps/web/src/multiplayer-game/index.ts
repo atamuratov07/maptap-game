@@ -1,3 +1,9 @@
-export { HomePage as MultiplayerHomePage } from './pages/HomePage'
-export { RoomHostPage as MultiplayerRoomHostPage } from './pages/RoomHostPage'
-export { RoomPlayerPage as MultiplayerRoomPlayerPage } from './pages/RoomPlayerPage'
+import { lazy } from 'react'
+
+export const MultiplayerHomePage = lazy(() => import('./pages/HomePage'))
+export const MultiplayerRoomHostPage = lazy(
+	() => import('./pages/RoomHostPage'),
+)
+export const MultiplayerRoomPlayerPage = lazy(
+	() => import('./pages/RoomPlayerPage'),
+)

@@ -1,4 +1,4 @@
-import type { SessionIdentity } from '@maptap/game-protocol'
+import type { SessionIdentity } from '@georally/game-protocol'
 
 export interface RoomSession extends SessionIdentity {
 	savedAt: number

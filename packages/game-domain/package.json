@@ -1,17 +1,51 @@
 {
-	"name": "@maptap/game-domain",
+	"name": "@georally/game-domain",
 	"version": "1.0.0",
 	"private": true,
 	"type": "module",
-	"main": "./src/index.ts",
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
 	"types": "./src/index.ts",
-	"exports": {
-		".": "./src/index.ts",
-		"./singleplayer": "./src/singleplayer/index.ts",
-		"./multiplayer": "./src/multiplayer/index.ts",
-		"./multiplayer-next": "./src/multiplayer-next/index.ts",
-		"./multiplayer-next/game": "./src/multiplayer-next/game/index.ts",
-		"./multiplayer-next/room": "./src/multiplayer-next/room/index.ts"
+	"scripts": {
+		"build": "tsup",
+		"check": "tsc -p tsconfig.json --noEmit",
+		"test": "vitest run"
 	},
-	"sideEffects": false
+	"exports": {
+		".": {
+			"types": "./src/index.ts",
+			"development": "./src/index.ts",
+			"import": "./dist/index.js",
+			"default": "./dist/index.js"
+		},
+		"./singleplayer": {
+			"types": "./src/singleplayer/index.ts",
+			"development": "./src/singleplayer/index.ts",
+			"import": "./dist/singleplayer/index.js",
+			"default": "./dist/singleplayer/index.js"
+		},
+		"./multiplayer": {
+			"types": "./src/multiplayer/index.ts",
+			"development": "./src/multiplayer/index.ts",
+			"import": "./dist/multiplayer/index.js",
+			"default": "./dist/multiplayer/index.js"
+		},
+		"./multiplayer/game": {
+			"types": "./src/multiplayer/game/index.ts",
+			"development": "./src/multiplayer/game/index.ts",
+			"import": "./dist/multiplayer/game/index.js",
+			"default": "./dist/multiplayer/game/index.js"
+		},
+		"./multiplayer/room": {
+			"types": "./src/multiplayer/room/index.ts",
+			"development": "./src/multiplayer/room/index.ts",
+			"import": "./dist/multiplayer/room/index.js",
+			"default": "./dist/multiplayer/room/index.js"
+		}
+	},
+	"sideEffects": false,
+	"devDependencies": {
+		"tsup": "^8.5.1",
+		"vitest": "^4.1.10"
+	}
 }

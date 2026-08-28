@@ -1,4 +1,4 @@
-import type { CountryInfo } from '@maptap/country-catalog'
+import type { CountryInfo } from '@georally/country-catalog'
 import {
 	getAttemptsLeft,
 	getIsCorrect,
@@ -12,7 +12,7 @@ import {
 	getWrongPicks,
 	isPickAllowed,
 	type GameState,
-} from '@maptap/game-domain/singleplayer'
+} from '@georally/game-domain/singleplayer'
 import { useEffect, useMemo, useRef } from 'react'
 import { MapRenderer } from '../../shared/map/MapRenderer'
 import type { MapHighlightTone, MapRendererProps } from '../../shared/map/types'
@@ -21,6 +21,9 @@ import { CountryInfoCard } from '../../shared/widgets/CountryInfoCard'
 import { Button } from '../../shared/ui'
 import { GameHeader } from '../components/GameHeader'
 import { Hearts } from '../components/Hearts'
+import { useTranslation } from 'react-i18next'
+import { getCountryName } from '../../shared/i18n'
+import { useCurrentLocale } from '../../app/LocaleContext'
 
 interface GameScreenProps {
 	state: GameState
@@ -39,6 +42,8 @@ export function GameScreen({
 	onGiveUp,
 	onNext,
 }: GameScreenProps): JSX.Element {
+	const { t } = useTranslation()
+	const language = useCurrentLocale()
 	const targetId = getTargetId(state)
 	const targetInfo = targetId ? countriesInfo.get(targetId) : undefined
 	const revealedId = getRevealedId(state)
@@ -52,23 +57,19 @@ export function GameScreen({
 	const isCorrect = getIsCorrect(state)
 	const previousScoreRef = useRef(totalScore)
 
-	const popup = useMemo<MapRendererProps['popup']>(() => {
-		if (!revealedId) {
-			return null
-		}
+	const revealedInfo = revealedId ? countriesInfo.get(revealedId) : undefined
 
-		const info = countriesInfo.get(revealedId)
-		if (!info) {
+	const revealTarget = useMemo<MapRendererProps['revealTarget']>(() => {
+		if (!revealedId || !revealedInfo) {
 			return null
 		}
 
 		return {
 			countryId: revealedId,
-			longitude: info.centroidLng,
-			latitude: info.centroidLat,
-			element: <CountryInfoCard info={info} />,
+			longitude: revealedInfo.centroidLng,
+			latitude: revealedInfo.centroidLat,
 		}
-	}, [countriesInfo, revealedId])
+	}, [revealedInfo, revealedId])
 
 	const interactiveIds = useMemo<ReadonlySet<string>>(
 		() => new Set(eligibleIds),
@@ -99,7 +100,10 @@ export function GameScreen({
 		interactiveIds,
 		scope: state.config.scope,
 		highlights: highlights,
-		popup,
+		revealTarget,
+		popupElement: revealedInfo ? (
+			<CountryInfoCard info={revealedInfo} />
+		) : null,
 		disabled: !canPick,
 		resetViewKey:
 			state.phase === 'playing'
@@ -122,7 +126,9 @@ export function GameScreen({
 				questionIndex={questionIndex}
 				questionCount={questionCount}
 				targetName={
-					targetInfo?.nameRu || targetInfo?.name || 'Игра завершена'
+					targetInfo
+						? getCountryName(targetInfo, language)
+						: t('singleplayer.gameFinished')
 				}
 				targetFlagUrl={targetInfo?.flagUrl}
 				isPlaying={state.phase === 'playing'}
@@ -142,7 +148,7 @@ export function GameScreen({
 				/>
 
 				{showHearts ? (
-					<div className='absolute right-5 top-3 z-20'>
+					<div className='absolute right-4 top-4 z-20'>
 						<Hearts
 							attemptsLeft={attemptsLeft}
 							maxAttempts={state.config.attemptsPerQuestion}
@@ -160,7 +166,7 @@ export function GameScreen({
 							className='px-4 py-2.5'
 							onClick={onNext}
 						>
-							Следующий вопрос
+							{t('singleplayer.nextQuestion')}
 						</Button>
 					</div>
 				) : null}

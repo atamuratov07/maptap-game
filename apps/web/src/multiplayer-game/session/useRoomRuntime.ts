@@ -2,11 +2,15 @@ import type {
 	MemberId,
 	RoomCode,
 	RoomId,
-} from '@maptap/game-domain/multiplayer-next/room'
-import type { RoomClosedEvent } from '@maptap/game-protocol'
+	RoomMode,
+	RoomPhase,
+} from '@georally/game-domain/multiplayer/room'
+import type { RoomClosedEvent } from '@georally/game-protocol'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { formatGatewayErrorMessage, toGatewayError } from '../api/errors'
 import type { RoomSession } from './types'
+import { i18n } from '../../shared/i18n/setup'
+import { trackRoomClosed } from '../../shared/analytics/track'
 
 export type RoomRuntimeState<TView> =
 	| {
@@ -41,7 +45,7 @@ export type RoomRuntimeState<TView> =
 type RoomSubscriptionHandlers<TView> = {
 	onRoomSnapshot: (payload: { roomId: RoomId; snapshot: TView }) => void
 	onRoomClosed: (payload: RoomClosedEvent) => void
-	onDisconnect: (reason: string) => void
+	onSocketDisconnect: (reason: string) => void
 }
 
 export type RoomRuntimeAdapter<TView> = {
@@ -83,7 +87,13 @@ function isRejectedSessionError(error: unknown): boolean {
 	)
 }
 
-export function useRoomRuntime<TView>({
+type RoomAnalyticsFields = {
+	roomMode: RoomMode
+	phase: RoomPhase
+	connectedMemberCount: number
+}
+
+export function useRoomRuntime<TView extends RoomAnalyticsFields>({
 	roomCode,
 	adapter,
 }: UseRoomRuntimeOptions<TView>): UseRoomRuntimeResult<TView> {
@@ -171,6 +181,14 @@ export function useRoomRuntime<TView>({
 						return
 					}
 
+					trackRoomClosed({
+						reason: payload.reason,
+						roomMode: roomRef.current?.roomMode,
+						role: session.role === 'host' ? 'host' : 'player',
+						phaseAtClose: roomRef.current?.phase,
+						memberCountAtClose: roomRef.current?.connectedMemberCount,
+					})
+
 					stopConnection()
 					setState({
 						status: 'closed',
@@ -183,7 +201,7 @@ export function useRoomRuntime<TView>({
 						adapter.close()
 					}, 0)
 				},
-				onDisconnect: () => {
+				onSocketDisconnect: () => {
 					setState({
 						status: 'reconnecting',
 						roomCode,
@@ -256,8 +274,7 @@ export function useRoomRuntime<TView>({
 						setState({
 							status: 'error',
 							roomCode,
-							message:
-								'Сохранённая сессия комнаты истекла или недействительна.',
+							message: i18n.t('multiplayer.error.roomSessionExpired'),
 						})
 					}
 					return { kind: 'rejected' }

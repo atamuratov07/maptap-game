@@ -1,38 +1,48 @@
-import { err, ok, type CountryPool, type Result } from '@maptap/game-domain'
+import { err, ok, type CountryPool, type Result } from '@georally/game-domain'
 import type {
 	CreateRoomResponse,
 	EmptyAckData,
-	GameProtocolError,
 	JoinRoomResponse,
 	LookupRoomResponse,
 	ResumeHostRoomResponse,
 	ResumePlayerRoomResponse,
 	RoomClosedEvent,
+	RoomProtocolError,
 	SubmitAnswerResponse,
-} from '@maptap/game-protocol'
+} from '@georally/game-protocol'
 
 import {
 	advanceActiveRoomGame,
+	advanceActiveRoomGameRound,
 	getNextActiveRoomGameAdvanceAt,
+	revealActiveRoomGameRound,
 	startRoomGame,
 	submitRoomGameAnswer,
-} from '@maptap/game-domain/multiplayer-next'
+} from '@georally/game-domain/multiplayer'
 import {
+	applyGameCommand,
 	getAnsweredParticipantCount,
-	prepareGameSession,
+	getGameParticipantCount,
 	type GameConfig,
-} from '@maptap/game-domain/multiplayer-next/game'
+} from '@georally/game-domain/multiplayer/game'
 import {
 	applyRoomCommand,
 	createRoom,
-	toHostRoomView,
 	toPlayerRoomView,
 	type MemberId,
-	type RoomHostView,
+	type ClassroomHostRoomView,
+	type GroupHostRoomView,
 	type RoomId,
+	type RoomMode,
 	type RoomPlayerView,
 	type RoomState,
-} from '@maptap/game-domain/multiplayer-next/room'
+	toClassroomHostRoomView,
+	toGroupHostRoomView,
+	isRoomInGroupMode,
+	getRoomExpireDueAt,
+	type RoomExpireTTLConfig,
+	getRoomOccupancy,
+} from '@georally/game-domain/multiplayer/room'
 import {
 	createGameId,
 	createMemberId,
@@ -43,13 +53,13 @@ import {
 import type { MemberSessionRecord, RoomsRepository } from './repository.js'
 import type { BoundServiceResponse, MemberSessionToken } from './types.js'
 
-type ServiceResult<T> = Result<T, GameProtocolError>
+type ServiceResult<T> = Result<T, RoomProtocolError>
 
 interface RoomUpdateOptions {
 	excludeMemberId?: MemberId
 }
 
-interface GameRoomServiceHooks {
+interface RoomsServiceHooks {
 	onRoomUpdated: (roomId: RoomId, options?: RoomUpdateOptions) => void
 	onRoomClosed: (roomId: RoomId, reason: RoomClosedEvent['reason']) => void
 }
@@ -59,12 +69,15 @@ export interface RoomsServiceOptions {
 	repository: RoomsRepository
 	revealDurationMs: number
 	leaderboardDurationMs: number
-	hooks: GameRoomServiceHooks
+	hooks: RoomsServiceHooks
+	roomCapacityLimit: number
+	roomExpireTTL: RoomExpireTTLConfig
 	now?: () => number
 }
 
 export interface CreateRoomInput {
 	hostName: string
+	roomMode: RoomMode
 	socketId: string
 }
 
@@ -88,6 +101,14 @@ export interface StartGameInput {
 	gameConfig: GameConfig
 }
 
+export interface RevealRoundInput {
+	memberSessionToken: MemberSessionToken
+}
+
+export interface AdvanceRoundInput {
+	memberSessionToken: MemberSessionToken
+}
+
 export interface SubmitAnswerInput {
 	memberSessionToken: MemberSessionToken
 	countryId: string
@@ -106,8 +127,10 @@ export class RoomsService {
 	private readonly repository: RoomsRepository
 	private readonly revealDurationMs: number
 	private readonly leaderboardDurationMs: number
-	private readonly hooks: GameRoomServiceHooks
+	private readonly hooks: RoomsServiceHooks
+	private readonly roomCapacityLimit: number
 	private readonly now: () => number
+	private readonly roomExpireTTL: RoomExpireTTLConfig
 
 	constructor(options: RoomsServiceOptions) {
 		this.countryPool = options.countryPool
@@ -115,6 +138,8 @@ export class RoomsService {
 		this.revealDurationMs = options.revealDurationMs
 		this.leaderboardDurationMs = options.leaderboardDurationMs
 		this.hooks = options.hooks
+		this.roomCapacityLimit = options.roomCapacityLimit
+		this.roomExpireTTL = options.roomExpireTTL
 		this.now = options.now ?? Date.now
 	}
 
@@ -157,6 +182,7 @@ export class RoomsService {
 		const roomResult = createRoom({
 			roomId,
 			roomCode,
+			roomMode: input.roomMode,
 			hostId,
 			hostName: input.hostName,
 			now: this.now(),
@@ -177,7 +203,10 @@ export class RoomsService {
 			socketId: input.socketId,
 		})
 
-		const snapshot = this.buildRoomHostSnapshot(roomResult.value, hostId)
+		const snapshot = isRoomInGroupMode(roomResult.value)
+			? this.buildGroupHostRoomSnapshot(roomResult.value, hostId)
+			: this.buildClassroomHostRoomSnapshot(roomResult.value, hostId)
+
 		if (!snapshot.ok) {
 			return snapshot
 		}
@@ -201,6 +230,12 @@ export class RoomsService {
 		if (!context) {
 			return err({
 				code: 'room_not_found',
+			})
+		}
+
+		if (getRoomOccupancy(context.state) >= this.roomCapacityLimit) {
+			return err({
+				code: 'room_participant_capacity_limit_exceeded',
 			})
 		}
 
@@ -256,7 +291,7 @@ export class RoomsService {
 			})
 		}
 		if (session.role !== 'host') {
-			return err({ code: 'unauthorized' })
+			return err({ code: 'insufficient_permissions' })
 		}
 
 		const context = this.repository.getRoomById(session.roomId)
@@ -296,7 +331,9 @@ export class RoomsService {
 			input.socketId,
 		)
 
-		const snapshot = this.buildRoomHostSnapshot(nextState, session.memberId)
+		const snapshot = isRoomInGroupMode(nextState)
+			? this.buildGroupHostRoomSnapshot(nextState, session.memberId)
+			: this.buildClassroomHostRoomSnapshot(nextState, session.memberId)
 		if (!snapshot.ok) {
 			return snapshot
 		}
@@ -322,7 +359,7 @@ export class RoomsService {
 		}
 
 		if (session.role !== 'player') {
-			return err({ code: 'unauthorized' })
+			return err({ code: 'insufficient_permissions' })
 		}
 
 		const context = this.repository.getRoomById(session.roomId)
@@ -418,7 +455,7 @@ export class RoomsService {
 			memberSession.role !== 'host' ||
 			memberSession.memberId !== state.hostId
 		) {
-			return err({ code: 'unauthorized' })
+			return err({ code: 'only_host_can_manage_room' })
 		}
 
 		this.closeRoom(state.roomId, 'host_terminated')
@@ -427,10 +464,6 @@ export class RoomsService {
 	}
 
 	startGame(input: StartGameInput): ServiceResult<EmptyAckData> {
-		const gameSession = prepareGameSession(this.countryPool, input.gameConfig)
-		if (!gameSession.ok) {
-			return gameSession
-		}
 		const sessionContext = this.getMemberSessionContext(
 			input.memberSessionToken,
 		)
@@ -440,9 +473,10 @@ export class RoomsService {
 
 		const nextState = startRoomGame({
 			gameId: createGameId(),
-			room: sessionContext.value.state,
-			session: gameSession.value,
 			actorId: sessionContext.value.memberSession.memberId,
+			room: sessionContext.value.state,
+			config: input.gameConfig,
+			countryPool: this.countryPool,
 			now: this.now(),
 		})
 		if (!nextState.ok) {
@@ -454,19 +488,66 @@ export class RoomsService {
 		return ok({})
 	}
 
-	submitAnswer(input: SubmitAnswerInput): ServiceResult<SubmitAnswerResponse> {
-		const memberSessionContext = this.getMemberSessionContext(
+	revealGameRound(input: RevealRoundInput): ServiceResult<EmptyAckData> {
+		const sessionContext = this.getMemberSessionContext(
 			input.memberSessionToken,
 		)
-		if (!memberSessionContext.ok) {
-			return memberSessionContext
+		if (!sessionContext.ok) {
+			return sessionContext
 		}
-		const { memberSession, state: room } = memberSessionContext.value
+
+		const { memberSession, state: room } = sessionContext.value
+		const revealedResult = revealActiveRoomGameRound(
+			room,
+			memberSession.memberId,
+			this.now(),
+		)
+
+		if (!revealedResult.ok) {
+			return revealedResult
+		}
+
+		this.commitRoomState(room.roomId, revealedResult.value)
+
+		return ok({})
+	}
+
+	advanceGameRound(input: AdvanceRoundInput): ServiceResult<EmptyAckData> {
+		const sessionContext = this.getMemberSessionContext(
+			input.memberSessionToken,
+		)
+		if (!sessionContext.ok) {
+			return sessionContext
+		}
+		const { memberSession, state: room } = sessionContext.value
+		const advancedResult = advanceActiveRoomGameRound(
+			room,
+			this.now(),
+			memberSession.memberId,
+		)
+
+		if (!advancedResult.ok) {
+			return advancedResult
+		}
+
+		this.commitRoomState(room.roomId, advancedResult.value)
+
+		return ok({})
+	}
+
+	submitAnswer(input: SubmitAnswerInput): ServiceResult<SubmitAnswerResponse> {
+		const sessionContext = this.getMemberSessionContext(
+			input.memberSessionToken,
+		)
+		if (!sessionContext.ok) {
+			return sessionContext
+		}
+		const { memberSession, state: room } = sessionContext.value
 
 		const acceptedAt = this.now()
-		const submittedState = submitRoomGameAnswer(room, {
-			type: 'SUBMIT_ANSWER',
-			participantId: memberSession.memberId,
+		const submittedState = submitRoomGameAnswer({
+			room,
+			memberId: memberSession.memberId,
 			countryId: input.countryId,
 			now: acceptedAt,
 		})
@@ -476,11 +557,20 @@ export class RoomsService {
 		}
 
 		let nextState = submittedState.value
-		if (this.shouldRevealImmediately(nextState)) {
-			const revealedState = advanceActiveRoomGame(nextState, acceptedAt)
+		if (
+			this.shouldRevealImmediately(nextState) &&
+			nextState.phase === 'active'
+		) {
+			const revealedGameState = applyGameCommand(nextState.activeGame, {
+				type: 'REVEAL_ROUND',
+				now: acceptedAt,
+			})
 
-			if (revealedState.ok) {
-				nextState = revealedState.value
+			if (revealedGameState.ok) {
+				nextState = {
+					...nextState,
+					activeGame: revealedGameState.value,
+				}
 			}
 		}
 
@@ -564,11 +654,23 @@ export class RoomsService {
 		})
 	}
 
-	private buildRoomHostSnapshot(
+	private buildClassroomHostRoomSnapshot(
 		state: RoomState,
 		memberId: MemberId,
-	): ServiceResult<RoomHostView> {
-		const snapshot = toHostRoomView(state, memberId)
+	): ServiceResult<ClassroomHostRoomView> {
+		const snapshot = toClassroomHostRoomView(state, memberId)
+		return snapshot
+			? ok(snapshot)
+			: err({
+					code: 'internal_error',
+				})
+	}
+
+	private buildGroupHostRoomSnapshot(
+		state: RoomState,
+		memberId: MemberId,
+	): ServiceResult<GroupHostRoomView> {
+		const snapshot = toGroupHostRoomView(state, memberId)
 
 		return snapshot
 			? ok(snapshot)
@@ -597,6 +699,7 @@ export class RoomsService {
 	): void {
 		this.repository.setRoomState(roomId, nextState)
 		this.rescheduleRoomAdvance(roomId)
+		this.rescheduleRoomExpire(roomId)
 		this.hooks.onRoomUpdated(roomId, options)
 	}
 
@@ -606,13 +709,10 @@ export class RoomsService {
 			return
 		}
 
-		const dueAt = getNextActiveRoomGameAdvanceAt(
-			context.state,
-			{
-				revealDurationMs: this.revealDurationMs,
-				leaderboardDurationMs: this.leaderboardDurationMs,
-			},
-		)
+		const dueAt = getNextActiveRoomGameAdvanceAt(context.state, {
+			revealDurationMs: this.revealDurationMs,
+			leaderboardDurationMs: this.leaderboardDurationMs,
+		})
 
 		if (dueAt === null) {
 			this.repository.setScheduledRoomAdvance(roomId, null)
@@ -621,7 +721,11 @@ export class RoomsService {
 
 		const delayMs = Math.max(0, dueAt - this.now())
 		const handle = setTimeout(() => {
-			this.executeScheduledRoomAdvance(roomId, dueAt)
+			try {
+				this.executeScheduledRoomAdvance(roomId, dueAt)
+			} catch (error) {
+				console.error(`Failed to advance room ${roomId}`, error)
+			}
 		}, delayMs)
 
 		this.repository.setScheduledRoomAdvance(roomId, {
@@ -646,6 +750,43 @@ export class RoomsService {
 		this.commitRoomState(roomId, transitionedState.value)
 	}
 
+	private rescheduleRoomExpire(roomId: RoomId): void {
+		const context = this.repository.getRoomById(roomId)
+		if (!context) {
+			return
+		}
+
+		const dueAt = getRoomExpireDueAt(context.state, this.roomExpireTTL)
+
+		if (dueAt === null) {
+			this.repository.setScheduledRoomExpire(roomId, null)
+			return
+		}
+
+		const ttlMs = Math.max(0, dueAt - this.now())
+		const handle = setTimeout(() => {
+			try {
+				this.executeScheduledRoomExpire(roomId, dueAt)
+			} catch (error) {
+				console.error(`Failed to expire room ${roomId}`, error)
+			}
+		}, ttlMs)
+
+		this.repository.setScheduledRoomExpire(roomId, {
+			dueAt,
+			handle,
+		})
+	}
+
+	private executeScheduledRoomExpire(roomId: RoomId, dueAt: number): void {
+		const context = this.repository.getRoomById(roomId)
+		if (!context || context.scheduledExpire?.dueAt !== dueAt) {
+			return
+		}
+
+		this.closeRoom(roomId, 'expired')
+	}
+
 	private shouldRevealImmediately(state: RoomState): boolean {
 		if (state.phase !== 'active') {
 			return false
@@ -667,7 +808,7 @@ export class RoomsService {
 
 		return (
 			getAnsweredParticipantCount(state.activeGame) >=
-			connectedParticipantCount
+			getGameParticipantCount(state.activeGame)
 		)
 	}
 }

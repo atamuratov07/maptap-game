@@ -2,7 +2,7 @@ import type {
 	CountryId,
 	CountryPool,
 	CountryPoolEntry,
-} from '@maptap/game-domain'
+} from '@georally/game-domain'
 import playableCountryRegistryJson from '../generated/countries.playable.json'
 import countryRegistryJson from '../generated/countries.registry.json'
 import type {
@@ -52,13 +52,16 @@ export function buildCountryCatalog(
 			name: country.name.trim(),
 			nameRu: country.name_ru.trim(),
 			capital: country.capital.trim(),
+			nameUzLatn: country.name_uz_latn.trim(),
 			capitalRu: country.capital_ru.trim(),
+			capitalUzLatn: country.capital_uz_latn.trim(),
 			continent: country.continent,
 			population: country.population,
 			centroidLng: country.centroid_lng,
 			centroidLat: country.centroid_lat,
 			currency: country.currency.trim(),
 			currencyRu: country.currency_ru.trim(),
+			currencyUzLatn: country.currency_uz_latn.trim(),
 			flagUrl: country.flag_url,
 			playable: true,
 			difficulty: country.difficulty,

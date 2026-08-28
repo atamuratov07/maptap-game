@@ -1,4 +1,4 @@
-import type { GameScope } from '@maptap/game-domain'
+import type { GameScope } from '@georally/game-domain'
 import type { ReactNode } from 'react'
 
 export type MapHighlightTone = 'correct' | 'wrong' | 'selected'
@@ -23,12 +23,12 @@ export interface MapRendererProps {
 	resetViewKey?: string | number | null
 	highlights?: readonly MapHighlight[]
 	markers?: readonly MapMarker[]
-	popup?: null | {
+	revealTarget?: null | {
 		countryId: string
 		longitude: number
 		latitude: number
-		element: ReactNode
 	}
+	popupElement?: ReactNode | null
 	disabled?: boolean
 	className?: string
 }

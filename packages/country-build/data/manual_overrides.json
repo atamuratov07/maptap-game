@@ -187,12 +187,30 @@
 		}
 	},
 	"geolines": {
-		"Equator": "Экватор",
-		"Prime Meridian": "Нулевой меридиан",
-		"Greenwich Meridian": "Гринвичский меридиан",
-		"Tropic of Cancer": "Северный тропик",
-		"Tropic of Capricorn": "Южный тропик",
-		"Arctic Circle": "Северный полярный круг",
-		"Antarctic Circle": "Южный полярный круг"
+		"Equator": {
+			"en": "Equator",
+			"ru": "Экватор",
+			"uz-latn": "Ekvator"
+		},
+		"Tropic of Cancer": {
+			"en": "Tropic of Cancer",
+			"ru": "Северный тропик",
+			"uz-latn": "Shimoliy tropik"
+		},
+		"Tropic of Capricorn": {
+			"en": "Tropic of Capricorn",
+			"ru": "Южный тропик",
+			"uz-latn": "Janubiy tropik"
+		},
+		"Arctic Circle": {
+			"en": "Arctic Circle",
+			"ru": "Северный полярный круг",
+			"uz-latn": "Shimoliy qutb doirasi"
+		},
+		"Antarctic Circle": {
+			"en": "Antarctic Circle",
+			"ru": "Южный полярный круг",
+			"uz-latn": "Janubiy qutb doirasi"
+		}
 	}
 }

@@ -5,7 +5,7 @@ export {
 	type AckSuccess,
 	type EmptyAckData,
 } from './ack'
-export { type GameProtocolError, type TransportError } from './errors'
+export { type RoomProtocolError, type TransportError } from './errors'
 export {
 	GAME_NAMESPACE,
 	type ClientToServerEvents,
@@ -23,6 +23,8 @@ export {
 	roomCodeSchema,
 	scopeSchema,
 	startGameRequestSchema,
+	advanceRoundRequestSchema,
+	revealRoundRequestSchema,
 	submitAnswerRequestSchema,
 	terminateRoomRequestSchema,
 	type CreateRoomRequest,
@@ -33,6 +35,8 @@ export {
 	type ReturnToLobbyRequest,
 	type StartGameRequest,
 	type SubmitAnswerRequest,
+	type AdvanceRoundRequest,
+	type RevealRoundRequest,
 	type TerminateRoomRequest,
 } from './requests'
 export {

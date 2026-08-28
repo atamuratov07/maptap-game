@@ -4,7 +4,7 @@ It does all of this:
 
 * loads the original Demotiles z6 country polygons,
 * loads current Natural Earth countries and populated places ZIPs,
-* fetches REST Countries v3.1 for cca2, cca3, ccn3, capital, capitalInfo, continents, and translations,
+* fetches REST Countries v5 for cca2, cca3, ccn3, capital, capitalInfo, continents, and translations,
 * fetches Wikidata for Russian country and capital labels,
 * validates your 195 playable roster,
 * assigns difficulty,
@@ -13,14 +13,20 @@ It does all of this:
 * builds capitals.geojson,
 * creates supplemental country polygons only for playable states missing from the base,
 * creates the geolines join CSV keyed by name,
-* writes validator reports and exits with failure if any required fields are still missing. REST Countries’ current docs require the fields filter on /v3.1/all, and Wikidata’s SPARQL service returns JSON when requested with Accept: application/sparql-results+json.
+* writes validator reports and exits with failure if any required fields are still missing. REST Countries’ current docs require the fields filter on /countries/v5?response_fields=, and Wikidata’s SPARQL service returns JSON when requested with Accept: application/sparql-results+json.
  */
 
 import pointOnFeature from '@turf/point-on-feature'
 import fs from 'node:fs'
 import shp from 'shpjs'
 import { canonicalizeContinent } from './lib/continent.mjs'
-import { fetchWdqsJson } from './lib/wdqs.mjs'
+import { firstUzLatnLabel } from './lib/uz-latn.mjs'
+import { cleanWdLabel, fetchWdqsJson } from './lib/wdqs.mjs'
+import {
+	extractCapitalCoords,
+	fetchRestcountriesJson,
+	pickPrimaryCapital,
+} from './lib/restcountries.mjs'
 
 const BASE_COUNTRIES = 'build/base_countries.geojson'
 const BASE_CENTROIDS_NDJSON = 'build/base_centroids_z0.geojson'
@@ -28,6 +34,7 @@ const NE_COUNTRIES_ZIP = 'upstream/ne_110m_admin_0_countries.zip'
 const NE_PLACES_ZIP = 'upstream/ne_110m_populated_places.zip'
 const PLAYABLE_JSON = 'data/playable_states_195.json'
 const OVERRIDES_JSON = 'data/manual_overrides.json'
+const LOCALES = ['en', 'ru', 'uz']
 
 fs.mkdirSync('build', { recursive: true })
 
@@ -126,14 +133,6 @@ async function loadZipAsFeatureCollection(zipPath) {
 		if (fc) return fc
 	}
 	throw new Error(`Could not parse ${zipPath}`)
-}
-
-async function fetchJson(url) {
-	const res = await fetch(url, {
-		headers: { 'user-agent': 'demotiles-hybrid-build/1.0' },
-	})
-	if (!res.ok) throw new Error(`HTTP ${res.status} ${url}`)
-	return res.json()
 }
 
 function validatePlayable(playable) {
@@ -258,38 +257,75 @@ const baseCountries = readJson(BASE_COUNTRIES)
 const neCountriesFc = await loadZipAsFeatureCollection(NE_COUNTRIES_ZIP)
 const nePlacesFc = await loadZipAsFeatureCollection(NE_PLACES_ZIP)
 
-const restCountries = await fetchJson(
-	'https://restcountries.com/v3.1/all?fields=cca2,cca3,ccn3,name,translations,capital,capitalInfo,continents,independent',
-)
+const restCountries = await fetchRestcountriesJson({
+	cacheKey: 'rc-tiles-data',
+	fields: [
+		'codes.alpha_2,codes.alpha_3,codes.ccn3',
+		'names.common,names.translations',
+		'capitals',
+		'continents',
+	],
+})
 
-const wikidata = await fetchWdqsJson({
-	cacheKey: 'wdqs-country-capital-labels',
-	query: `
+const restByA3 = new Map()
+for (const row of restCountries) {
+	if (row?.codes?.alpha_3) restByA3.set(row.codes.alpha_3, row)
+}
+
+function buildLabelQuery(locale) {
+	return `
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>
 PREFIX bd: <http://www.bigdata.com/rdf#>
 PREFIX wikibase: <http://wikiba.se/ontology#>
 
 SELECT ?iso3 ?countryLabel ?capitalLabel WHERE {
   ?country wdt:P298 ?iso3 .
-  OPTIONAL { ?country wdt:P36 ?capital . }
-  SERVICE wikibase:label { bd:serviceParam wikibase:language "ru,en". }
-}
-`,
-})
+  OPTIONAL {
+    ?country wdt:P36 ?capital .
+  }
 
-const restByA3 = new Map()
-for (const row of restCountries) {
-	if (row?.cca3) restByA3.set(row.cca3, row)
+  SERVICE wikibase:label {
+    bd:serviceParam wikibase:language "${locale}" .
+  }
+}
+`
+}
+
+const wikidata = []
+for (const locale of LOCALES) {
+	wikidata.push(
+		await fetchWdqsJson({
+			cacheKey: `wdqs-country-capital-labels-${locale}`,
+			query: buildLabelQuery(locale),
+		}),
+	)
 }
 
 const wdByA3 = new Map()
-for (const row of wikidata.results.bindings ?? []) {
-	const a3 = row.iso3?.value?.trim()
-	if (!a3 || wdByA3.has(a3)) continue
-	wdByA3.set(a3, {
-		NAME_RU: row.countryLabel?.value?.trim() ?? '',
-		CAPITAL_RU: row.capitalLabel?.value?.trim() ?? '',
-	})
+wikidata.forEach((localeRes, i) => {
+	const locale = LOCALES[i]
+
+	for (const row of localeRes.results.bindings ?? []) {
+		const a3 = row.iso3?.value?.trim()
+		if (!a3) continue
+		if (!wdByA3.has(a3)) {
+			wdByA3.set(a3, { countryLabel: {}, capitalLabel: {} })
+		}
+		const entry = wdByA3.get(a3)
+		entry.countryLabel[locale] = cleanWdLabel(row?.countryLabel?.value)
+		entry.capitalLabel[locale] = cleanWdLabel(row?.capitalLabel?.value)
+	}
+})
+
+for (const row of wdByA3.values()) {
+	row.countryLabel = {
+		ru: row.countryLabel?.ru || '',
+		uz: firstUzLatnLabel(row.countryLabel?.uz, row.countryLabel?.en),
+	}
+	row.capitalLabel = {
+		ru: row.capitalLabel?.ru || '',
+		uz: firstUzLatnLabel(row.capitalLabel?.uz, row.capitalLabel?.en),
+	}
 }
 
 const neByA3 = new Map()
@@ -399,8 +435,10 @@ function toSeedRecord(props) {
 		ADM0_A3: String(props.ADM0_A3),
 		NAME: String(props.NAME),
 		NAME_RU: String(props.NAME_RU),
+		NAME_UZ_LATN: String(props.NAME_UZ_LATN),
 		CAPITAL: String(props.CAPITAL),
 		CAPITAL_RU: String(props.CAPITAL_RU),
+		CAPITAL_UZ_LATN: String(props.CAPITAL_UZ_LATN),
 		CONTINENT: String(props.CONTINENT),
 		ISO_A2: String(props.ISO_A2),
 		ISO_N3: String(props.ISO_N3),
@@ -424,44 +462,56 @@ function buildCountryRecord({ a3, baseFeat, neFeat }) {
 		ov.NAME,
 		base.NAME,
 		pickNeName(ne),
-		rest?.name?.common,
+		rest?.names?.common,
 	)
 
 	const ABBREV = firstNonEmpty(ov.ABBREV, base.ABBREV, pickNeAbbrev(ne), NAME)
 
 	const NAME_RU = firstNonEmpty(
 		ov.NAME_RU,
-		wd.NAME_RU,
-		rest?.translations?.rus?.common,
+		wd?.countryLabel?.['ru'],
+		rest?.names?.translations?.rus?.common,
 	)
+
+	const NAME_UZ_LATN = firstUzLatnLabel(
+		ov.NAME_UZ_LATN,
+		wd?.countryLabel?.['uz'],
+		rest?.names?.translations?.uzb?.common,
+		NAME,
+	)
+
+	const primaryCapital = pickPrimaryCapital(rest)
 
 	const CAPITAL = firstNonEmpty(
 		ov.CAPITAL,
-		firstArrayValue(rest?.capital),
+		primaryCapital?.name,
 		ne.CAPITAL,
 		capFallback?.name,
 	)
 
-	const CAPITAL_RU = firstNonEmpty(ov.CAPITAL_RU, wd.CAPITAL_RU)
+	const CAPITAL_RU = firstNonEmpty(ov.CAPITAL_RU, wd?.capitalLabel?.['ru'])
+	const CAPITAL_UZ_LATN = firstUzLatnLabel(
+		ov.CAPITAL_UZ_LATN,
+		wd?.capitalLabel?.['uz'],
+		CAPITAL,
+	)
 
 	let CAPITAL_COORDS = null
 	if (Array.isArray(ov.CAPITAL_COORDS) && ov.CAPITAL_COORDS.length === 2) {
 		CAPITAL_COORDS = ov.CAPITAL_COORDS
-	} else if (
-		Array.isArray(rest?.capitalInfo?.latlng) &&
-		rest.capitalInfo.latlng.length === 2
-	) {
-		CAPITAL_COORDS = [
-			Number(rest.capitalInfo.latlng[1]),
-			Number(rest.capitalInfo.latlng[0]),
-		]
+	} else if (extractCapitalCoords(primaryCapital)) {
+		CAPITAL_COORDS = extractCapitalCoords(primaryCapital)
 	} else if (capFallback?.coordinates) {
 		CAPITAL_COORDS = capFallback.coordinates
 	}
 
-	const ISO_A2 = firstNonEmpty(ov.ISO_A2, pickNeIsoA2(ne), rest?.cca2)
+	const ISO_A2 = firstNonEmpty(
+		ov.ISO_A2,
+		pickNeIsoA2(ne),
+		rest?.codes?.alpha_2,
+	)
 
-	const ISO_N3 = firstNonEmpty(ov.ISO_N3, pickNeIsoN3(ne), rest?.ccn3)
+	const ISO_N3 = firstNonEmpty(ov.ISO_N3, pickNeIsoN3(ne), rest?.codes?.ccn3)
 
 	const CONTINENT = canonicalizeContinent(
 		firstNonEmpty(
@@ -476,8 +526,10 @@ function buildCountryRecord({ a3, baseFeat, neFeat }) {
 	const props = {
 		NAME,
 		NAME_RU,
+		NAME_UZ_LATN,
 		CAPITAL,
 		CAPITAL_RU,
+		CAPITAL_UZ_LATN,
 		ABBREV,
 		ADM0_A3: a3,
 		ISO_A2,
@@ -491,8 +543,10 @@ function buildCountryRecord({ a3, baseFeat, neFeat }) {
 	for (const key of [
 		'NAME',
 		'NAME_RU',
+		'NAME_UZ_LATN',
 		'CAPITAL',
 		'CAPITAL_RU',
+		'CAPITAL_UZ_LATN',
 		'ADM0_A3',
 		'ISO_A2',
 		'ISO_N3',
@@ -530,8 +584,10 @@ for (const [a3, baseFeat] of [...baseByA3.entries()].sort()) {
 		a3,
 		record.props.NAME,
 		record.props.NAME_RU,
+		record.props.NAME_UZ_LATN,
 		record.props.CAPITAL,
 		record.props.CAPITAL_RU,
+		record.props.CAPITAL_UZ_LATN,
 		record.props.ISO_A2,
 		record.props.ISO_N3,
 		record.props.CONTINENT,
@@ -616,8 +672,10 @@ writeCsv(
 		'ADM0_A3',
 		'NAME',
 		'NAME_RU',
+		'NAME_UZ_LATN',
 		'CAPITAL',
 		'CAPITAL_RU',
+		'CAPITAL_UZ_LATN',
 		'ISO_A2',
 		'ISO_N3',
 		'CONTINENT',
@@ -629,10 +687,11 @@ writeCsv(
 
 writeCsv(
 	'build/geolines_join.csv',
-	['name', 'name_ru'],
-	Object.entries(overrides.geolines ?? {}).map(([name, nameRu]) => [
-		name,
-		nameRu,
+	['name', 'name_ru', 'name_uz_latn'],
+	Object.values(overrides.geolines ?? {}).map(geoline => [
+		geoline['en'],
+		geoline['ru'],
+		geoline['uz-latn'],
 	]),
 )
 

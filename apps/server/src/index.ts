@@ -1,4 +1,4 @@
-import { playableCountryPool } from '@maptap/country-catalog'
+import { playableCountryPool } from '@georally/country-catalog'
 
 import { createApp } from './app.js'
 import { parseEnv } from './config/env.js'
@@ -16,10 +16,12 @@ let getHealthSnapshot = (): Record<string, unknown> => ({})
 const app = createApp({
 	getHealthSnapshot: () => getHealthSnapshot(),
 })
+
 const { httpServer, io, gameNamespace } = createRealtimeServer({
 	app,
 	corsOrigins: env.corsOrigins,
 })
+
 const publisher = createRoomPublisher({
 	namespace: gameNamespace,
 	repository,
@@ -30,6 +32,13 @@ const roomsService = new RoomsService({
 	repository,
 	revealDurationMs: env.revealDurationMs,
 	leaderboardDurationMs: env.leaderboardDurationMs,
+	roomCapacityLimit: env.roomCapacityLimit,
+	roomExpireTTL: {
+		noConnectedMembersMs: env.roomNoConnectedMembersTTL,
+		hostDisconnectedInGroupMs: env.roomHostDisconnectedInGroupTTL,
+		hostDisconnectedInClassroomMs: env.roomHostDisconnectedInClassroomTTL,
+		finishedMs: env.roomFinishedTTL,
+	},
 	hooks: {
 		onRoomUpdated: (roomId, options) => {
 			publisher.publishRoomSnapshots(roomId, options)
@@ -39,6 +48,7 @@ const roomsService = new RoomsService({
 		},
 	},
 })
+
 getHealthSnapshot = () => roomsService.getHealthSnapshot()
 
 registerRoomHandlers({

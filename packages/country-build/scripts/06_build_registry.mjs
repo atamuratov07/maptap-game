@@ -7,12 +7,23 @@ import {
 	parseRegistryOutputOptions,
 	resolvePackagePath,
 } from './lib/output-paths.mjs'
-import { fetchWdqsJson } from './lib/wdqs.mjs'
+import {
+	firstUzLatnLabel,
+	transliterateCyrillicToUzLatn,
+} from './lib/uz-latn.mjs'
+import { cleanWdLabel, fetchWdqsJson } from './lib/wdqs.mjs'
+import {
+	fetchRestcountriesJson,
+	pickPrimaryCurrency,
+} from './lib/restcountries.mjs'
 
 const SEED_JSON = resolvePackagePath('build', 'country_seed.json')
 const OVERRIDES_JSON = resolvePackagePath('data', 'manual_overrides.json')
 const CENTROIDS_GEOJSON = resolvePackagePath('build', 'centroids.geojson')
-const BASE_COUNTRIES_GEOJSON = resolvePackagePath('build', 'base_countries.geojson')
+const BASE_COUNTRIES_GEOJSON = resolvePackagePath(
+	'build',
+	'base_countries.geojson',
+)
 const SUPPLEMENTAL_COUNTRIES_GEOJSON = resolvePackagePath(
 	'build',
 	'supplemental_countries.geojson',
@@ -21,7 +32,10 @@ const VALIDATOR_FAILURES_CSV = resolvePackagePath(
 	'build',
 	'validator_registry_failures.csv',
 )
-const BUILD_REPORT_JSON = resolvePackagePath('build', 'registry_build_report.json')
+const BUILD_REPORT_JSON = resolvePackagePath(
+	'build',
+	'registry_build_report.json',
+)
 
 ensureDir(resolvePackagePath('build'))
 const { outDir } = parseRegistryOutputOptions()
@@ -113,28 +127,6 @@ function fallbackCentroidFromGeometry(a3, geometryByA3) {
 	}
 }
 
-async function fetchJson(url) {
-	const res = await fetch(url, {
-		headers: { 'user-agent': 'maptap-registry-build/1.0' },
-	})
-	if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`)
-	return res.json()
-}
-
-function pickPrimaryCurrency(currenciesObj) {
-	const entries = Object.entries(currenciesObj ?? {}).sort((a, b) =>
-		a[0].localeCompare(b[0]),
-	)
-	if (!entries.length) return null
-
-	const [code, meta] = entries[0]
-	return {
-		code,
-		name: meta?.name ?? '',
-		symbol: meta?.symbol ?? '',
-	}
-}
-
 const seed = readJson(SEED_JSON)
 const overrides = readJson(OVERRIDES_JSON)
 if (!fs.existsSync(CENTROIDS_GEOJSON)) {
@@ -179,46 +171,63 @@ const centroidSourceStats = {
  * Fetch only the extra fields the registry needs.
  * This is intentionally separate from build_data.
  */
-const restMeta = await fetchJson(
-	'https://restcountries.com/v3.1/all?fields=cca3,ccn3,population,currencies,flags,independent,unMember',
-)
+const restMeta = await fetchRestcountriesJson({
+	cacheKey: 'rc-registry-data',
+	fields: [
+		'codes.alpha_3,codes.ccn3',
+		'flag.url_svg,flag.url_png',
+		'classification.sovereign,classification.un_member',
+		'population',
+		'currencies',
+	],
+})
 
 const restByA3 = new Map()
 for (const row of restMeta) {
-	if (!row?.cca3) continue
-	restByA3.set(row.cca3, row)
+	if (!row?.codes?.alpha_3) continue
+	restByA3.set(row.codes.alpha_3, row)
 }
 
 const restByN3 = new Map()
 for (const row of restMeta) {
-	const n3 = normalizeIsoN3(row?.ccn3)
+	const n3 = normalizeIsoN3(row?.codes?.ccn3)
 	if (!n3 || restByN3.has(n3)) continue
 	restByN3.set(n3, row)
 }
 
 /**
- * Russian currency labels keyed by ISO 4217 code.
+ * Russian and Uzbek Latin currency labels keyed by ISO 4217 code.
  */
 const wdCurrencies = await fetchWdqsJson({
 	cacheKey: 'wdqs-currency-labels',
-	cacheDir: resolvePackagePath('build', 'cache'),
 	query: `
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>
 PREFIX bd: <http://www.bigdata.com/rdf#>
 PREFIX wikibase: <http://wikiba.se/ontology#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
-SELECT ?code ?currencyLabel WHERE {
+SELECT ?code ?currencyRuLabel ?currencyUzLabel ?currencyEnLabel WHERE {
   ?currency wdt:P498 ?code .
-  SERVICE wikibase:label { bd:serviceParam wikibase:language "ru,en". }
+  OPTIONAL { ?currency rdfs:label ?currencyRuLabel FILTER(LANG(?currencyRuLabel) = "ru") }
+  OPTIONAL { ?currency rdfs:label ?currencyUzLabel FILTER(LANG(?currencyUzLabel) = "uz") }
+  OPTIONAL { ?currency rdfs:label ?currencyEnLabel FILTER(LANG(?currencyEnLabel) = "en") }
 }
 `,
 })
 
 const currencyRuByCode = new Map()
+const currencyUzLatnByCode = new Map()
 for (const row of wdCurrencies.results.bindings ?? []) {
 	const code = row.code?.value?.trim()
 	if (!code || currencyRuByCode.has(code)) continue
-	currencyRuByCode.set(code, row.currencyLabel?.value?.trim() ?? '')
+	currencyRuByCode.set(code, cleanWdLabel(row.currencyRuLabel?.value))
+	currencyUzLatnByCode.set(
+		code,
+		firstUzLatnLabel(
+			cleanWdLabel(row.currencyUzLabel?.value),
+			cleanWdLabel(row.currencyEnLabel?.value),
+		),
+	)
 }
 
 const registry = []
@@ -274,14 +283,28 @@ for (const baseRow of seed) {
 			firstNonEmpty(
 				seedIsoN3,
 				normalizeIsoN3(ov.ISO_N3),
-				normalizeIsoN3(rest?.ccn3),
+				normalizeIsoN3(rest?.codes?.ccn3),
 				baseRow.ISO_N3,
 			),
 		),
 		name: String(firstNonEmpty(baseRow.NAME)),
 		name_ru: String(firstNonEmpty(baseRow.NAME_RU)),
+		name_uz_latn: String(
+			firstUzLatnLabel(
+				baseRow.NAME_UZ_LATN,
+				transliterateCyrillicToUzLatn(baseRow.NAME_RU),
+				baseRow.NAME,
+			),
+		),
 		capital: String(firstNonEmpty(baseRow.CAPITAL)),
 		capital_ru: String(firstNonEmpty(baseRow.CAPITAL_RU)),
+		capital_uz_latn: String(
+			firstUzLatnLabel(
+				baseRow.CAPITAL_UZ_LATN,
+				transliterateCyrillicToUzLatn(baseRow.CAPITAL_RU),
+				baseRow.CAPITAL,
+			),
+		),
 		continent: canonicalizeContinent(baseRow.CONTINENT, a3),
 		population:
 			typeof ov.POPULATION === 'number'
@@ -298,8 +321,17 @@ for (const baseRow of seed) {
 					: '',
 			),
 		),
+		currency_uz_latn: String(
+			firstUzLatnLabel(
+				ov.CURRENCY_UZ_LATN,
+				primaryCurrency?.code
+					? currencyUzLatnByCode.get(primaryCurrency.code)
+					: '',
+				primaryCurrency?.name,
+			),
+		),
 		flag_url: String(
-			firstNonEmpty(ov.FLAG_URL, rest?.flags?.svg, rest?.flags?.png),
+			firstNonEmpty(ov.FLAG_URL, rest?.flag?.url_svg, rest?.flag?.url_png),
 		),
 		centroid_lng: centroid ? centroid[0] : null,
 		centroid_lat: centroid ? centroid[1] : null,
@@ -308,11 +340,11 @@ for (const baseRow of seed) {
 		independent:
 			typeof ov.INDEPENDENT === 'boolean'
 				? ov.INDEPENDENT
-				: Boolean(rest?.independent),
+				: Boolean(rest?.classification?.sovereign),
 		un_member:
 			typeof ov.UN_MEMBER === 'boolean'
 				? ov.UN_MEMBER
-				: Boolean(rest?.unMember),
+				: Boolean(rest?.classification?.un_member),
 	}
 
 	const missing = []
@@ -320,12 +352,15 @@ for (const baseRow of seed) {
 	for (const key of [
 		'id',
 		'name',
+		'name_uz_latn',
 		'name_ru',
 		'capital',
 		'capital_ru',
+		'capital_uz_latn',
 		'continent',
 		'currency',
 		'currency_ru',
+		'currency_uz_latn',
 		'flag_url',
 		'difficulty',
 	]) {
@@ -404,9 +439,7 @@ writeJson(BUILD_REPORT_JSON, {
 
 if (validatorFailures.length > 0) {
 	console.error('Registry build blocked.')
-	console.error(
-		`Inspect ${VALIDATOR_FAILURES_CSV} and ${BUILD_REPORT_JSON}`,
-	)
+	console.error(`Inspect ${VALIDATOR_FAILURES_CSV} and ${BUILD_REPORT_JSON}`)
 	process.exitCode = 1
 } else {
 	console.log('OK')

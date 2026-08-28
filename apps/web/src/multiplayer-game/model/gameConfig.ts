@@ -1,8 +1,8 @@
-import type { GameDifficulty, GameScope } from '@maptap/game-domain'
+import type { GameDifficulty, GameScope } from '@georally/game-domain'
 import {
 	DEFAULT_GAME_CONFIG,
 	type GameConfig,
-} from '@maptap/game-domain/multiplayer-next'
+} from '@georally/game-domain/multiplayer'
 
 export const QUESTION_COUNT_OPTIONS = [5, 10, 15, 20] as const
 export const QUESTION_DURATION_MS_OPTIONS = [
@@ -11,27 +11,21 @@ export const QUESTION_DURATION_MS_OPTIONS = [
 
 export const DIFFICULTY_OPTIONS: Array<{
 	value: GameDifficulty
-	label: string
-}> = [
-	{ value: 'easy', label: 'Лёгкая' },
-	{ value: 'medium', label: 'Средняя' },
-	{ value: 'hard', label: 'Сложная' },
-]
+}> = [{ value: 'easy' }, { value: 'medium' }, { value: 'hard' }]
 
 export const SCOPE_OPTIONS: Array<{
 	value: GameScope
-	label: string
 }> = [
-	{ value: 'all', label: 'Весь мир' },
-	{ value: 'africa', label: 'Африка' },
-	{ value: 'asia', label: 'Азия' },
-	{ value: 'europe', label: 'Европа' },
-	{ value: 'north-america', label: 'Северная Америка' },
-	{ value: 'south-america', label: 'Южная Америка' },
-	{ value: 'oceania', label: 'Океания' },
+	{ value: 'all' },
+	{ value: 'africa' },
+	{ value: 'asia' },
+	{ value: 'europe' },
+	{ value: 'north-america' },
+	{ value: 'south-america' },
+	{ value: 'oceania' },
 ]
 
-const CONFIG_STORAGE_PREFIX = 'maptap.multiplayer.gameConfig'
+const CONFIG_STORAGE_PREFIX = 'georally.multiplayer.gameConfig'
 
 function getConfigStorageKey(roomCode: string): string {
 	return `${CONFIG_STORAGE_PREFIX}.${roomCode.trim().toUpperCase()}`
@@ -55,12 +49,13 @@ function normalizeGameConfig(value: unknown): GameConfig {
 		questionCount: includesValue(QUESTION_COUNT_OPTIONS, draft.questionCount)
 			? draft.questionCount
 			: DEFAULT_GAME_CONFIG.questionCount,
-		questionDurationMs: includesValue(
-			QUESTION_DURATION_MS_OPTIONS,
-			draft.questionDurationMs,
-		)
-			? draft.questionDurationMs
-			: DEFAULT_GAME_CONFIG.questionDurationMs,
+		questionDurationMs:
+			includesValue(
+				QUESTION_DURATION_MS_OPTIONS,
+				draft.questionDurationMs,
+			) || draft.questionDurationMs === undefined
+				? draft.questionDurationMs
+				: DEFAULT_GAME_CONFIG.questionDurationMs,
 		difficulty: includesValue(
 			DIFFICULTY_OPTIONS.map(option => option.value),
 			draft.difficulty,

@@ -1,70 +1,51 @@
-import type { GameView } from '@maptap/game-domain/multiplayer-next/game'
-import type { VisibleMemberInfo } from '@maptap/game-domain/multiplayer-next/room'
+import type { ActiveGameParticipantView } from '@georally/game-domain/multiplayer/game'
+import type { VisibleMemberInfo } from '@georally/game-domain/multiplayer/room'
 import { useMemo } from 'react'
 import { MapRenderer } from '../../../shared/map/MapRenderer'
 import { ScoreBanner } from '../../../shared/widgets/ScoreBanner'
 import {
-	getCurrentRound,
 	getLeaderboardEntries,
 	getTargetCountryInfo,
+	type CurrentRoundView,
 } from '../../model/gameSelectors'
 import { GameQuestionBar } from './GameQuestionBar'
 import { RoomLeaderboardOverlay } from './LeaderboardOverlay'
 import { useGameMap } from './useGameMap'
+import { useTranslation } from 'react-i18next'
+import { getCountryName } from '../../../shared/i18n'
+import { useCurrentLocale } from '../../../app/LocaleContext'
 
 interface CountryMapGameScreenProps {
-	game: GameView
+	game: ActiveGameParticipantView
 	members: VisibleMemberInfo[]
+	showCountryInfo: boolean
 	submitPending: boolean
-	actionErrorMessage: string | null
-	isReconnecting: boolean
+	currentRound: CurrentRoundView
 	onSubmitAnswer: (countryId: string) => Promise<void>
-}
-
-function FloatingNotice({
-	message,
-	tone = 'neutral',
-	offsetClassName = 'top-[5.25rem]',
-}: {
-	message: string
-	tone?: 'neutral' | 'error'
-	offsetClassName?: string
-}): JSX.Element {
-	return (
-		<div
-			className={`absolute inset-x-0 ${offsetClassName} z-40 flex justify-center px-4`}
-		>
-			<p
-				className={`rounded-full px-4 py-2 text-sm font-bold shadow-lg backdrop-blur ${tone === 'error' ? 'bg-rose-500/92 text-white' : 'bg-slate-950/80 text-slate-100'}`}
-			>
-				{message}
-			</p>
-		</div>
-	)
 }
 
 export function CountryMapGameScreen({
 	game,
+	currentRound,
 	members,
+	showCountryInfo,
 	submitPending,
-	actionErrorMessage,
-	isReconnecting,
 	onSubmitAnswer,
 }: CountryMapGameScreenProps): JSX.Element {
-	const currentRound = getCurrentRound(game)
+	const { t } = useTranslation()
+	const language = useCurrentLocale()
 	const { mapProps } = useGameMap({
 		game,
 		submitPending,
 		onSubmitAnswer,
+		showCountryInfo,
 	})
 	const leaderboardEntries = useMemo(
 		() => getLeaderboardEntries(game, members, 5),
-		[game.leaderboard, members],
+		[game, members],
 	)
 	const evaluatedSubmission =
-		game.phase === 'open' || game.phase === 'completed'
-			? null
-			: game.viewerSubmission
+		game.phase === 'open' ? null : game.viewerSubmission
 	const scoreBannerTriggerKey =
 		game.phase === 'revealed' ? game.revealedAt : null
 	const awardedScore = evaluatedSubmission?.scoreAwarded ?? 0
@@ -73,16 +54,9 @@ export function CountryMapGameScreen({
 			? evaluatedSubmission.isCorrect
 			: null
 	const targetInfo = getTargetCountryInfo(game)
-
-	if (game.phase === 'completed' || !currentRound) {
-		return (
-			<main className='grid h-full place-items-center bg-slate-950 px-5 py-8 text-white'>
-				<p className='text-sm font-semibold text-slate-300'>
-					Завершаем игру...
-				</p>
-			</main>
-		)
-	}
+	const targetName = targetInfo
+		? getCountryName(targetInfo, language)
+		: t('multiplayer.game.countryFallback')
 
 	return (
 		<section className='flex h-full flex-col overflow-hidden bg-slate-950 text-white'>
@@ -93,26 +67,14 @@ export function CountryMapGameScreen({
 			<GameQuestionBar
 				progressLabel={`${currentRound.currentQuestionNumber} / ${currentRound.questionCount}`}
 				questionLabel={
-					game.phase === 'open' ? 'Найдите страну' : 'Правильный ответ'
+					game.phase === 'open'
+						? t('multiplayer.game.findCountry')
+						: t('multiplayer.game.correctAnswer')
 				}
-				targetName={targetInfo?.nameRu || targetInfo?.name || 'Страна'}
+				targetName={targetName}
 				targetFlagUrl={targetInfo?.flagUrl}
 				deadlineAt={game.phase === 'open' ? currentRound.deadlineAt : null}
 			/>
-
-			{isReconnecting ? (
-				<FloatingNotice message='Переподключаемся к комнате...' />
-			) : null}
-
-			{actionErrorMessage ? (
-				<FloatingNotice
-					message={actionErrorMessage}
-					tone='error'
-					offsetClassName={
-						isReconnecting ? 'top-[8.5rem]' : 'top-[5.25rem]'
-					}
-				/>
-			) : null}
 
 			<ScoreBanner
 				triggerKey={scoreBannerTriggerKey}

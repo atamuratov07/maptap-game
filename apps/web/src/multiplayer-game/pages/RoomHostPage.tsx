@@ -1,27 +1,59 @@
-import { useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { lazy, Suspense, useEffect } from 'react'
+import { useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { useLocalizedNavigate } from '../../app/useLocalizedNavigate'
+
 import { RoomFinishedScreen } from '../finished/RoomFinishedScreen'
-import { ActiveGameScreen } from '../game/ActiveGameScreen'
 import { RoomLobbyScreen } from '../lobby/RoomLobbyScreen'
 import { RoomClosedScreen } from '../screens/RoomClosedScreen'
 import { RoomErrorScreen } from '../screens/RoomErrorScreen'
 import { RoomLoadingScreen } from '../screens/RoomLoadingScreen'
-import { useRoomHostController } from '../session/useRoomHostController'
 
-export function RoomHostPage(): JSX.Element {
+import { useRoomHostController } from '../session/useRoomHostController'
+import { useGroupHostActions } from '../session/useGroupHostActions'
+import { useClassroomHostActions } from '../session/useClassroomHostActions'
+
+const loadParticipantScreen = () =>
+	import('../game/ActiveGameParticipantScreen').then(module => ({
+		default: module.ActiveGameParticipantScreen,
+	}))
+
+const loadHostScreen = () =>
+	import('../game/ActiveGameHostScreen').then(module => ({
+		default: module.ActiveGameHostScreen,
+	}))
+
+const ActiveGameParticipantScreen = lazy(loadParticipantScreen)
+const ActiveGameHostScreen = lazy(loadHostScreen)
+
+export default function RoomHostPage(): JSX.Element {
+	const { t } = useTranslation()
 	const params = useParams<{ roomCode: string }>()
-	const navigate = useNavigate()
+	const navigate = useLocalizedNavigate()
 	const roomCode = (params.roomCode ?? '').trim().toUpperCase()
 	const {
 		state,
+		gateway,
 		actionPending,
 		actionErrorMessage,
+		runAction,
 		startGame,
-		submitAnswer,
 		returnToLobby,
 		terminateRoom,
 		retry,
 	} = useRoomHostController(roomCode)
+
+	const { submitAnswer } = useGroupHostActions({
+		state,
+		gateway,
+		runAction,
+	})
+	const { revealRound, advanceRound } = useClassroomHostActions({
+		state,
+		gateway,
+		runAction,
+	})
+
 	const closedReason = state.status === 'closed' ? state.reason : null
 
 	useEffect(() => {
@@ -30,12 +62,24 @@ export function RoomHostPage(): JSX.Element {
 		}
 	}, [closedReason, navigate])
 
+	useEffect(() => {
+		if (state.status !== 'ready' || state.room.phase !== 'lobby') {
+			return
+		}
+
+		if (state.room.roomMode === 'group') {
+			void loadParticipantScreen()
+		} else {
+			void loadHostScreen()
+		}
+	}, [state])
+
 	if (state.status === 'connecting') {
 		return (
 			<RoomLoadingScreen
-				label='Комната'
-				title='Подключение'
-				message='Подключаемся к игре.'
+				label={t('multiplayer.room')}
+				title={t('multiplayer.loading.connecting')}
+				message={t('multiplayer.loading.connectingMessage')}
 			/>
 		)
 	}
@@ -44,9 +88,9 @@ export function RoomHostPage(): JSX.Element {
 		if (state.reason === 'host_terminated') {
 			return (
 				<RoomLoadingScreen
-					label='Комната'
-					title='Комната закрыта'
-					message='Возвращаемся на страницу мультиплеера.'
+					label={t('multiplayer.room')}
+					title={t('multiplayer.loading.closed')}
+					message={t('multiplayer.loading.closedRedirect')}
 				/>
 			)
 		}
@@ -71,18 +115,20 @@ export function RoomHostPage(): JSX.Element {
 	if (!room) {
 		return (
 			<RoomLoadingScreen
-				label='Комната'
-				title='Переподключение'
-				message='Возвращаем вас в игру.'
+				label={t('multiplayer.room')}
+				title={t('multiplayer.loading.reconnecting')}
+				message={t('multiplayer.loading.reconnectingMessage')}
 			/>
 		)
 	}
 
+	const requireQuestionDuration = room.roomMode === 'group'
 	if (room.phase === 'lobby') {
 		return (
 			<RoomLobbyScreen
 				role='host'
 				roomCode={roomCode}
+				requireQuestionDuration={requireQuestionDuration}
 				members={room.members}
 				startPending={actionPending === 'start'}
 				terminatePending={actionPending === 'terminate-room'}
@@ -121,16 +167,44 @@ export function RoomHostPage(): JSX.Element {
 		)
 	}
 
+	const gameLoadingFallback = (
+		<RoomLoadingScreen
+			label={t('multiplayer.room')}
+			title={t('multiplayer.loading.starting')}
+			message={t('multiplayer.loading.startingMessage')}
+		/>
+	)
+
+	if (room.roomMode === 'group') {
+		return (
+			<div className='fixed inset-0 overflow-hidden bg-slate-950'>
+				<Suspense fallback={gameLoadingFallback}>
+					<ActiveGameParticipantScreen
+						game={room.activeGame}
+						members={room.members}
+						showCountryInfo={false}
+						submitPending={actionPending === 'submit'}
+						actionErrorMessage={actionErrorMessage}
+						isReconnecting={isReconnecting}
+						onSubmitAnswer={submitAnswer}
+					/>
+				</Suspense>
+			</div>
+		)
+	}
+
 	return (
-		<div className='fixed inset-0 overflow-hidden bg-slate-950'>
-			<ActiveGameScreen
+		<Suspense fallback={gameLoadingFallback}>
+			<ActiveGameHostScreen
 				game={room.activeGame}
 				members={room.members}
-				submitPending={actionPending === 'submit'}
-				actionErrorMessage={actionErrorMessage}
+				onRevealRound={revealRound}
+				onAdvanceRound={advanceRound}
 				isReconnecting={isReconnecting}
-				onSubmitAnswer={submitAnswer}
+				revealPending={actionPending === 'reveal'}
+				advancePending={actionPending === 'advance'}
+				actionErrorMessage={actionErrorMessage}
 			/>
-		</div>
+		</Suspense>
 	)
 }

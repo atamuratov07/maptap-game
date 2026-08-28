@@ -1,0 +1,1779 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { playableCountryPool } from '@georally/country-catalog'
+
+import { RoomsRepository } from './repository.js'
+import { RoomsService } from './service.js'
+import { DEFAULT_GAME_CONFIG } from '@georally/game-domain/multiplayer'
+import type { RoomExpireTTLConfig } from '@georally/game-domain/multiplayer/room'
+
+function createService(
+	overrides: {
+		roomCapacityLimit?: number
+		revealDurationMs?: number
+		leaderboardDurationMs?: number
+		roomExpireTTL?: Partial<RoomExpireTTLConfig>
+	} = {},
+) {
+	const repository = new RoomsRepository()
+	const hooks = {
+		onRoomUpdated: vi.fn(),
+		onRoomClosed: vi.fn(),
+	}
+
+	const service = new RoomsService({
+		countryPool: playableCountryPool,
+		repository,
+		revealDurationMs: overrides.revealDurationMs ?? 5_000,
+		leaderboardDurationMs: overrides.leaderboardDurationMs ?? 5_000,
+		roomCapacityLimit: overrides?.roomCapacityLimit ?? 40,
+		hooks,
+		roomExpireTTL: {
+			finishedMs: 1_000 * 60 * 15,
+			hostDisconnectedInGroupMs: 1_000 * 60 * 5,
+			hostDisconnectedInClassroomMs: 1_000 * 60 * 3,
+			noConnectedMembersMs: 1_000 * 60 * 10,
+			...overrides.roomExpireTTL,
+		},
+	})
+
+	return { service, repository, hooks }
+}
+
+describe('RoomsService.createRoom', () => {
+	it('creates a room and returns a host session', () => {
+		const { service, hooks } = createService()
+
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'group',
+			socketId: 'socket-1',
+		})
+
+		expect(created.ok).toBe(true)
+		if (!created.ok) return
+
+		expect(created.value.response.role).toBe('host')
+		expect(created.value.response.roomCode).toHaveLength(6)
+		expect(hooks.onRoomUpdated).not.toHaveBeenCalled()
+	})
+})
+
+describe('RoomsService.joinRoom', () => {
+	it('rejects a room code that does not exist', () => {
+		const { service } = createService()
+
+		const joined = service.joinRoom({
+			roomCode: 'ZZZZZZ',
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+
+		expect(joined.ok).toBe(false)
+		if (joined.ok) return
+		expect(joined.error.code).toBe('room_not_found')
+	})
+
+	it('lets players join a room the host created', () => {
+		const { service, hooks } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joined = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+
+		expect(joined.ok).toBe(true)
+		if (!joined.ok) return
+
+		expect(joined.value.response.role).toBe('player')
+		expect(hooks.onRoomUpdated).toHaveBeenCalledTimes(1)
+	})
+
+	it('rejects a name already taken in the room', () => {
+		const { service } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joined = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Alice',
+			socketId: 'socket-2',
+		})
+
+		expect(joined.ok).toBe(false)
+		if (joined.ok) return
+		expect(joined.error.code).toBe('member_name_taken')
+	})
+
+	it('counts the host toward the limit in group mode', () => {
+		const { service } = createService({ roomCapacityLimit: 2 })
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'group',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joinedOne = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+		expect(joinedOne.ok).toBe(true)
+
+		const joinedTwo = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Tom',
+			socketId: 'socket-3',
+		})
+
+		expect(joinedTwo.ok).toBe(false)
+		if (joinedTwo.ok) return
+		expect(joinedTwo.error.code).toBe(
+			'room_participant_capacity_limit_exceeded',
+		)
+	})
+
+	it('excludes the host from the limit in classroom mode', () => {
+		const { service } = createService({ roomCapacityLimit: 2 })
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joinedOne = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+		expect(joinedOne.ok).toBe(true)
+
+		const joinedTwo = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Tom',
+			socketId: 'socket-3',
+		})
+		expect(joinedTwo.ok).toBe(true)
+
+		const joinedThree = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Jerry',
+			socketId: 'socket-4',
+		})
+
+		expect(joinedThree.ok).toBe(false)
+		if (joinedThree.ok) return
+		expect(joinedThree.error.code).toBe(
+			'room_participant_capacity_limit_exceeded',
+		)
+	})
+})
+
+describe('RoomsService.startGame', () => {
+	it('rejects a start attempt from a non-host member', () => {
+		const { service } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joined = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+		if (!joined.ok) throw new Error('setup failed')
+
+		const started = service.startGame({
+			gameConfig: DEFAULT_GAME_CONFIG,
+			memberSessionToken: joined.value.response.memberSessionToken,
+		})
+
+		expect(started.ok).toBe(false)
+		if (started.ok) return
+		expect(started.error).toMatchObject({ code: 'only_host_can_manage_room' })
+	})
+
+	it('fails when the room has no game participants', () => {
+		const { service } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const started = service.startGame({
+			gameConfig: DEFAULT_GAME_CONFIG,
+			memberSessionToken: created.value.response.memberSessionToken,
+		})
+
+		expect(started.ok).toBe(false)
+		if (started.ok) return
+		expect(started.error).toMatchObject({ code: 'game_has_no_participants' })
+	})
+
+	it('fails when there are fewer eligible countries than the question count', () => {
+		const { service } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'group',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const started = service.startGame({
+			memberSessionToken: created.value.response.memberSessionToken,
+			gameConfig: {
+				difficulty: 'easy',
+				scope: 'oceania',
+				questionCount: 30,
+				questionDurationMs: 30_000,
+			},
+		})
+
+		expect(started.ok).toBe(false)
+		if (started.ok) return
+		expect(started.error).toMatchObject({
+			code: 'insufficient_eligible_countries',
+			questionCount: 30,
+			countryCount: 2,
+		})
+	})
+
+	it('rejects a missing questionDurationMs in group mode', () => {
+		const { service } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'group',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const started = service.startGame({
+			memberSessionToken: created.value.response.memberSessionToken,
+			gameConfig: {
+				difficulty: 'easy',
+				scope: 'all',
+				questionCount: 10,
+				questionDurationMs: undefined,
+			},
+		})
+
+		expect(started.ok).toBe(false)
+		if (started.ok) return
+		expect(started.error).toMatchObject({ code: 'invalid_game_config' })
+	})
+
+	it('accepts a missing questionDurationMs in classroom mode', () => {
+		const { service } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joined = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+		if (!joined.ok) throw new Error('setup failed')
+
+		const started = service.startGame({
+			memberSessionToken: created.value.response.memberSessionToken,
+			gameConfig: {
+				difficulty: 'easy',
+				scope: 'all',
+				questionCount: 10,
+				questionDurationMs: undefined,
+			},
+		})
+
+		expect(started.ok).toBe(true)
+	})
+
+	it('accepts a questionDurationMs in classroom mode', () => {
+		const { service } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joined = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+		if (!joined.ok) throw new Error('setup failed')
+
+		const started = service.startGame({
+			memberSessionToken: created.value.response.memberSessionToken,
+			gameConfig: DEFAULT_GAME_CONFIG,
+		})
+
+		expect(started.ok).toBe(true)
+	})
+
+	it('excludes the host from participants in classroom mode', () => {
+		const { service, hooks, repository } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joined = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+		if (!joined.ok) throw new Error('setup failed')
+
+		const started = service.startGame({
+			memberSessionToken: created.value.response.memberSessionToken,
+			gameConfig: DEFAULT_GAME_CONFIG,
+		})
+		if (!started.ok) throw new Error('setup failed')
+
+		expect(hooks.onRoomUpdated).toHaveBeenCalledTimes(2)
+		expect(hooks.onRoomUpdated).toHaveBeenLastCalledWith(
+			created.value.response.roomId,
+			{},
+		)
+
+		const room = repository.getRoomById(created.value.response.roomId)
+		if (!room) throw new Error('room not created')
+		if (room.state.phase !== 'active')
+			throw new Error('expected active phase')
+
+		expect(room.state.activeGame.participantsById).not.toHaveProperty(
+			room.state.hostId,
+		)
+	})
+
+	it('includes the host as a participant in group mode', () => {
+		const { service, hooks, repository } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'group',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const started = service.startGame({
+			memberSessionToken: created.value.response.memberSessionToken,
+			gameConfig: DEFAULT_GAME_CONFIG,
+		})
+		if (!started.ok) throw new Error('setup failed')
+
+		expect(hooks.onRoomUpdated).toHaveBeenCalledTimes(1)
+		expect(hooks.onRoomUpdated).toHaveBeenLastCalledWith(
+			created.value.response.roomId,
+			{},
+		)
+
+		const room = repository.getRoomById(created.value.response.roomId)
+		if (!room) throw new Error('room not created')
+		if (room.state.phase !== 'active')
+			throw new Error('expected active phase')
+
+		expect(room.state.activeGame.participantsById).toHaveProperty(
+			room.state.hostId,
+		)
+	})
+
+	it('excludes disconnected members from the participant list', () => {
+		const { service, hooks, repository } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joinedOne = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+		const joinedTwo = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Tom',
+			socketId: 'socket-3',
+		})
+		if (!joinedOne.ok || !joinedTwo.ok) throw new Error('setup failed')
+
+		service.disconnectSocket('socket-2')
+
+		const started = service.startGame({
+			memberSessionToken: created.value.response.memberSessionToken,
+			gameConfig: DEFAULT_GAME_CONFIG,
+		})
+		if (!started.ok) throw new Error('setup failed')
+
+		expect(hooks.onRoomUpdated).toHaveBeenLastCalledWith(
+			created.value.response.roomId,
+			{},
+		)
+
+		const room = repository.getRoomById(created.value.response.roomId)
+		if (!room) throw new Error('room not created')
+		if (room.state.phase !== 'active')
+			throw new Error('expected active phase')
+
+		expect(Object.keys(room.state.activeGame.participantsById)).toEqual([
+			joinedTwo.value.response.memberId,
+		])
+	})
+})
+
+describe('RoomsService.submitAnswer', () => {
+	it('rejects a second answer from the same participant', () => {
+		const { service, repository } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joinedOne = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+		const joinedTwo = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Tom',
+			socketId: 'socket-3',
+		})
+		if (!joinedOne.ok || !joinedTwo.ok) throw new Error('setup failed')
+
+		const started = service.startGame({
+			memberSessionToken: created.value.response.memberSessionToken,
+			gameConfig: {
+				difficulty: 'hard',
+				scope: 'all',
+				questionCount: 10,
+				questionDurationMs: undefined,
+			},
+		})
+		if (!started.ok) throw new Error('setup failed')
+
+		const room = repository.getRoomById(created.value.response.roomId)
+		if (room?.state.phase !== 'active')
+			throw new Error('expected active phase')
+		expect(room.state.activeGame.phase).toBe('open')
+
+		const submittedOne = service.submitAnswer({
+			memberSessionToken: joinedOne.value.response.memberSessionToken,
+			countryId: '840',
+		})
+		if (!submittedOne.ok) throw new Error('setup failed')
+
+		const submittedTwo = service.submitAnswer({
+			memberSessionToken: joinedOne.value.response.memberSessionToken,
+			countryId: '860',
+		})
+
+		expect(submittedTwo.ok).toBe(false)
+		if (submittedTwo.ok) return
+		expect(submittedTwo.error.code).toBe('participant_already_submitted')
+	})
+
+	it('reveals immediately once every participant has answered', () => {
+		const { service, repository } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joinedOne = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+		const joinedTwo = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Tom',
+			socketId: 'socket-3',
+		})
+		if (!joinedOne.ok || !joinedTwo.ok) throw new Error('setup failed')
+
+		const started = service.startGame({
+			memberSessionToken: created.value.response.memberSessionToken,
+			gameConfig: {
+				difficulty: 'easy',
+				scope: 'all',
+				questionCount: 10,
+				questionDurationMs: undefined,
+			},
+		})
+		if (!started.ok) throw new Error('setup failed')
+
+		service.submitAnswer({
+			memberSessionToken: joinedOne.value.response.memberSessionToken,
+			countryId: '840',
+		})
+
+		let room = repository.getRoomById(created.value.response.roomId)
+		if (room?.state.phase !== 'active')
+			throw new Error('expected active phase')
+		expect(room.state.activeGame.phase).toBe('open')
+
+		service.submitAnswer({
+			memberSessionToken: joinedTwo.value.response.memberSessionToken,
+			countryId: '840',
+		})
+
+		room = repository.getRoomById(created.value.response.roomId)
+		if (room?.state.phase !== 'active')
+			throw new Error('expected active phase')
+		expect(room.state.activeGame.phase).toBe('revealed')
+	})
+
+	it("doesn't reveal once every connected participant has answered, if a disconnected one hasn't", () => {
+		const { service, repository } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joinedOne = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+		const joinedTwo = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Tom',
+			socketId: 'socket-3',
+		})
+		if (!joinedOne.ok || !joinedTwo.ok) throw new Error('setup failed')
+
+		const started = service.startGame({
+			memberSessionToken: created.value.response.memberSessionToken,
+			gameConfig: {
+				difficulty: 'easy',
+				scope: 'all',
+				questionCount: 10,
+				questionDurationMs: undefined,
+			},
+		})
+		if (!started.ok) throw new Error('setup failed')
+
+		service.disconnectSocket('socket-3')
+
+		service.submitAnswer({
+			memberSessionToken: joinedOne.value.response.memberSessionToken,
+			countryId: '840',
+		})
+
+		const room = repository.getRoomById(created.value.response.roomId)
+		if (room?.state.phase !== 'active')
+			throw new Error('expected active phase')
+		expect(room.state.activeGame.phase).toBe('open')
+	})
+})
+
+describe('RoomsService.revealGameRound', () => {
+	it('reveals the round for the host in an active classroom-mode room', () => {
+		const { service, repository } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joined = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+		if (!joined.ok) throw new Error('setup failed')
+
+		const started = service.startGame({
+			memberSessionToken: created.value.response.memberSessionToken,
+			gameConfig: {
+				difficulty: 'easy',
+				scope: 'all',
+				questionCount: 10,
+				questionDurationMs: undefined,
+			},
+		})
+		if (!started.ok) throw new Error('setup failed')
+
+		const revealed = service.revealGameRound({
+			memberSessionToken: created.value.response.memberSessionToken,
+		})
+		expect(revealed.ok).toBe(true)
+
+		const room = repository.getRoomById(created.value.response.roomId)
+		if (room?.state.phase !== 'active')
+			throw new Error('expected active phase')
+		expect(room.state.activeGame.phase).toBe('revealed')
+	})
+
+	it('rejects a non-host actor', () => {
+		const { service } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joined = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+		if (!joined.ok) throw new Error('setup failed')
+
+		const started = service.startGame({
+			memberSessionToken: created.value.response.memberSessionToken,
+			gameConfig: DEFAULT_GAME_CONFIG,
+		})
+		if (!started.ok) throw new Error('setup failed')
+
+		const revealed = service.revealGameRound({
+			memberSessionToken: joined.value.response.memberSessionToken,
+		})
+		expect(revealed.ok).toBe(false)
+		if (revealed.ok) return
+		expect(revealed.error).toMatchObject({
+			code: 'only_host_can_manage_room',
+		})
+	})
+
+	it('rejects a group-mode room', () => {
+		const { service } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'group',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joined = service.joinRoom({
+			memberName: 'Bob',
+			roomCode: created.value.response.roomCode,
+			socketId: 'socket-2',
+		})
+		if (!joined.ok) throw new Error('setup failed')
+
+		const started = service.startGame({
+			memberSessionToken: created.value.response.memberSessionToken,
+			gameConfig: DEFAULT_GAME_CONFIG,
+		})
+		if (!started.ok) throw new Error('setup failed')
+
+		const revealed = service.revealGameRound({
+			memberSessionToken: created.value.response.memberSessionToken,
+		})
+		expect(revealed.ok).toBe(false)
+		if (revealed.ok) return
+		expect(revealed.error).toMatchObject({
+			code: 'room_not_in_classroom_mode',
+		})
+	})
+
+	it('rejects a room that has not started a game yet', () => {
+		const { service } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const revealed = service.revealGameRound({
+			memberSessionToken: created.value.response.memberSessionToken,
+		})
+		expect(revealed.ok).toBe(false)
+		if (revealed.ok) return
+		expect(revealed.error).toMatchObject({ code: 'room_not_active' })
+	})
+})
+
+describe('RoomsService.advanceGameRound', () => {
+	beforeEach(() => {
+		vi.useFakeTimers()
+	})
+
+	afterEach(() => {
+		vi.useRealTimers()
+	})
+
+	function reachRevealedPhase(options: { questionCount?: number } = {}) {
+		const helpers = createService()
+		const created = helpers.service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joined = helpers.service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+		if (!joined.ok) throw new Error('setup failed')
+
+		const started = helpers.service.startGame({
+			memberSessionToken: created.value.response.memberSessionToken,
+			gameConfig: {
+				difficulty: 'easy',
+				scope: 'all',
+				questionCount: options.questionCount ?? 10,
+				questionDurationMs: undefined,
+			},
+		})
+		if (!started.ok) throw new Error('setup failed')
+
+		const revealed = helpers.service.revealGameRound({
+			memberSessionToken: created.value.response.memberSessionToken,
+		})
+		if (!revealed.ok) throw new Error('setup failed')
+
+		return { ...helpers, created, joined }
+	}
+
+	it('advances from the revealed stage to the next round for the host', () => {
+		const { service, repository, created } = reachRevealedPhase()
+
+		const before = repository.getRoomById(created.value.response.roomId)
+		if (before?.state.phase !== 'active')
+			throw new Error('expected active phase')
+		expect(before.state.activeGame.phase).toBe('revealed')
+
+		const advanced = service.advanceGameRound({
+			memberSessionToken: created.value.response.memberSessionToken,
+		})
+		expect(advanced.ok).toBe(true)
+
+		const after = repository.getRoomById(created.value.response.roomId)
+		if (after?.state.phase !== 'active')
+			throw new Error('expected active phase')
+		expect(after.state.activeGame.phase).toBe('open')
+	})
+
+	it('rejects a non-host actor', () => {
+		const { service, joined } = reachRevealedPhase()
+
+		const advanced = service.advanceGameRound({
+			memberSessionToken: joined.value.response.memberSessionToken,
+		})
+		expect(advanced.ok).toBe(false)
+		if (advanced.ok) return
+		expect(advanced.error).toMatchObject({
+			code: 'only_host_can_manage_room',
+		})
+	})
+
+	it('rejects a group-mode room', () => {
+		const { service } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'group',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joined = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+		if (!joined.ok) throw new Error('setup failed')
+
+		const started = service.startGame({
+			memberSessionToken: created.value.response.memberSessionToken,
+			gameConfig: DEFAULT_GAME_CONFIG,
+		})
+		if (!started.ok) throw new Error('setup failed')
+
+		const advanced = service.advanceGameRound({
+			memberSessionToken: created.value.response.memberSessionToken,
+		})
+		expect(advanced.ok).toBe(false)
+		if (advanced.ok) return
+		expect(advanced.error).toMatchObject({
+			code: 'room_not_in_classroom_mode',
+		})
+	})
+
+	it('rejects advancing before the round has reached the revealed stage', () => {
+		const { service } = createService()
+		const room = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!room.ok) throw new Error('setup failed')
+
+		const joined = service.joinRoom({
+			roomCode: room.value.response.roomCode,
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+		if (!joined.ok) throw new Error('setup failed')
+
+		const started = service.startGame({
+			memberSessionToken: room.value.response.memberSessionToken,
+			gameConfig: DEFAULT_GAME_CONFIG,
+		})
+		if (!started.ok) throw new Error('setup failed')
+
+		const advanced = service.advanceGameRound({
+			memberSessionToken: room.value.response.memberSessionToken,
+		})
+		expect(advanced.ok).toBe(false)
+		if (advanced.ok) return
+		expect(advanced.error).toMatchObject({ code: 'game_not_advanceable' })
+	})
+
+	it('moves a classroom room to finished once the host advances past the last round', () => {
+		const { service, repository, created } = reachRevealedPhase({
+			questionCount: 1,
+		})
+
+		const before = repository.getRoomById(created.value.response.roomId)
+		if (before?.state.phase !== 'active')
+			throw new Error('expected active phase')
+		expect(before.state.activeGame.phase).toBe('revealed')
+
+		const advanced = service.advanceGameRound({
+			memberSessionToken: created.value.response.memberSessionToken,
+		})
+		if (!advanced.ok) throw new Error('setup failed')
+
+		const after = repository.getRoomById(created.value.response.roomId)
+		expect(after?.state.phase).toBe('finished')
+	})
+})
+
+describe('RoomsService game auto advance', () => {
+	beforeEach(() => {
+		vi.useFakeTimers()
+	})
+
+	afterEach(() => {
+		vi.useRealTimers()
+	})
+
+	it('auto-reveals the answer once the question deadline passes, in group mode', () => {
+		const { repository, service } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'group',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const started = service.startGame({
+			gameConfig: DEFAULT_GAME_CONFIG,
+			memberSessionToken: created.value.response.memberSessionToken,
+		})
+		if (!started.ok) throw new Error('setup failed')
+
+		const before = repository.getRoomById(created.value.response.roomId)
+		if (before?.state.phase !== 'active')
+			throw new Error('expected active phase')
+		expect(before.state.activeGame.phase).toBe('open')
+
+		vi.advanceTimersByTime(DEFAULT_GAME_CONFIG.questionDurationMs + 1)
+
+		const after = repository.getRoomById(created.value.response.roomId)
+		if (after?.state.phase !== 'active')
+			throw new Error('expected active phase')
+		expect(after.state.activeGame.phase).toBe('revealed')
+	})
+
+	it('auto-reveals the answer once the question deadline passes, in classroom mode', () => {
+		const revealDurationMs = 1_000
+		const { repository, service } = createService({ revealDurationMs })
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joined = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+		if (!joined.ok) throw new Error('setup failed')
+
+		const started = service.startGame({
+			gameConfig: DEFAULT_GAME_CONFIG,
+			memberSessionToken: created.value.response.memberSessionToken,
+		})
+		if (!started.ok) throw new Error('setup failed')
+
+		vi.advanceTimersByTime(DEFAULT_GAME_CONFIG.questionDurationMs + 1)
+
+		const after = repository.getRoomById(created.value.response.roomId)
+		if (after?.state.phase !== 'active')
+			throw new Error('expected active phase')
+		expect(after.state.activeGame.phase).toBe('revealed')
+	})
+
+	it("doesn't auto-reveal the answer in classroom mode when no duration was configured", () => {
+		const { repository, service } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joined = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+		if (!joined.ok) throw new Error('setup failed')
+
+		const started = service.startGame({
+			gameConfig: {
+				difficulty: 'easy',
+				scope: 'all',
+				questionCount: 10,
+				questionDurationMs: undefined,
+			},
+			memberSessionToken: created.value.response.memberSessionToken,
+		})
+		if (!started.ok) throw new Error('setup failed')
+
+		const before = repository.getRoomById(created.value.response.roomId)
+		if (before?.state.phase !== 'active')
+			throw new Error('expected active phase')
+		expect(before.state.activeGame.phase).toBe('open')
+
+		vi.advanceTimersByTime(30_000 + 1)
+
+		const after = repository.getRoomById(created.value.response.roomId)
+		if (after?.state.phase !== 'active')
+			throw new Error('expected active phase')
+		expect(after.state.activeGame.phase).toBe('open')
+	})
+
+	it('auto-shows the leaderboard once the reveal duration passes, in group mode', () => {
+		const revealDurationMs = 1_000
+		const { repository, service } = createService({ revealDurationMs })
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'group',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const started = service.startGame({
+			gameConfig: DEFAULT_GAME_CONFIG,
+			memberSessionToken: created.value.response.memberSessionToken,
+		})
+		if (!started.ok) throw new Error('setup failed')
+
+		vi.advanceTimersByTime(
+			DEFAULT_GAME_CONFIG.questionDurationMs + revealDurationMs + 1,
+		)
+
+		const after = repository.getRoomById(created.value.response.roomId)
+		if (after?.state.phase !== 'active')
+			throw new Error('expected active phase')
+		expect(after.state.activeGame.phase).toBe('leaderboard')
+	})
+
+	it("doesn't auto-advance past the revealed stage in classroom mode", () => {
+		const revealDurationMs = 1_000
+		const { repository, service } = createService({
+			revealDurationMs,
+		})
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joined = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+		if (!joined.ok) throw new Error('setup failed')
+
+		const started = service.startGame({
+			gameConfig: DEFAULT_GAME_CONFIG,
+			memberSessionToken: created.value.response.memberSessionToken,
+		})
+		if (!started.ok) throw new Error('setup failed')
+
+		vi.advanceTimersByTime(
+			DEFAULT_GAME_CONFIG.questionDurationMs + revealDurationMs + 1,
+		)
+
+		const after = repository.getRoomById(created.value.response.roomId)
+		if (after?.state.phase !== 'active')
+			throw new Error('expected active phase')
+
+		expect(after.state.activeGame.phase).toBe('revealed')
+	})
+
+	it('auto-advances to the next round in group mode', () => {
+		const revealDurationMs = 1_000
+		const leaderboardDurationMs = 1_000
+		const { repository, service } = createService({
+			revealDurationMs,
+			leaderboardDurationMs,
+		})
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'group',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const started = service.startGame({
+			gameConfig: DEFAULT_GAME_CONFIG,
+			memberSessionToken: created.value.response.memberSessionToken,
+		})
+		if (!started.ok) throw new Error('setup failed')
+
+		vi.advanceTimersByTime(
+			DEFAULT_GAME_CONFIG.questionDurationMs +
+				revealDurationMs +
+				leaderboardDurationMs +
+				1,
+		)
+
+		const after = repository.getRoomById(created.value.response.roomId)
+		if (after?.state.phase !== 'active')
+			throw new Error('expected active phase')
+		expect(after.state.activeGame.phase).toBe('open')
+	})
+
+	it('auto-advances through the last round to a finished room, in group mode', () => {
+		const commonTTLMs = 1_000
+		const { service, repository } = createService({
+			revealDurationMs: commonTTLMs,
+			leaderboardDurationMs: commonTTLMs,
+		})
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'group',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const started = service.startGame({
+			memberSessionToken: created.value.response.memberSessionToken,
+			gameConfig: {
+				difficulty: 'easy',
+				scope: 'all',
+				questionCount: 1,
+				questionDurationMs: commonTTLMs,
+			},
+		})
+		if (!started.ok) throw new Error('setup failed')
+
+		vi.advanceTimersByTime(3 * commonTTLMs + 1)
+
+		const room = repository.getRoomById(created.value.response.roomId)
+		if (room?.state.phase !== 'finished')
+			throw new Error(`expected finished phase, got ${room?.state.phase}`)
+
+		expect(room.state.lastGameResult.leaderboard.length).toBeGreaterThan(0)
+		expect(room.state.gameHistory).toHaveLength(1)
+	})
+})
+
+describe('RoomsService room expiry', () => {
+	beforeEach(() => {
+		vi.useFakeTimers()
+	})
+
+	afterEach(() => {
+		vi.useRealTimers()
+	})
+
+	it('closes the room once every member has disconnected and the empty-room TTL elapses', () => {
+		const noConnectedMembersTTLMs = 1_000
+
+		const { service, repository, hooks } = createService({
+			roomExpireTTL: {
+				noConnectedMembersMs: noConnectedMembersTTLMs,
+			},
+		})
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joined = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+		if (!joined.ok) throw new Error('setup failed')
+
+		service.disconnectSocket('socket-1')
+		service.disconnectSocket('socket-2')
+
+		vi.advanceTimersByTime(noConnectedMembersTTLMs - 1)
+
+		expect(hooks.onRoomClosed).not.toHaveBeenCalled()
+		expect(
+			repository.getRoomById(created.value.response.roomId),
+		).toBeDefined()
+
+		vi.advanceTimersByTime(2)
+
+		expect(hooks.onRoomClosed).toHaveBeenCalledWith(
+			created.value.response.roomId,
+			'expired',
+		)
+		expect(
+			repository.getRoomById(created.value.response.roomId),
+		).toBeUndefined()
+	})
+
+	it('cancels a pending expiry once the host reconnects before the TTL elapses', () => {
+		const hostDisconnectedInGroupTTLMs = 1_000
+
+		const { service, repository, hooks } = createService({
+			roomExpireTTL: {
+				hostDisconnectedInGroupMs: hostDisconnectedInGroupTTLMs,
+			},
+		})
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'group',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		service.disconnectSocket('socket-1')
+
+		vi.advanceTimersByTime(hostDisconnectedInGroupTTLMs - 1)
+
+		const resumed = service.resumeHostRoom({
+			memberSessionToken: created.value.response.memberSessionToken,
+			socketId: 'socket-1-new',
+		})
+		expect(resumed.ok).toBe(true)
+
+		vi.advanceTimersByTime(hostDisconnectedInGroupTTLMs)
+
+		expect(hooks.onRoomClosed).not.toHaveBeenCalled()
+		expect(
+			repository.getRoomById(created.value.response.roomId),
+		).toBeDefined()
+	})
+
+	it('closes a classroom room after the host stays disconnected through an active game', () => {
+		const hostDisconnectedInClassroomTTLMs = 1_000
+
+		const { service, hooks } = createService({
+			roomExpireTTL: {
+				hostDisconnectedInClassroomMs: hostDisconnectedInClassroomTTLMs,
+			},
+		})
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joined = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+		if (!joined.ok) throw new Error('setup failed')
+
+		const started = service.startGame({
+			memberSessionToken: created.value.response.memberSessionToken,
+			gameConfig: DEFAULT_GAME_CONFIG,
+		})
+		if (!started.ok) throw new Error('setup failed')
+
+		service.disconnectSocket('socket-1')
+
+		vi.advanceTimersByTime(hostDisconnectedInClassroomTTLMs - 1)
+		expect(hooks.onRoomClosed).not.toHaveBeenCalled()
+
+		vi.advanceTimersByTime(2)
+		expect(hooks.onRoomClosed).toHaveBeenCalledWith(
+			created.value.response.roomId,
+			'expired',
+		)
+	})
+
+	it('keeps a group-mode room alive indefinitely while the host is disconnected mid-game', () => {
+		const commonTTLMs = 1_000
+
+		const { service, repository, hooks } = createService({
+			roomExpireTTL: {
+				noConnectedMembersMs: commonTTLMs,
+				hostDisconnectedInGroupMs: commonTTLMs,
+				hostDisconnectedInClassroomMs: commonTTLMs,
+				finishedMs: commonTTLMs,
+			},
+		})
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'group',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joined = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+		if (!joined.ok) throw new Error('setup failed')
+
+		const started = service.startGame({
+			memberSessionToken: created.value.response.memberSessionToken,
+			gameConfig: DEFAULT_GAME_CONFIG,
+		})
+		if (!started.ok) throw new Error('setup failed')
+
+		service.disconnectSocket('socket-1')
+
+		vi.advanceTimersByTime(commonTTLMs * 3)
+
+		expect(hooks.onRoomClosed).not.toHaveBeenCalled()
+		expect(
+			repository.getRoomById(created.value.response.roomId),
+		).toBeDefined()
+	})
+})
+
+describe('RoomsService.resumePlayerRoom', () => {
+	it('rejects an unknown token', () => {
+		const { service } = createService()
+
+		const resumed = service.resumePlayerRoom({
+			memberSessionToken: 'not-a-real-token',
+			socketId: 'socket-9',
+		})
+
+		expect(resumed.ok).toBe(false)
+		if (resumed.ok) return
+		expect(resumed.error).toMatchObject({ code: 'member_session_not_found' })
+	})
+
+	it('rejects a host token', () => {
+		const { service } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const resumed = service.resumePlayerRoom({
+			memberSessionToken: created.value.response.memberSessionToken,
+			socketId: 'socket-9',
+		})
+
+		expect(resumed.ok).toBe(false)
+		if (resumed.ok) return
+		expect(resumed.error).toMatchObject({ code: 'insufficient_permissions' })
+	})
+
+	it('reconnects a disconnected player and rebinds the socket', () => {
+		const { service, repository } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joined = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+		if (!joined.ok) throw new Error('setup failed')
+
+		service.disconnectSocket('socket-2')
+
+		const room = repository.getRoomById(created.value.response.roomId)
+		if (!room) throw new Error('room not created')
+
+		expect(
+			room.state.membersById[joined.value.response.memberId]?.connected,
+		).toBe(false)
+
+		const resumed = service.resumePlayerRoom({
+			memberSessionToken: joined.value.response.memberSessionToken,
+			socketId: 'socket-2-new',
+		})
+
+		expect(resumed.ok).toBe(true)
+		if (!resumed.ok) return
+		expect(resumed.value.replacedSocketId).toBeUndefined()
+
+		const roomAfter = repository.getRoomById(created.value.response.roomId)
+		if (!roomAfter) throw new Error('room not found')
+
+		expect(
+			roomAfter.state.membersById[joined.value.response.memberId]?.connected,
+		).toBe(true)
+	})
+
+	it("doesn't error resuming an already-connected member, and still rebinds the socket", () => {
+		const { service } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joined = service.joinRoom({
+			memberName: 'Bob',
+			roomCode: created.value.response.roomCode,
+			socketId: 'socket-2',
+		})
+		if (!joined.ok) throw new Error('setup failed')
+
+		const resumed = service.resumePlayerRoom({
+			memberSessionToken: joined.value.response.memberSessionToken,
+			socketId: 'socket-2-duplicate-tab',
+		})
+
+		expect(resumed.ok).toBe(true)
+		if (!resumed.ok) return
+		expect(resumed.value.replacedSocketId).toBe('socket-2')
+	})
+
+	it('returns the previous socket id when a second socket resumes the same session', () => {
+		const { service } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joined = service.joinRoom({
+			memberName: 'Bob',
+			roomCode: created.value.response.roomCode,
+			socketId: 'socket-2',
+		})
+		if (!joined.ok) throw new Error('setup failed')
+
+		service.disconnectSocket('socket-2')
+
+		const firstResume = service.resumePlayerRoom({
+			memberSessionToken: joined.value.response.memberSessionToken,
+			socketId: 'socket-2-tab-a',
+		})
+		expect(firstResume.ok).toBe(true)
+
+		const secondResume = service.resumePlayerRoom({
+			memberSessionToken: joined.value.response.memberSessionToken,
+			socketId: 'socket-2-tab-b',
+		})
+
+		expect(secondResume.ok).toBe(true)
+		if (!secondResume.ok) return
+		expect(secondResume.value.replacedSocketId).toBe('socket-2-tab-a')
+	})
+})
+
+describe('RoomsService.resumeHostRoom', () => {
+	it('rejects an unknown token', () => {
+		const { service } = createService()
+
+		const resumed = service.resumeHostRoom({
+			memberSessionToken: 'not-a-real-token',
+			socketId: 'socket-9',
+		})
+
+		expect(resumed.ok).toBe(false)
+		if (resumed.ok) return
+		expect(resumed.error).toMatchObject({ code: 'member_session_not_found' })
+	})
+
+	it('rejects a player token used against resumeHostRoom', () => {
+		const { service } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joined = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+		if (!joined.ok) throw new Error('setup failed')
+
+		const resumed = service.resumeHostRoom({
+			memberSessionToken: joined.value.response.memberSessionToken,
+			socketId: 'socket-9',
+		})
+
+		expect(resumed.ok).toBe(false)
+		if (resumed.ok) return
+		expect(resumed.error).toMatchObject({ code: 'insufficient_permissions' })
+	})
+
+	it('reconnects a disconnected host and rebinds the socket', () => {
+		const { service, repository } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joined = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+		if (!joined.ok) throw new Error('setup failed')
+
+		service.disconnectSocket('socket-1')
+
+		const room = repository.getRoomById(created.value.response.roomId)
+		if (!room) throw new Error('room not created')
+		expect(
+			room.state.membersById[created.value.response.memberId]?.connected,
+		).toBe(false)
+
+		const resumed = service.resumeHostRoom({
+			memberSessionToken: created.value.response.memberSessionToken,
+			socketId: 'socket-1-new',
+		})
+
+		expect(resumed.ok).toBe(true)
+		if (!resumed.ok) return
+		expect(resumed.value.replacedSocketId).toBeUndefined()
+
+		const roomAfter = repository.getRoomById(created.value.response.roomId)
+		if (!roomAfter) throw new Error('room not found')
+		expect(
+			roomAfter.state.membersById[created.value.response.memberId]
+				?.connected,
+		).toBe(true)
+	})
+
+	it("doesn't error resuming an already-connected member, and still rebinds the socket", () => {
+		const { service } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const resumed = service.resumeHostRoom({
+			memberSessionToken: created.value.response.memberSessionToken,
+			socketId: 'socket-1-duplicate-tab',
+		})
+
+		expect(resumed.ok).toBe(true)
+		if (!resumed.ok) return
+		expect(resumed.value.replacedSocketId).toBe('socket-1')
+	})
+
+	it('returns the previous socket id when a second socket resumes the same session', () => {
+		const { service } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		service.disconnectSocket('socket-1')
+
+		const firstResume = service.resumeHostRoom({
+			memberSessionToken: created.value.response.memberSessionToken,
+			socketId: 'socket-1-tab-a',
+		})
+		expect(firstResume.ok).toBe(true)
+
+		const secondResume = service.resumeHostRoom({
+			memberSessionToken: created.value.response.memberSessionToken,
+			socketId: 'socket-1-tab-b',
+		})
+
+		expect(secondResume.ok).toBe(true)
+		if (!secondResume.ok) return
+		expect(secondResume.value.replacedSocketId).toBe('socket-1-tab-a')
+	})
+})
+
+describe('RoomsService.returnToLobby', () => {
+	beforeEach(() => {
+		vi.useFakeTimers()
+	})
+
+	afterEach(() => {
+		vi.useRealTimers()
+	})
+
+	it('rejects a non-host actor', () => {
+		const commonPhaseDurationMs = 1_000
+
+		const { service } = createService({
+			leaderboardDurationMs: commonPhaseDurationMs,
+			revealDurationMs: commonPhaseDurationMs,
+		})
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'group',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joined = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+		if (!joined.ok) throw new Error('setup failed')
+
+		const started = service.startGame({
+			memberSessionToken: created.value.response.memberSessionToken,
+			gameConfig: {
+				difficulty: 'easy',
+				scope: 'all',
+				questionCount: 1,
+				questionDurationMs: commonPhaseDurationMs,
+			},
+		})
+		if (!started.ok) throw new Error('setup failed')
+
+		vi.advanceTimersByTime(3 * commonPhaseDurationMs + 1)
+
+		const returned = service.returnToLobby({
+			memberSessionToken: joined.value.response.memberSessionToken,
+		})
+
+		expect(returned.ok).toBe(false)
+		if (returned.ok) return
+		expect(returned.error).toMatchObject({
+			code: 'only_host_can_manage_room',
+		})
+	})
+
+	it('rejects a room that has not finished yet', () => {
+		const { service } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const returned = service.returnToLobby({
+			memberSessionToken: created.value.response.memberSessionToken,
+		})
+
+		expect(returned.ok).toBe(false)
+		if (returned.ok) return
+		expect(returned.error).toMatchObject({ code: 'room_not_finished' })
+	})
+
+	it('moves a finished room back to the lobby and allows a second game to start', () => {
+		const commonTTLMs = 1_000
+		const { service, repository } = createService({
+			revealDurationMs: commonTTLMs,
+			leaderboardDurationMs: commonTTLMs,
+		})
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'group',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const started = service.startGame({
+			memberSessionToken: created.value.response.memberSessionToken,
+			gameConfig: {
+				difficulty: 'easy',
+				scope: 'all',
+				questionCount: 1,
+				questionDurationMs: commonTTLMs,
+			},
+		})
+		if (!started.ok) throw new Error('setup failed')
+
+		vi.advanceTimersByTime(3 * commonTTLMs + 1)
+
+		const finishedRoom = repository.getRoomById(created.value.response.roomId)
+		if (finishedRoom?.state.phase !== 'finished')
+			throw new Error('expected finished phase, setup is broken')
+
+		const returned = service.returnToLobby({
+			memberSessionToken: created.value.response.memberSessionToken,
+		})
+		expect(returned.ok).toBe(true)
+
+		const lobbyRoom = repository.getRoomById(created.value.response.roomId)
+		if (lobbyRoom?.state.phase !== 'lobby')
+			throw new Error('expected lobby phase')
+		expect(lobbyRoom.state.gameHistory).toHaveLength(1)
+
+		const startedAgain = service.startGame({
+			memberSessionToken: created.value.response.memberSessionToken,
+			gameConfig: DEFAULT_GAME_CONFIG,
+		})
+		expect(startedAgain.ok).toBe(true)
+	})
+})
+
+describe('RoomsService.terminateRoom', () => {
+	it('rejects a non-host actor', () => {
+		const { service } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joined = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+		if (!joined.ok) throw new Error('setup failed')
+
+		const terminated = service.terminateRoom({
+			memberSessionToken: joined.value.response.memberSessionToken,
+		})
+
+		expect(terminated.ok).toBe(false)
+		if (terminated.ok) return
+		expect(terminated.error).toMatchObject({
+			code: 'only_host_can_manage_room',
+		})
+	})
+
+	it('removes the room and notifies onRoomClosed for the host', () => {
+		const { service, repository, hooks } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const terminated = service.terminateRoom({
+			memberSessionToken: created.value.response.memberSessionToken,
+		})
+
+		expect(terminated.ok).toBe(true)
+		expect(hooks.onRoomClosed).toHaveBeenCalledWith(
+			created.value.response.roomId,
+			'host_terminated',
+		)
+		expect(
+			repository.getRoomById(created.value.response.roomId),
+		).toBeUndefined()
+	})
+})
+
+describe('RoomsService.disconnectSocket', () => {
+	it('is a no-op for an unknown socket id', () => {
+		const { service, hooks } = createService()
+
+		expect(() => service.disconnectSocket('never-connected')).not.toThrow()
+		expect(hooks.onRoomUpdated).not.toHaveBeenCalled()
+	})
+
+	it('marks a known member disconnected and notifies the room', () => {
+		const { service, repository, hooks } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joined = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+		if (!joined.ok) throw new Error('setup failed')
+
+		hooks.onRoomUpdated.mockClear()
+
+		service.disconnectSocket('socket-2')
+
+		expect(hooks.onRoomUpdated).toHaveBeenCalledTimes(1)
+		const room = repository.getRoomById(created.value.response.roomId)
+		expect(
+			room?.state.membersById[joined.value.response.memberId]?.connected,
+		).toBe(false)
+	})
+
+	it('is idempotent for a socket that already disconnected', () => {
+		const { service, hooks } = createService()
+		const created = service.createRoom({
+			hostName: 'Alice',
+			roomMode: 'classroom',
+			socketId: 'socket-1',
+		})
+		if (!created.ok) throw new Error('setup failed')
+
+		const joined = service.joinRoom({
+			roomCode: created.value.response.roomCode,
+			memberName: 'Bob',
+			socketId: 'socket-2',
+		})
+		if (!joined.ok) throw new Error('setup failed')
+
+		service.disconnectSocket('socket-2')
+		hooks.onRoomUpdated.mockClear()
+
+		expect(() => service.disconnectSocket('socket-2')).not.toThrow()
+		expect(hooks.onRoomUpdated).not.toHaveBeenCalled()
+	})
+})

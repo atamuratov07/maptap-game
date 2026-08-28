@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { GAME_DIFFICULTIES, GAME_SCOPES } from '@maptap/game-domain'
+import { GAME_DIFFICULTIES, GAME_SCOPES } from '@georally/game-domain'
 
 export const difficultySchema = z.enum(GAME_DIFFICULTIES)
 export const scopeSchema = z.enum(GAME_SCOPES)
@@ -12,6 +12,7 @@ export const roomCodeSchema = z
 
 export const createRoomRequestSchema = z.object({
 	hostName: z.string().trim().min(1).max(20),
+	roomMode: z.enum(['classroom', 'group']),
 })
 
 export const lookupRoomRequestSchema = z.object({
@@ -39,9 +40,12 @@ export const startGameRequestSchema = z.object({
 		questionCount: z.number().int().min(1).max(50),
 		difficulty: difficultySchema,
 		scope: scopeSchema,
-		questionDurationMs: z.number().int().min(5_000).max(120_000),
+		questionDurationMs: z.number().int().min(5_000).max(120_000).optional(),
 	}),
 })
+
+export const revealRoundRequestSchema = z.object({})
+export const advanceRoundRequestSchema = z.object({})
 
 export const submitAnswerRequestSchema = z.object({
 	countryId: z.string().regex(/^\d{3}$/),
@@ -57,4 +61,6 @@ export type ResumePlayerRoomRequest = z.infer<
 export type ReturnToLobbyRequest = z.infer<typeof returnToLobbyRequestSchema>
 export type TerminateRoomRequest = z.infer<typeof terminateRoomRequestSchema>
 export type StartGameRequest = z.infer<typeof startGameRequestSchema>
+export type RevealRoundRequest = z.infer<typeof revealRoundRequestSchema>
+export type AdvanceRoundRequest = z.infer<typeof advanceRoundRequestSchema>
 export type SubmitAnswerRequest = z.infer<typeof submitAnswerRequestSchema>

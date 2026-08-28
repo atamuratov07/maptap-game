@@ -1,12 +1,13 @@
 import {
 	ROOM_PHASES,
+	type ClassroomHostRoomView,
+	type GroupHostRoomView,
 	type MemberId,
 	type RoomCode,
-	type RoomHostView,
 	type RoomId,
 	type RoomMemberRole,
 	type RoomPlayerView,
-} from '@maptap/game-domain/multiplayer-next/room'
+} from '@georally/game-domain/multiplayer/room'
 
 import { z } from 'zod'
 export const roomPhaseSchema = z.enum(ROOM_PHASES)
@@ -20,7 +21,7 @@ export interface SessionIdentity {
 }
 
 export interface CreateRoomResponse extends SessionIdentity {
-	snapshot: RoomHostView
+	snapshot: ClassroomHostRoomView | GroupHostRoomView
 }
 
 export const lookupRoomMissingResponseSchema = z.object({
@@ -59,7 +60,7 @@ export interface JoinRoomResponse extends SessionIdentity {
 export type ResumeHostRoomResponse = {
 	roomId: RoomId
 	memberId: MemberId
-	snapshot: RoomHostView
+	snapshot: ClassroomHostRoomView | GroupHostRoomView
 }
 
 export interface ResumePlayerRoomResponse {
@@ -74,7 +75,7 @@ export interface SubmitAnswerResponse {
 
 export type HostRoomSnapshotEvent = {
 	roomId: RoomId
-	snapshot: RoomHostView
+	snapshot: ClassroomHostRoomView | GroupHostRoomView
 }
 
 export interface PlayerRoomSnapshotEvent {

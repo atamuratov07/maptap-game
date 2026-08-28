@@ -1,4 +1,4 @@
-import type { GameView } from '@maptap/game-domain/multiplayer-next/game'
+import type { GameParticipantView } from '@georally/game-domain/multiplayer/game'
 import { useCallback, useMemo } from 'react'
 import type { MapHighlight, MapRendererProps } from '../../../shared/map/types'
 import { CountryInfoCard } from '../../../shared/widgets/CountryInfoCard'
@@ -13,7 +13,8 @@ const EMPTY_MARKERS: NonNullable<MapRendererProps['markers']> = []
 const noopPick = () => undefined
 
 interface UseRoomGameMapArgs {
-	game: GameView
+	game: GameParticipantView
+	showCountryInfo: boolean
 	submitPending: boolean
 	onSubmitAnswer: (countryId: string) => void
 }
@@ -25,12 +26,13 @@ interface UseRoomGameMapResult {
 export function useGameMap({
 	game,
 	submitPending,
+	showCountryInfo,
 	onSubmitAnswer,
 }: UseRoomGameMapArgs): UseRoomGameMapResult {
 	const eligibleCountryIdsKey = game.eligibleCountryIds.join('|')
 	const interactiveIds = useMemo<ReadonlySet<string>>(
 		() => new Set(game.eligibleCountryIds),
-		[eligibleCountryIdsKey],
+		[game, eligibleCountryIdsKey],
 	)
 
 	const isCompleted = game.phase === 'completed'
@@ -124,20 +126,24 @@ export function useGameMap({
 			scope: game.scope,
 			highlights,
 			markers: EMPTY_MARKERS,
-			popup: correctCountryInfo
+			revealTarget: correctCountryInfo
 				? {
 						countryId: correctCountryInfo.id,
 						longitude: correctCountryInfo.centroidLng,
 						latitude: correctCountryInfo.centroidLat,
-						element: <CountryInfoCard info={correctCountryInfo} />,
 					}
 				: null,
+			popupElement:
+				correctCountryInfo && showCountryInfo ? (
+					<CountryInfoCard info={correctCountryInfo} />
+				) : null,
 			disabled: true,
 			resetViewKey,
 		}
 	}, [
 		correctCountryId,
 		correctCountryInfo,
+		showCountryInfo,
 		game.scope,
 		handlePick,
 		isCompleted,

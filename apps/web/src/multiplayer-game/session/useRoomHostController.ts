@@ -1,9 +1,9 @@
 import type {
 	GameConfig,
 	RoomHostView,
-} from '@maptap/game-domain/multiplayer-next'
+} from '@georally/game-domain/multiplayer'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { createSocketGateway } from '../api/socketGateway'
+import { createSocketGateway, type SocketGateway } from '../api/socketGateway'
 import { clearRoomGameConfig } from '../model/gameConfig'
 import {
 	clearRoomSession,
@@ -17,24 +17,31 @@ import {
 	type RoomRuntimeAdapter,
 	type RoomRuntimeState,
 } from './useRoomRuntime'
+import { i18n } from '../../shared/i18n/setup'
+import { trackMultiplayerGameStart } from '../../shared/analytics/track'
+import { useMultiplayerGameAnalytics } from '../../shared/analytics/useMultiplayerGameAnalytics'
 
 type RoomHostControllerState = RoomRuntimeState<RoomHostView>
-type RoomHostAction = 'start' | 'submit' | 'return-lobby' | 'terminate-room'
+type RoomHostAction = 'start' | 'return-lobby' | 'terminate-room'
 
-interface UseRoomHostControllerResult {
+interface UseRoomHostControllerResult<TAction> {
 	state: RoomHostControllerState
-	actionPending: RoomHostAction | null
+	gateway: SocketGateway
+	actionPending: RoomHostAction | TAction | null
 	actionErrorMessage: string | null
 	startGame: (config: GameConfig) => Promise<void>
-	submitAnswer: (countryId: string) => Promise<void>
 	returnToLobby: () => Promise<void>
 	terminateRoom: () => Promise<void>
+	runAction: (
+		action: RoomHostAction | TAction,
+		task: () => Promise<void>,
+	) => Promise<void>
 	retry: () => Promise<void>
 }
 
-export function useRoomHostController(
+export function useRoomHostController<TAction extends string>(
 	roomCode: string,
-): UseRoomHostControllerResult {
+): UseRoomHostControllerResult<TAction> {
 	const gateway = useMemo(() => createSocketGateway(), [])
 	const hostConnectionPort = useMemo(
 		(): RoomRuntimeAdapter<RoomHostView> => ({
@@ -56,7 +63,7 @@ export function useRoomHostController(
 		null,
 	)
 	const { actionPending, actionErrorMessage, clearActionError, runAction } =
-		useActionStatus<RoomHostAction>()
+		useActionStatus<RoomHostAction | TAction>()
 
 	const state = useMemo<RoomHostControllerState>(() => {
 		if (entryErrorMessage) {
@@ -70,18 +77,20 @@ export function useRoomHostController(
 		return runtime.state
 	}, [entryErrorMessage, roomCode, runtime.state])
 
+	useMultiplayerGameAnalytics(state.status === 'ready' ? state.room : null)
+
 	const bootstrap = useCallback(async () => {
 		setEntryErrorMessage(null)
 		clearActionError()
 
 		if (roomCode.length !== 6) {
-			setEntryErrorMessage('Код комнаты должен состоять из 6 символов.')
+			setEntryErrorMessage(i18n.t('multiplayer.error.roomCodeLength'))
 			return
 		}
 
 		const storedSession = loadRoomSession(roomCode, 'host')
 		if (!storedSession) {
-			setEntryErrorMessage('Для этой комнаты нет сохранённой сессии хоста.')
+			setEntryErrorMessage(i18n.t('multiplayer.error.hostSessionMissing'))
 			return
 		}
 
@@ -92,9 +101,7 @@ export function useRoomHostController(
 				return
 			case 'rejected':
 				clearRoomSession(roomCode, 'host')
-				setEntryErrorMessage(
-					'Сохранённая сессия хоста истекла или недействительна.',
-				)
+				setEntryErrorMessage(i18n.t('multiplayer.error.hostSessionExpired'))
 				return
 			case 'error':
 			case 'aborted':
@@ -108,24 +115,21 @@ export function useRoomHostController(
 				return
 			}
 
+			const { roomMode, connectedMemberCount } = runtime.state.room
+
 			await runAction('start', async () => {
 				await gateway.startGame({ gameConfig })
+				trackMultiplayerGameStart({
+					roomMode,
+					difficulty: gameConfig.difficulty,
+					scope: gameConfig.scope,
+					questionCount: gameConfig.questionCount,
+					questionDurationMs: gameConfig.questionDurationMs,
+					memberCountAtStart: connectedMemberCount,
+				})
 			})
 		},
-		[gateway, runAction, runtime.state.status],
-	)
-
-	const submitAnswer = useCallback(
-		async (countryId: string) => {
-			if (runtime.state.status !== 'ready') {
-				return
-			}
-
-			await runAction('submit', async () => {
-				await gateway.submitAnswer({ countryId })
-			})
-		},
-		[gateway, runAction, runtime.state.status],
+		[gateway, runAction, runtime.state],
 	)
 
 	const returnToLobby = useCallback(async () => {
@@ -168,10 +172,11 @@ export function useRoomHostController(
 
 	return {
 		state,
+		gateway,
 		actionPending,
 		actionErrorMessage,
+		runAction,
 		startGame,
-		submitAnswer,
 		returnToLobby,
 		terminateRoom,
 		retry,

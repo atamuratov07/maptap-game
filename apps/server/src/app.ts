@@ -13,7 +13,7 @@ export function createApp(options: CreateAppOptions = {}) {
 	app.get('/health', (_request, response) => {
 		response.json({
 			status: 'ok',
-			service: 'maptap-server',
+			service: 'georally-server',
 			timestamp: Date.now(),
 			...options.getHealthSnapshot?.(),
 		})

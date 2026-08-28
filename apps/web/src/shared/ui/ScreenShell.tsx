@@ -13,7 +13,7 @@ export function ScreenShell({
 	return (
 		<main
 			className={cn(
-				'fixed inset-0 overflow-y-auto px-5 py-8',
+				'fixed inset-0 overflow-y-auto',
 				center && 'grid place-items-center',
 				className,
 			)}

@@ -9,8 +9,9 @@
 		"module": "ESNext",
 		"types": ["vite/client"],
 		"moduleResolution": "bundler",
+		"allowImportingTsExtensions": true,
 		"noEmit": true,
 		"jsx": "react-jsx"
 	},
-	"include": ["src"]
+	"include": ["src/**/*"]
 }

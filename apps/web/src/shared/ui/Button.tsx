@@ -1,10 +1,14 @@
 import type { ButtonHTMLAttributes } from 'react'
-import { Link, type LinkProps } from 'react-router-dom'
-import { getButtonClassName, type ButtonSize, type ButtonVariant } from './buttonStyles'
+import { type LinkProps } from 'react-router-dom'
+import {
+	getButtonClassName,
+	type ButtonSize,
+	type ButtonVariant,
+} from './buttonStyles'
+import { LocalizedLink } from '../../app/LocalizedLink'
 
-export interface ButtonProps
-	extends ButtonHTMLAttributes<HTMLButtonElement> {
-	variant?: ButtonVariant
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+	variant?: ButtonVariant | 'none'
 	size?: ButtonSize
 	is3d?: boolean
 }
@@ -30,7 +34,7 @@ export function Button({
 }
 
 export interface ButtonLinkProps extends LinkProps {
-	variant?: ButtonVariant
+	variant?: ButtonVariant | 'none'
 	size?: ButtonSize
 	is3d?: boolean
 }
@@ -43,7 +47,7 @@ export function ButtonLink({
 	...props
 }: ButtonLinkProps): JSX.Element {
 	return (
-		<Link
+		<LocalizedLink
 			className={getButtonClassName({
 				variant,
 				size,

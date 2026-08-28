@@ -1,8 +1,9 @@
-import type { RoomClosedEvent } from '@maptap/game-protocol'
+import type { RoomClosedEvent } from '@georally/game-protocol'
 import type {
 	RoomView,
 	VisibleMemberInfo,
-} from '@maptap/game-domain/multiplayer-next/room'
+} from '@georally/game-domain/multiplayer/room'
+import { i18n } from '../../shared/i18n/setup'
 
 export function getViewerMember(room: RoomView): VisibleMemberInfo | null {
 	return (
@@ -20,12 +21,12 @@ export function getMemberName(
 
 export function formatClosedReason(reason: RoomClosedEvent['reason']): string {
 	if (reason === 'host_terminated') {
-		return 'Хост закрыл комнату.'
+		return i18n.t('multiplayer.closed.hostTerminated')
 	}
 
 	if (reason === 'expired') {
-		return 'Время комнаты истекло.'
+		return i18n.t('multiplayer.closed.expired')
 	}
 
-	return 'Комната была закрыта.'
+	return i18n.t('multiplayer.closed.default')
 }

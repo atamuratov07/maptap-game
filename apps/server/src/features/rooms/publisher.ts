@@ -1,11 +1,13 @@
-import type { RoomClosedEvent } from '@maptap/game-protocol'
+import type { RoomClosedEvent } from '@georally/game-protocol'
 
-import type { MemberId } from '@maptap/game-domain/multiplayer-next'
+import type { MemberId } from '@georally/game-domain/multiplayer'
 import {
-	toHostRoomView,
+	isRoomInGroupMode,
+	toClassroomHostRoomView,
+	toGroupHostRoomView,
 	toPlayerRoomView,
 	type RoomId,
-} from '@maptap/game-domain/multiplayer-next/room'
+} from '@georally/game-domain/multiplayer/room'
 import type { RoomsRepository } from './repository.js'
 import type { GameNamespace } from './types.js'
 
@@ -40,7 +42,10 @@ export function createRoomPublisher({
 			}
 
 			if (session.role === 'host') {
-				const snapshot = toHostRoomView(context.state, session.memberId)
+				const snapshot = isRoomInGroupMode(context.state)
+					? toGroupHostRoomView(context.state, session.memberId)
+					: toClassroomHostRoomView(context.state, session.memberId)
+
 				if (!snapshot) {
 					continue
 				}

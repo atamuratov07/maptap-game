@@ -3,45 +3,26 @@ import {
 	GAME_SCOPES,
 	type GameDifficulty,
 	type GameScope,
-} from '@maptap/game-domain'
-import { type GameConfig } from '@maptap/game-domain/singleplayer'
+} from '@georally/game-domain'
+import { type GameConfig } from '@georally/game-domain/singleplayer'
 
 export const QUESTION_COUNT_OPTIONS = [5, 10, 15, 20] as const
 export const ATTEMPTS_PER_QUESTION_OPTIONS = [1, 2, 3, 4, 5] as const
 
 export const DIFFICULTY_OPTIONS: Array<{
 	value: GameDifficulty
-	label: string
-	description: string
-}> = [
-	{
-		value: 'easy',
-		label: 'Лёгкая',
-		description: 'Знакомые страны.',
-	},
-	{
-		value: 'medium',
-		label: 'Средняя',
-		description: 'Больше стран.',
-	},
-	{
-		value: 'hard',
-		label: 'Сложная',
-		description: 'Все страны.',
-	},
-]
+}> = [{ value: 'easy' }, { value: 'medium' }, { value: 'hard' }]
 
 export const SCOPE_OPTIONS: Array<{
 	value: GameScope
-	label: string
 }> = [
-	{ value: 'all', label: 'Весь мир' },
-	{ value: 'africa', label: 'Африка' },
-	{ value: 'asia', label: 'Азия' },
-	{ value: 'europe', label: 'Европа' },
-	{ value: 'north-america', label: 'Северная Америка' },
-	{ value: 'south-america', label: 'Южная Америка' },
-	{ value: 'oceania', label: 'Океания' },
+	{ value: 'all' },
+	{ value: 'africa' },
+	{ value: 'asia' },
+	{ value: 'europe' },
+	{ value: 'north-america' },
+	{ value: 'south-america' },
+	{ value: 'oceania' },
 ]
 
 function isDifficulty(value: string | null): value is GameDifficulty {
@@ -65,8 +46,7 @@ function parseNumberOption(
 }
 
 export type GameConfigParseResult =
-	| { ok: true; value: GameConfig }
-	| { ok: false; error: 'invalid_config' }
+	{ ok: true; value: GameConfig } | { ok: false; error: 'invalid_config' }
 
 export function parseGameConfig(
 	searchParams: URLSearchParams,
@@ -100,15 +80,4 @@ export function parseGameConfig(
 			scope,
 		},
 	}
-}
-
-export function buildGamePath(config: GameConfig): string {
-	const searchParams = new URLSearchParams({
-		questionCount: String(config.questionCount),
-		attempts: String(config.attemptsPerQuestion),
-		scope: config.scope,
-		difficulty: config.difficulty,
-	})
-
-	return `/singleplayer/play?${searchParams.toString()}`
 }
