@@ -29,83 +29,86 @@ export function useMultiplayerGameAnalytics(
 	const endedGameIdRef = useRef<string | null>(null)
 
 	useEffect(() => {
-		if (!room || room.phase !== 'active' || !room.activeGame) {
+		if (!room) {
 			return
 		}
 
-		const activeGame = room.activeGame
-		const roomMode = room.roomMode
-		const role = room.viewerRole === 'host' ? 'host' : 'player'
+		if (room.phase === 'active' && room.activeGame) {
+			const activeGame = room.activeGame
+			const roomMode = room.roomMode
+			const role = room.viewerRole === 'host' ? 'host' : 'player'
 
-		if (enteredGameIdRef.current !== activeGame.gameId) {
-			enteredGameIdRef.current = activeGame.gameId
-			lastQuestionTrackedRef.current = null
-			trackGameEntered({
-				roomMode,
-				role,
-				questionCount: activeGame.questionCount,
-				scope: activeGame.scope,
-				participantCount: activeGame.participantCount,
-			})
+			if (enteredGameIdRef.current !== activeGame.gameId) {
+				enteredGameIdRef.current = activeGame.gameId
+				lastQuestionTrackedRef.current = null
+				trackGameEntered({
+					roomMode,
+					role,
+					questionCount: activeGame.questionCount,
+					scope: activeGame.scope,
+					participantCount: activeGame.participantCount,
+				})
+			}
+
+			if (
+				isParticipantGame(activeGame) &&
+				(activeGame.phase === 'revealed' ||
+					activeGame.phase === 'leaderboard') &&
+				activeGame.viewerSubmission &&
+				'isCorrect' in activeGame.viewerSubmission &&
+				lastQuestionTrackedRef.current !== activeGame.currentQuestionNumber
+			) {
+				lastQuestionTrackedRef.current = activeGame.currentQuestionNumber
+				trackMultiplayerQuestionAnswered({
+					roomMode,
+					role,
+					questionNumber: activeGame.currentQuestionNumber,
+					isCorrect: activeGame.viewerSubmission.isCorrect,
+					responseTimeMs:
+						activeGame.viewerSubmission.submittedAt != null
+							? activeGame.viewerSubmission.submittedAt -
+								activeGame.startedAt
+							: undefined,
+				})
+			}
 		}
 
 		if (
-			isParticipantGame(activeGame) &&
-			(activeGame.phase === 'revealed' ||
-				activeGame.phase === 'leaderboard') &&
-			activeGame.viewerSubmission &&
-			'isCorrect' in activeGame.viewerSubmission &&
-			lastQuestionTrackedRef.current !== activeGame.currentQuestionNumber
+			room.phase === 'finished' &&
+			endedGameIdRef.current !== room.lastGameResult.gameId
 		) {
-			lastQuestionTrackedRef.current = activeGame.currentQuestionNumber
-			trackMultiplayerQuestionAnswered({
-				roomMode,
-				role,
-				questionNumber: activeGame.currentQuestionNumber,
-				isCorrect: activeGame.viewerSubmission.isCorrect,
-				responseTimeMs:
-					activeGame.viewerSubmission.submittedAt != null
-						? activeGame.viewerSubmission.submittedAt -
-							activeGame.startedAt
-						: undefined,
-			})
-		}
-
-		if (
-			activeGame.phase === 'completed' &&
-			endedGameIdRef.current !== activeGame.gameId
-		) {
-			endedGameIdRef.current = activeGame.gameId
-			const { result } = activeGame
+			endedGameIdRef.current = room.lastGameResult.gameId
+			const result = room.lastGameResult
 			const durationMs =
 				result.rounds.length > 0
 					? result.finishedAt - result.rounds[0].startedAt
 					: undefined
 
-			if (isParticipantGame(activeGame)) {
-				const viewerId = activeGame.viewerParticipantId
+			if ('viewerLeaderboardEntry' in room) {
+				const entry = room.viewerLeaderboardEntry
 				const questionsAnswered = result.rounds.filter(
-					round => round.submissions[viewerId]?.submittedAt != null,
+					round =>
+						round.submissions[room.viewerMemberId]?.submittedAt != null,
 				).length
 
 				trackMultiplayerGameEnd({
-					roomMode,
-					role,
+					roomMode: room.roomMode,
+					role: room.viewerRole,
 					roundsPlayed: result.rounds.length,
 					durationMs,
-					participantCount: activeGame.participantCount,
-					score: activeGame.viewerScore,
-					correctCount: activeGame.viewerCorrectCount,
-					rank: activeGame.viewerRank,
+					participantCount: result.leaderboard.length,
+					score: entry?.score,
+					correctCount: entry?.correctCount,
+					rank: entry?.rank,
 					questionsAnswered,
 				})
 			} else {
 				trackMultiplayerGameEnd({
-					roomMode,
-					role,
+					roomMode: room.roomMode,
+					role: 'host',
 					roundsPlayed: result.rounds.length,
 					durationMs,
-					participantCount: activeGame.participantCount,
+					participantCount: result.leaderboard.length,
 				})
 			}
 		}
